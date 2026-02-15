@@ -208,6 +208,7 @@ export const CallerPanel = memo(function CallerPanel({
             }
             onGenerateNumber={handleCallNumber}
             className="h-64 sm:h-80 lg:h-[28rem]"
+            collapsible={true}
           />
         </motion.div>
 
