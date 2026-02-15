@@ -4,13 +4,13 @@
  * Players will play with these visual cards
  */
 
-'use client';
+"use client";
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, MousePointerClick, Zap } from 'lucide-react';
-import { PlayableCardImage } from './PlayableCardImage';
-import { useGameStore } from '@/store/useGameStore';
-import type { Card } from '@/types';
+import { motion, AnimatePresence } from "framer-motion";
+import { Sparkles, MousePointerClick, Zap } from "lucide-react";
+import { PlayableCardImage } from "./PlayableCardImage";
+import { useGameStore } from "@/store/useGameStore";
+import type { Card } from "@/types";
 
 interface SelectedCardsDisplayProps {
   /** Map of selected cards: cardId -> playerId */
@@ -27,6 +27,9 @@ interface SelectedCardsDisplayProps {
 
   /** Manual marking mode */
   manualMarkingMode?: boolean;
+
+  /** Change marking mode callback (optional, from parent) */
+  onChangeMarkingMode?: (mode: boolean) => void;
 }
 
 export function SelectedCardsDisplay({
@@ -35,11 +38,32 @@ export function SelectedCardsDisplay({
   calledNumbers,
   cards,
   manualMarkingMode: manualMarkingModeProp,
+  onChangeMarkingMode,
 }: SelectedCardsDisplayProps) {
-  // Get marking mode from store
-  const storeManualMode = useGameStore((state) => state.manualMarkingMode);
-  const toggleManualMode = useGameStore((state) => state.toggleManualMarkingMode);
-  const manualMarkingMode = manualMarkingModeProp ?? storeManualMode;
+  // Get marking mode from room (not local store)
+  const room = useGameStore((state) => state.room);
+  const isHost = useGameStore((state) => state.isHost());
+
+  // Use room's marking mode (or prop for backward compatibility)
+  const manualMarkingMode =
+    manualMarkingModeProp ?? room?.manualMarkingMode ?? true;
+
+  // Toggle function - only for host
+  const handleToggleMarkingMode = () => {
+    console.log('[SelectedCardsDisplay] Toggle clicked', {
+      isHost,
+      hasCallback: !!onChangeMarkingMode,
+      currentMode: manualMarkingMode,
+      newMode: !manualMarkingMode
+    });
+
+    if (!isHost || !onChangeMarkingMode) {
+      console.log('[SelectedCardsDisplay] Toggle blocked', { isHost, hasCallback: !!onChangeMarkingMode });
+      return;
+    }
+
+    onChangeMarkingMode(!manualMarkingMode);
+  };
 
   // Get current player's selected card IDs
   const mySelectedCardIds = Object.entries(selectedCards)
@@ -50,33 +74,32 @@ export function SelectedCardsDisplay({
   // Empty state
   if (mySelectedCardIds.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-        <motion.div
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+      <motion.div
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+        className="flex flex-col items-center justify-center py-12 px-4 text-center"
+      >
+        <svg
+          className="w-16 h-16 sm:w-20 sm:h-20 text-gray-300 mb-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
         >
-          <svg
-            className="w-16 h-16 sm:w-20 sm:h-20 text-gray-300 mb-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            />
-          </svg>
-          <h3 className="text-lg sm:text-xl font-bold text-gray-400 mb-2">
-            Chưa chọn thẻ
-          </h3>
-          <p className="text-sm sm:text-base text-gray-500 max-w-md">
-            Hãy chọn thẻ từ lưới bên trên để bắt đầu chơi!
-          </p>
-        </motion.div>
-      </div>
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+          />
+        </svg>
+        <h3 className="text-lg sm:text-xl font-bold text-gray-400 mb-2">
+          Chưa chọn thẻ
+        </h3>
+        <p className="text-sm sm:text-base text-gray-500 max-w-md">
+          Hãy chọn thẻ từ lưới bên trên để bắt đầu chơi!
+        </p>
+      </motion.div>
     );
   }
 
@@ -98,7 +121,7 @@ export function SelectedCardsDisplay({
       y: 0,
       scale: 1,
       transition: {
-        type: 'spring',
+        type: "spring",
         stiffness: 300,
         damping: 30,
       },
@@ -119,35 +142,64 @@ export function SelectedCardsDisplay({
         <div className="flex items-center gap-3">
           <Sparkles className="w-5 h-5 text-loto-gold" />
           <span className="text-base font-semibold text-gray-700">
-            Thẻ của bạn: <span className="text-loto-green">{mySelectedCardIds.length}</span>
+            Thẻ của bạn:{" "}
+            <span className="text-loto-green">{mySelectedCardIds.length}</span>
           </span>
         </div>
 
-        {/* Manual Marking Mode Toggle */}
-        <button
-          onClick={toggleManualMode}
-          className={`
+        {/* Manual Marking Mode Toggle - Only shown to host */}
+        {isHost && (
+          <button
+            onClick={handleToggleMarkingMode}
+            className={`
+              flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm
+              transition-all shadow-md hover:shadow-lg active:scale-95
+              ${
+                manualMarkingMode
+                  ? "bg-blue-500 text-white hover:bg-blue-600"
+                  : "bg-green-500 text-white hover:bg-green-600"
+              }
+            `}
+          >
+            {manualMarkingMode ? (
+              <>
+                <MousePointerClick className="w-4 h-4" />
+                <span>Đánh dấu thủ công</span>
+              </>
+            ) : (
+              <>
+                <Zap className="w-4 h-4" />
+                <span>Tự động đánh dấu</span>
+              </>
+            )}
+          </button>
+        )}
+
+        {/* Show mode indicator for non-host players */}
+        {!isHost && (
+          <div
+            className={`
             flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm
-            transition-all shadow-md hover:shadow-lg active:scale-95
             ${
               manualMarkingMode
-                ? 'bg-blue-500 text-white hover:bg-blue-600'
-                : 'bg-green-500 text-white hover:bg-green-600'
+                ? "bg-blue-100 text-blue-700"
+                : "bg-green-100 text-green-700"
             }
           `}
-        >
-          {manualMarkingMode ? (
-            <>
-              <MousePointerClick className="w-4 h-4" />
-              <span>Đánh dấu thủ công</span>
-            </>
-          ) : (
-            <>
-              <Zap className="w-4 h-4" />
-              <span>Tự động đánh dấu</span>
-            </>
-          )}
-        </button>
+          >
+            {manualMarkingMode ? (
+              <>
+                <MousePointerClick className="w-4 h-4" />
+                <span>Đánh dấu thủ công</span>
+              </>
+            ) : (
+              <>
+                <Zap className="w-4 h-4" />
+                <span>Tự động đánh dấu</span>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Mode explanation */}
@@ -155,12 +207,14 @@ export function SelectedCardsDisplay({
         <p className="text-xs text-gray-700">
           {manualMarkingMode ? (
             <>
-              <strong className="text-blue-700">🖱️ Chế độ thủ công:</strong> Nhấn vào số trên thẻ để đánh dấu.
-              Số được gọi sẽ nhấp nháy màu vàng để nhắc nhở bạn.
+              <strong className="text-blue-700">🖱️ Chế độ thủ công:</strong>{" "}
+              Nhấn vào số trên thẻ để đánh dấu. Số được gọi sẽ nhấp nháy màu
+              vàng để nhắc nhở bạn.
             </>
           ) : (
             <>
-              <strong className="text-green-700">⚡ Chế độ tự động:</strong> Số được gọi sẽ tự động được đánh dấu vàng trên thẻ của bạn.
+              <strong className="text-green-700">⚡ Chế độ tự động:</strong> Số
+              được gọi sẽ tự động được đánh dấu vàng trên thẻ của bạn.
             </>
           )}
         </p>
@@ -179,11 +233,7 @@ export function SelectedCardsDisplay({
             if (!cardData) return null;
 
             return (
-              <motion.div
-                key={cardId}
-                variants={cardVariants}
-                layout
-              >
+              <motion.div key={cardId} variants={cardVariants} layout>
                 <PlayableCardImage
                   cardId={cardId}
                   cardData={cardData}
@@ -217,12 +267,10 @@ export function SelectedCardsDisplay({
             />
           </svg>
           <div className="flex-1 text-sm text-gray-700">
-            <p className="font-semibold text-loto-green mb-1">
-              Cách chơi:
-            </p>
+            <p className="font-semibold text-loto-green mb-1">Cách chơi:</p>
             <p>
-              Khi trò chơi bắt đầu, các số sẽ được gọi. Đánh dấu các số trên thẻ của bạn.
-              Người đầu tiên hoàn thành một dòng ngang sẽ thắng!
+              Khi trò chơi bắt đầu, các số sẽ được gọi. Đánh dấu các số trên thẻ
+              của bạn. Người đầu tiên hoàn thành một dòng ngang sẽ thắng!
             </p>
           </div>
         </div>

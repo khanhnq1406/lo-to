@@ -26,6 +26,7 @@ interface SocketContextValue {
   kickPlayer: (playerId: string) => void;
   changeCallerMode: (mode: CallerMode) => void;
   changeCaller: (targetPlayerId: string) => void;
+  changeMarkingMode: (manualMarkingMode: boolean) => void;
   resetGame: () => void;
 }
 
@@ -153,6 +154,10 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       console.log('[Socket Provider] Caller changed from', data.oldCallerName, 'to', data.newCallerName);
     });
 
+    socket.on('marking_mode_changed', (data) => {
+      console.log('[Socket Provider] Marking mode changed to:', data.manualMarkingMode);
+    });
+
     // Cleanup on unmount
     return () => {
       console.log('[Socket Provider] Cleaning up');
@@ -169,6 +174,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       socket.off('tickets_generated');
       socket.off('caller_mode_changed');
       socket.off('caller_changed');
+      socket.off('marking_mode_changed');
       socket.disconnect();
       socketRef.current = null;
       hasInitialized.current = false;
@@ -312,6 +318,21 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     socket.emit('change_caller', { roomId, targetPlayerId });
   };
 
+  const changeMarkingMode = (manualMarkingMode: boolean) => {
+    const socket = socketRef.current;
+    if (!socket || !socket.connected) {
+      setError('Not connected to server');
+      return;
+    }
+    if (!roomId) {
+      setError('Not in a room');
+      return;
+    }
+
+    console.log('[Socket Provider] Changing marking mode to:', manualMarkingMode);
+    socket.emit('change_marking_mode', { roomId, manualMarkingMode });
+  };
+
   const resetGame = () => {
     const socket = socketRef.current;
     if (!socket || !socket.connected) {
@@ -341,6 +362,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     kickPlayer,
     changeCallerMode,
     changeCaller,
+    changeMarkingMode,
     resetGame,
   };
 

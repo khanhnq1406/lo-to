@@ -18,6 +18,7 @@ import {
   ClientSelectCardEventSchema,
   ClientDeselectCardEventSchema,
   ClientResetGameEventSchema,
+  ClientChangeMarkingModeEventSchema,
   ServerRoomUpdateEvent,
   ServerPlayerJoinedEvent,
   ServerPlayerLeftEvent,
@@ -31,6 +32,7 @@ import {
   ServerCallerChangedEvent,
   ServerCardSelectedEvent,
   ServerCardDeselectedEvent,
+  ServerMarkingModeChangedEvent,
   serializeRoom,
 } from '../types/index';
 import { roomManager } from './room-manager';
@@ -456,6 +458,48 @@ export function setupSocketHandlers(io: SocketServer): void {
         };
         socket.emit('error', errorMsg);
         console.error('[Error] change_caller:', error);
+      }
+    });
+
+    // Change marking mode
+    socket.on('change_marking_mode', (data) => {
+      try {
+        const validated = ClientChangeMarkingModeEventSchema.parse(data);
+
+        const room = roomManager.getRoom(validated.roomId);
+        if (!room) {
+          throw new Error('Room not found');
+        }
+
+        // Verify host permission
+        const host = room.players.find((p) => p.id === socket.id);
+        if (!host || !host.isHost) {
+          throw new Error('Only host can change marking mode');
+        }
+
+        // Update marking mode
+        room.manualMarkingMode = validated.manualMarkingMode;
+
+        // Send marking mode changed event
+        const markingModeChanged: ServerMarkingModeChangedEvent = {
+          manualMarkingMode: validated.manualMarkingMode,
+        };
+        io.to(validated.roomId).emit('marking_mode_changed', markingModeChanged);
+
+        // Send room update
+        const roomUpdate: ServerRoomUpdateEvent = {
+          room: serializeRoom(room),
+        };
+        io.to(validated.roomId).emit('room_update', roomUpdate);
+
+        console.log(`[Room] Marking mode changed to ${validated.manualMarkingMode ? 'manual' : 'auto'} in room ${validated.roomId}`);
+      } catch (error) {
+        const errorMsg: ServerErrorEvent = {
+          message: error instanceof Error ? error.message : 'Failed to change marking mode',
+          code: 'CHANGE_MARKING_MODE_ERROR',
+        };
+        socket.emit('error', errorMsg);
+        console.error('[Error] change_marking_mode:', error);
       }
     });
 

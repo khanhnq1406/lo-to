@@ -45,6 +45,7 @@ export class RoomManager {
       machineInterval,
       createdAt: new Date(),
       selectedCards: {},
+      manualMarkingMode: true, // Default to manual-mark
     };
 
     // Validate room before storing

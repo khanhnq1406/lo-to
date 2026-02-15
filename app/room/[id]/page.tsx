@@ -65,7 +65,7 @@ export default function RoomPage() {
   const roomId = params.id as string;
 
   // Socket connection and actions
-  const { connected, connecting, joinRoom, leaveRoom, startGame, callNumber, changeCallerMode, changeCaller, resetGame } = useSocket();
+  const { connected, connecting, joinRoom, leaveRoom, startGame, callNumber, changeCallerMode, changeCaller, changeMarkingMode, resetGame } = useSocket();
 
   // Store state
   const room = useRoom();
@@ -85,6 +85,17 @@ export default function RoomPage() {
 
   // Get current player from players array to avoid infinite loop
   const currentPlayer = players.find((p) => p.id === currentPlayerId) || null;
+
+  // Debug logging for card selector visibility
+  if (typeof window !== 'undefined') {
+    console.log('[CardSelector Debug]', {
+      gameState,
+      currentPlayerId,
+      playerIdsInRoom: players.map(p => p.id),
+      hasCurrentPlayer: !!currentPlayer,
+      playersCount: players.length,
+    });
+  }
 
   // Card selection hook
   const { selectCard, deselectCard } = useCardSelection();
@@ -347,18 +358,28 @@ export default function RoomPage() {
           />
 
           {/* Card Selector (only show during waiting state) */}
-          {gameState === 'waiting' && currentPlayerId && currentPlayer && (
-            <div className="bg-white rounded-xl p-6 border-2 border-loto-green shadow-lg">
-              <CardSelector
-                selectedCards={selectedCards}
-                currentPlayerId={currentPlayerId}
-                players={players}
-                gameStarted={gameState !== 'waiting'}
-                onSelectCard={selectCard}
-                onDeselectCard={deselectCard}
-              />
-            </div>
-          )}
+          {(() => {
+            const shouldShow = gameState === 'waiting' && currentPlayerId && currentPlayer;
+            console.log('[CardSelector Desktop] Debug:', {
+              gameState,
+              currentPlayerId,
+              hasCurrentPlayer: !!currentPlayer,
+              shouldShow,
+              players: players.length,
+            });
+            return shouldShow ? (
+              <div className="bg-white rounded-xl p-6 border-2 border-loto-green shadow-lg">
+                <CardSelector
+                  selectedCards={selectedCards}
+                  currentPlayerId={currentPlayerId}
+                  players={players}
+                  gameStarted={gameState !== 'waiting'}
+                  onSelectCard={selectCard}
+                  onDeselectCard={deselectCard}
+                />
+              </div>
+            ) : null;
+          })()}
 
           {/* Selected Cards Display - Show card images */}
           <div className="bg-white rounded-xl p-6 border-2 border-loto-green shadow-lg">
@@ -368,6 +389,7 @@ export default function RoomPage() {
               currentPlayerId={currentPlayerId || ''}
               calledNumbers={calledNumbersSet}
               cards={playerCards}
+              onChangeMarkingMode={changeMarkingMode}
             />
           </div>
 
@@ -446,6 +468,7 @@ export default function RoomPage() {
                 currentPlayerId={currentPlayerId || ''}
                 calledNumbers={calledNumbersSet}
                 cards={playerCards}
+                onChangeMarkingMode={changeMarkingMode}
               />
             </motion.div>
           </div>

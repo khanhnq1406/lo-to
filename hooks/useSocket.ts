@@ -40,6 +40,7 @@ import {
   ServerTicketsGeneratedEvent,
   ServerCallerModeChangedEvent,
   ServerCallerChangedEvent,
+  ServerMarkingModeChangedEvent,
   ServerGameResetEvent,
   deserializeRoom,
   CallerMode,
@@ -65,6 +66,7 @@ export interface UseSocketReturn {
   kickPlayer: (playerId: string) => void;
   changeCallerMode: (mode: CallerMode) => void;
   changeCaller: (targetPlayerId: string) => void;
+  changeMarkingMode: (manualMarkingMode: boolean) => void;
   resetGame: () => void;
 }
 
@@ -315,7 +317,18 @@ export function useSocket(): UseSocketReturn {
       }
     });
 
-    // 11. game_reset - Game reset
+    // 11. marking_mode_changed - Marking mode changed
+    socket.on('marking_mode_changed', (data: ServerMarkingModeChangedEvent) => {
+      try {
+        console.log('[Socket] Marking mode changed:', data);
+        // Room update will handle the actual state update
+        // This event is mainly for notifications
+      } catch (error) {
+        console.error('[Socket] Error processing marking_mode_changed:', error);
+      }
+    });
+
+    // 12. game_reset - Game reset
     socket.on('game_reset', (data: ServerGameResetEvent) => {
       try {
         console.log('[Socket] Game reset:', data);
@@ -349,6 +362,7 @@ export function useSocket(): UseSocketReturn {
       socket.off('tickets_generated');
       socket.off('caller_mode_changed');
       socket.off('caller_changed');
+      socket.off('marking_mode_changed');
       socket.off('game_reset');
       socket.disconnect();
       socketRef.current = null;
@@ -589,7 +603,29 @@ export function useSocket(): UseSocketReturn {
   };
 
   /**
-   * 11. Reset game (host only)
+   * 11. Change marking mode (host only)
+   */
+  const changeMarkingMode = (manualMarkingMode: boolean) => {
+    const socket = socketRef.current;
+    if (!socket || !socket.connected) {
+      setError('Not connected to server');
+      return;
+    }
+
+    if (!roomId) {
+      setError('Not in a room');
+      return;
+    }
+
+    console.log('[Socket] Changing marking mode:', { roomId, manualMarkingMode });
+    socket.emit('change_marking_mode', {
+      roomId,
+      manualMarkingMode,
+    });
+  };
+
+  /**
+   * 12. Reset game (host only)
    */
   const resetGame = () => {
     const socket = socketRef.current;
@@ -626,6 +662,7 @@ export function useSocket(): UseSocketReturn {
     kickPlayer,
     changeCallerMode,
     changeCaller,
+    changeMarkingMode,
     resetGame,
   };
 }

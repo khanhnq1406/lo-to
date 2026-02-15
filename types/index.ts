@@ -318,6 +318,11 @@ export interface Room {
    * Each player can select multiple cards (up to 5)
    */
   selectedCards: Record<number, string>;
+
+  /** Manual marking mode (false = auto-mark, true = manual-mark)
+   * Set by room host, applies to all players
+   */
+  manualMarkingMode: boolean;
 }
 
 export const RoomSchema = z.object({
@@ -330,7 +335,8 @@ export const RoomSchema = z.object({
   winner: WinResultSchema.nullable(),
   machineInterval: z.number().int().min(1000).max(60000), // 1s to 60s
   createdAt: z.date(),
-  selectedCards: z.record(z.string(), z.string()).optional().default({})
+  selectedCards: z.record(z.string(), z.string()).optional().default({}),
+  manualMarkingMode: z.boolean().default(true)
 }).refine(
   (room) => {
     // Called history should not have duplicates
@@ -536,6 +542,19 @@ export const ClientResetGameEventSchema = z.object({
   roomId: z.string().min(1)
 });
 
+/**
+ * Host changes marking mode (manual/auto)
+ */
+export interface ClientChangeMarkingModeEvent {
+  roomId: string;
+  manualMarkingMode: boolean;
+}
+
+export const ClientChangeMarkingModeEventSchema = z.object({
+  roomId: z.string().min(1),
+  manualMarkingMode: z.boolean()
+});
+
 // ============================================================================
 // SOCKET EVENT TYPES - SERVER TO CLIENT
 // ============================================================================
@@ -558,7 +577,8 @@ export const ServerRoomUpdateEventSchema = z.object({
     winner: WinResultSchema.nullable(),
     machineInterval: z.number(),
     createdAt: z.string(),
-    selectedCards: z.record(z.string(), z.string()).optional().default({})
+    selectedCards: z.record(z.string(), z.string()).optional().default({}),
+    manualMarkingMode: z.boolean().default(true)
   })
 });
 
@@ -722,6 +742,17 @@ export const ServerCardDeselectedEventSchema = z.object({
   playerId: z.string().min(1)
 });
 
+/**
+ * Server confirms marking mode changed
+ */
+export interface ServerMarkingModeChangedEvent {
+  manualMarkingMode: boolean;
+}
+
+export const ServerMarkingModeChangedEventSchema = z.object({
+  manualMarkingMode: z.boolean()
+});
+
 // ============================================================================
 // SOCKET EVENT TYPE UNIONS
 // ============================================================================
@@ -741,7 +772,8 @@ export type ClientEvent =
   | { type: 'change_caller_mode'; data: ClientChangeCallerModeEvent }
   | { type: 'change_caller'; data: ClientChangeCallerEvent }
   | { type: 'select_card'; data: ClientSelectCardEvent }
-  | { type: 'deselect_card'; data: ClientDeselectCardEvent };
+  | { type: 'deselect_card'; data: ClientDeselectCardEvent }
+  | { type: 'change_marking_mode'; data: ClientChangeMarkingModeEvent };
 
 /**
  * All possible server-to-client events
@@ -758,7 +790,8 @@ export type ServerEvent =
   | { type: 'caller_mode_changed'; data: ServerCallerModeChangedEvent }
   | { type: 'caller_changed'; data: ServerCallerChangedEvent }
   | { type: 'card_selected'; data: ServerCardSelectedEvent }
-  | { type: 'card_deselected'; data: ServerCardDeselectedEvent };
+  | { type: 'card_deselected'; data: ServerCardDeselectedEvent }
+  | { type: 'marking_mode_changed'; data: ServerMarkingModeChangedEvent };
 
 // ============================================================================
 // UTILITY TYPE GUARDS

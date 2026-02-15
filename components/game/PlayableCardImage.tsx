@@ -137,80 +137,111 @@ export function PlayableCardImage({
             </motion.div>
           )}
 
-          {/* Interactive Number Grid Overlay */}
-          <div className="absolute inset-0 p-6 flex flex-col justify-center">
-            <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-xl">
-              {/* Number Grid */}
-              <div className="space-y-1">
-                {cardData.map((row, rowIndex) => {
-                  const rowComplete = isRowComplete(rowIndex);
-                  const isWinningRowHighlight = isWinning && winningRow === rowIndex;
+          {/* Interactive Number Grid Overlay - Matches Traditional Loto Card Styling */}
+          <div className="absolute inset-0 p-4 flex flex-col justify-center">
+            {/* Decorative Border Container (like traditional card) */}
+            <div
+              className="relative rounded-lg overflow-hidden shadow-2xl"
+              style={{
+                background: 'linear-gradient(135deg, #ff4b8b 0%, #ff6ba8 50%, #ff4b8b 100%)',
+                padding: '8px',
+                border: '3px solid #dc2f6c',
+              }}
+            >
+              {/* Inner white container */}
+              <div className="bg-white rounded p-2">
+                {/* Number Grid - 9x9 Traditional Layout */}
+                <div className="grid grid-cols-9 gap-[2px]">
+                  {cardData.map((row, rowIndex) => {
+                    const rowComplete = isRowComplete(rowIndex);
+                    const isWinningRowHighlight = isWinning && winningRow === rowIndex;
 
-                  return (
-                    <div
-                      key={rowIndex}
-                      className={`
-                        flex gap-1 p-1 rounded
-                        ${rowComplete ? 'bg-green-100' : ''}
-                        ${isWinningRowHighlight ? 'bg-loto-gold/50 ring-2 ring-loto-gold' : ''}
-                      `}
-                    >
-                      {row.map((cell, colIndex) => {
-                        const isMarked = cell !== null && markedNumbers.has(cell);
-                        const isCalledButNotMarked = false; // Hide yellow hints in all modes
+                    return row.map((cell, colIndex) => {
+                      const isMarked = cell !== null && markedNumbers.has(cell);
+                      const isCalled = cell !== null && calledNumbers.has(cell);
 
-                        return (
-                          <button
-                            key={colIndex}
-                            onClick={() => cell !== null && toggleManualMark(cell)}
-                            disabled={cell === null || !manualMarkingMode}
-                            className={`
-                              flex items-center justify-center
-                              aspect-square flex-1 rounded text-xs font-bold
-                              transition-all
-                              ${cell === null ? 'bg-gray-100' : ''}
-                              ${
-                                cell !== null && isMarked
-                                  ? 'bg-loto-gold text-white shadow-md scale-105'
-                                  : ''
-                              }
-                              ${
-                                cell !== null && !isMarked && isCalledButNotMarked
-                                  ? 'bg-yellow-200 text-gray-800 border-2 border-yellow-400 animate-pulse'
-                                  : ''
-                              }
-                              ${
-                                cell !== null && !isMarked && !isCalledButNotMarked
-                                  ? 'bg-white text-gray-800 border border-gray-300'
-                                  : ''
-                              }
-                              ${
-                                cell !== null && manualMarkingMode
-                                  ? 'cursor-pointer hover:bg-yellow-100 hover:scale-110'
-                                  : ''
-                              }
-                            `}
-                          >
-                            {cell !== null ? cell : ''}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  );
-                })}
-              </div>
+                      return (
+                        <motion.button
+                          key={`${rowIndex}-${colIndex}`}
+                          onClick={() => cell !== null && toggleManualMark(cell)}
+                          disabled={cell === null || !manualMarkingMode}
+                          whileHover={cell !== null && manualMarkingMode ? { scale: 1.1 } : {}}
+                          whileTap={cell !== null && manualMarkingMode ? { scale: 0.95 } : {}}
+                          className={`
+                            relative flex items-center justify-center
+                            aspect-square rounded-sm
+                            font-black text-[10px] sm:text-xs md:text-sm
+                            transition-all duration-200
+                            ${
+                              cell === null
+                                ? 'bg-[#ff4b8b]'  // Hot pink for blank cells (matching image)
+                                : isMarked
+                                  ? 'bg-[#ffd700] text-black shadow-lg scale-105 border-2 border-[#ffaa00]'  // Gold for marked
+                                  : isCalled && !manualMarkingMode
+                                    ? 'bg-[#ffd700] text-black shadow-lg animate-pulse border-2 border-[#ffaa00]'  // Gold for auto-marked
+                                    : 'bg-white text-black border border-gray-300'  // White cells with black text (matching image)
+                            }
+                            ${
+                              cell !== null && manualMarkingMode
+                                ? 'cursor-pointer hover:border-yellow-400'
+                                : ''
+                            }
+                            ${
+                              isWinningRowHighlight && cell !== null
+                                ? 'ring-2 ring-offset-1 ring-yellow-400 animate-pulse'
+                                : ''
+                            }
+                          `}
+                          style={{
+                            boxShadow: cell !== null && (isMarked || (isCalled && !manualMarkingMode))
+                              ? '0 2px 8px rgba(255, 215, 0, 0.5)'
+                              : undefined,
+                          }}
+                        >
+                          {/* Number Text */}
+                          {cell !== null && (
+                            <span className="relative z-10 select-none">
+                              {cell}
+                            </span>
+                          )}
 
-              {/* Mini Stats */}
-              <div className="mt-2 pt-2 border-t border-gray-300 flex items-center justify-between text-xs">
-                <span className="text-gray-600">
-                  {cardData.flat().filter((c): c is number => c !== null && markedNumbers.has(c)).length} / 45 đã đánh dấu
-                </span>
-                {isRowComplete(0) || isRowComplete(1) || isRowComplete(2) || isRowComplete(3) || isRowComplete(4) || isRowComplete(5) || isRowComplete(6) || isRowComplete(7) || isRowComplete(8) ? (
-                  <span className="text-green-600 font-bold flex items-center gap-1">
-                    <Check className="w-3 h-3" />
-                    Có dòng!
+                          {/* Checkmark for marked cells */}
+                          {cell !== null && isMarked && (
+                            <motion.div
+                              initial={{ scale: 0, rotate: -90 }}
+                              animate={{ scale: 1, rotate: 0 }}
+                              className="absolute inset-0 flex items-center justify-center"
+                            >
+                              <Check
+                                className="w-3 h-3 sm:w-4 sm:h-4 text-white drop-shadow-lg"
+                                strokeWidth={4}
+                              />
+                            </motion.div>
+                          )}
+                        </motion.button>
+                      );
+                    });
+                  })}
+                </div>
+
+                {/* Mini Stats */}
+                <div className="mt-2 pt-2 border-t border-gray-200 flex items-center justify-between text-[10px] sm:text-xs px-1">
+                  <span className="text-gray-700 font-semibold">
+                    {cardData.flat().filter((c): c is number => c !== null && markedNumbers.has(c)).length} / 45
                   </span>
-                ) : null}
+                  {(isRowComplete(0) || isRowComplete(1) || isRowComplete(2) ||
+                    isRowComplete(3) || isRowComplete(4) || isRowComplete(5) ||
+                    isRowComplete(6) || isRowComplete(7) || isRowComplete(8)) && (
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="text-green-600 font-bold flex items-center gap-1"
+                    >
+                      <Check className="w-3 h-3" />
+                      Có dòng!
+                    </motion.span>
+                  )}
+                </div>
               </div>
             </div>
           </div>

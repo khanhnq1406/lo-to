@@ -58,7 +58,10 @@ interface GameStore {
   /** Sound effects enabled */
   soundEnabled: boolean;
 
-  /** Manual marking mode (false = auto-mark, true = manual-mark) */
+  /** Manual marking mode (false = auto-mark, true = manual-mark)
+   * @deprecated Now controlled by room host via room.manualMarkingMode
+   * Kept for backward compatibility only
+   */
   manualMarkingMode: boolean;
 
   /** Is currently connecting to server */
@@ -256,7 +259,7 @@ export const useGameStore = create<GameStore>()(
       ...initialState,
       darkMode: false,
       soundEnabled: true,
-      manualMarkingMode: true,
+      manualMarkingMode: true, // Default but not used (room.manualMarkingMode is the source of truth)
 
       // ===========================
       // ROOM ACTIONS
@@ -553,10 +556,10 @@ export const useGameStore = create<GameStore>()(
       name: 'loto-game-preferences', // localStorage key
       storage: createJSONStorage(() => localStorage),
       // Only persist UI preferences (not game state)
+      // Note: manualMarkingMode is now controlled by room host, not persisted locally
       partialize: (state) => ({
         darkMode: state.darkMode,
         soundEnabled: state.soundEnabled,
-        manualMarkingMode: state.manualMarkingMode,
       }),
     }
   )
