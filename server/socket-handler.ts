@@ -19,6 +19,7 @@ import {
   ClientDeselectCardEventSchema,
   ClientResetGameEventSchema,
   ClientChangeMarkingModeEventSchema,
+  ClientRenamePlayerEventSchema,
   ServerRoomUpdateEvent,
   ServerPlayerJoinedEvent,
   ServerPlayerLeftEvent,
@@ -33,6 +34,7 @@ import {
   ServerCardSelectedEvent,
   ServerCardDeselectedEvent,
   ServerMarkingModeChangedEvent,
+  ServerPlayerRenamedEvent,
   serializeRoom,
 } from '../types/index';
 import { roomManager } from './room-manager';
@@ -55,7 +57,8 @@ export function setupSocketHandlers(io: SocketServer): void {
           socket.id,
           validated.playerName,
           validated.callerMode,
-          validated.machineInterval
+          validated.machineInterval,
+          (data as any).sessionId
         );
 
         // Join socket to room
@@ -94,7 +97,8 @@ export function setupSocketHandlers(io: SocketServer): void {
         const room = roomManager.joinRoom(
           validated.roomId,
           socket.id,
-          validated.playerName
+          validated.playerName,
+          (data as any).sessionId
         );
 
         // Join socket to room
@@ -712,6 +716,90 @@ export function setupSocketHandlers(io: SocketServer): void {
         };
         socket.emit('error', errorMsg);
         console.error('[Error] reset_game:', error);
+      }
+    });
+
+    // Reconnect session
+    socket.on('reconnect_session', (data) => {
+      try {
+        const { sessionId, playerName } = data;
+
+        console.log(`[Socket] Reconnect session request: ${sessionId} for ${playerName}`);
+
+        const result = roomManager.reconnectSession(sessionId, socket.id);
+
+        if (!result) {
+          // Session not found or expired
+          const errorMsg: ServerErrorEvent = {
+            message: 'Session not found or expired',
+            code: 'SESSION_NOT_FOUND',
+          };
+          socket.emit('session_reconnect_failed', errorMsg);
+          console.log(`[Socket] Session reconnection failed: ${sessionId}`);
+          return;
+        }
+
+        const { room, oldPlayerId: oldId } = result;
+
+        // Join socket to room
+        socket.join(room.id);
+
+        // Notify success
+        socket.emit('session_reconnected', {
+          roomId: room.id,
+          playerId: socket.id,
+        });
+
+        // Send room update to all players
+        const roomUpdate: ServerRoomUpdateEvent = {
+          room: serializeRoom(room),
+        };
+        io.to(room.id).emit('room_update', roomUpdate);
+
+        console.log(`[Socket] Session reconnected: ${playerName} (${oldId} -> ${socket.id}) in room ${room.id}`);
+      } catch (error) {
+        const errorMsg: ServerErrorEvent = {
+          message: error instanceof Error ? error.message : 'Failed to reconnect session',
+          code: 'RECONNECT_SESSION_ERROR',
+        };
+        socket.emit('session_reconnect_failed', errorMsg);
+        console.error('[Error] reconnect_session:', error);
+      }
+    });
+
+    // Rename player
+    socket.on('rename_player', (data) => {
+      try {
+        const validated = ClientRenamePlayerEventSchema.parse(data);
+
+        const result = roomManager.renamePlayer(
+          validated.roomId,
+          socket.id,
+          validated.newName
+        );
+
+        // Send player renamed event
+        const playerRenamed: ServerPlayerRenamedEvent = {
+          playerId: socket.id,
+          oldName: result.oldName,
+          newName: validated.newName,
+        };
+        io.to(validated.roomId).emit('player_renamed', playerRenamed);
+
+        // Send room update
+        const roomUpdate: ServerRoomUpdateEvent = {
+          room: serializeRoom(result.room),
+        };
+        io.to(validated.roomId).emit('room_update', roomUpdate);
+
+        console.log(`[Room] Player renamed: ${result.oldName} -> ${validated.newName} in room ${validated.roomId}`);
+      } catch (error) {
+        const errorMsg: ServerErrorEvent = {
+          message: error instanceof Error ? error.message : 'Failed to rename player',
+          code: 'RENAME_PLAYER_ERROR',
+        };
+        socket.emit('error', errorMsg);
+        console.error('[Error] rename_player:', error);
       }
     });
 

@@ -22,12 +22,13 @@
 
 'use client';
 
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users } from 'lucide-react';
-import { usePlayers, useCurrentPlayerId, useIsHost } from '@/store/useGameStore';
+import { usePlayers, useCurrentPlayerId, useIsHost, useCurrentPlayer } from '@/store/useGameStore';
 import { useSocket } from '@/providers/SocketProvider';
 import { PlayerCard } from './PlayerCard';
+import { EditNameModal } from './EditNameModal';
 
 // ============================================================================
 // PROPS
@@ -48,10 +49,14 @@ export const PlayerList = memo(function PlayerList({
   // Get data from store
   const players = usePlayers();
   const currentPlayerId = useCurrentPlayerId();
+  const currentPlayer = useCurrentPlayer();
   const isHost = useIsHost();
 
   // Get socket actions
-  const { kickPlayer } = useSocket();
+  const { kickPlayer, renamePlayer } = useSocket();
+
+  // Edit name modal state
+  const [isEditNameModalOpen, setIsEditNameModalOpen] = useState(false);
 
   /**
    * Handle kick player action
@@ -69,6 +74,20 @@ export const PlayerList = memo(function PlayerList({
       kickPlayer(playerId);
     }
   }, [players, kickPlayer]);
+
+  /**
+   * Handle edit name action
+   */
+  const handleEditName = useCallback(() => {
+    setIsEditNameModalOpen(true);
+  }, []);
+
+  /**
+   * Handle confirm name change
+   */
+  const handleConfirmNameChange = useCallback((newName: string) => {
+    renamePlayer(newName);
+  }, [renamePlayer]);
 
   // Container animation variants
   const containerVariants = {
@@ -161,6 +180,7 @@ export const PlayerList = memo(function PlayerList({
                 isCurrentUserHost={isHost}
                 isCurrentUser={player.id === currentPlayerId}
                 onKick={handleKick}
+                onEditName={player.id === currentPlayerId ? handleEditName : undefined}
               />
             </motion.div>
           ))}
@@ -203,6 +223,14 @@ export const PlayerList = memo(function PlayerList({
       <div className="sr-only" aria-live="polite">
         {players.length} người chơi trong phòng
       </div>
+
+      {/* Edit name modal */}
+      <EditNameModal
+        isOpen={isEditNameModalOpen}
+        currentName={currentPlayer?.name || ''}
+        onConfirm={handleConfirmNameChange}
+        onClose={() => setIsEditNameModalOpen(false)}
+      />
     </div>
   );
 });

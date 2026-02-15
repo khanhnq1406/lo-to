@@ -402,7 +402,7 @@ export const CurrentNumber = memo(function CurrentNumber({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="relative z-10 w-full h-full flex items-center justify-between px-3"
+          className="relative z-10 w-full h-full flex items-center gap-2 px-3"
         >
           <div className="flex items-center gap-2">
             {currentNumber !== null ? (
@@ -427,6 +427,41 @@ export const CurrentNumber = memo(function CurrentNumber({
               </div>
             )}
           </div>
+
+          {/* Generate button in collapsed state */}
+          {showGenerateButton && onGenerateNumber && (
+            <motion.button
+              onClick={onGenerateNumber}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="
+                px-3 py-1
+                bg-gradient-to-br from-loto-green to-loto-green-light
+                text-paper
+                font-bold text-xs
+                rounded-md
+                shadow-loto-button
+                hover:from-loto-green-light hover:to-loto-green
+                transition-all
+                flex items-center gap-1.5
+              "
+            >
+              <svg
+                className="w-3 h-3"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
+                />
+              </svg>
+              Gọi số mới
+            </motion.button>
+          )}
         </motion.div>
       )}
 

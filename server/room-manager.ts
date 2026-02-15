@@ -13,6 +13,7 @@ import {
 
 export class RoomManager {
   private rooms = new Map<string, Room>();
+  private sessions = new Map<string, { roomId: string; playerId: string; playerName: string }>();
 
   /**
    * Create a new room with a host player
@@ -21,7 +22,8 @@ export class RoomManager {
     hostSocketId: string,
     hostName: string,
     callerMode: CallerMode,
-    machineInterval: number = 3000
+    machineInterval: number = 3000,
+    sessionId?: string
   ): Room {
     const roomId = this.generateRoomId();
 
@@ -55,13 +57,19 @@ export class RoomManager {
     }
 
     this.rooms.set(roomId, room);
+
+    // Save session if provided
+    if (sessionId) {
+      this.saveSession(sessionId, roomId, hostSocketId, hostName);
+    }
+
     return room;
   }
 
   /**
    * Add a player to an existing room
    */
-  joinRoom(roomId: string, socketId: string, playerName: string): Room {
+  joinRoom(roomId: string, socketId: string, playerName: string, sessionId?: string): Room {
     const room = this.rooms.get(roomId);
     if (!room) {
       throw new Error('Room not found');
@@ -102,6 +110,12 @@ export class RoomManager {
     }
 
     room.players.push(newPlayer);
+
+    // Save session if provided
+    if (sessionId) {
+      this.saveSession(sessionId, roomId, socketId, playerName);
+    }
+
     return room;
   }
 
@@ -281,6 +295,46 @@ export class RoomManager {
   }
 
   /**
+   * Rename a player (player can rename themselves)
+   */
+  renamePlayer(roomId: string, playerId: string, newName: string): { room: Room; oldName: string } {
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      throw new Error('Room not found');
+    }
+
+    // Find the player
+    const player = room.players.find((p) => p.id === playerId);
+    if (!player) {
+      throw new Error('Player not found in room');
+    }
+
+    // Check if new name is already taken by another player
+    const nameExists = room.players.some(
+      (p) => p.id !== playerId && p.name.toLowerCase() === newName.toLowerCase()
+    );
+    if (nameExists) {
+      throw new Error('Player name already exists in this room');
+    }
+
+    // Store old name for event notification
+    const oldName = player.name;
+
+    // Update player name
+    player.name = newName;
+
+    // Update session if exists
+    for (const [, session] of this.sessions.entries()) {
+      if (session.playerId === playerId && session.roomId === roomId) {
+        session.playerName = newName;
+        break;
+      }
+    }
+
+    return { room, oldName };
+  }
+
+  /**
    * Generate unique room ID
    */
   private generateRoomId(): string {
@@ -303,6 +357,62 @@ export class RoomManager {
    */
   getRoomCount(): number {
     return this.rooms.size;
+  }
+
+  /**
+   * Save session for reconnection
+   */
+  saveSession(sessionId: string, roomId: string, playerId: string, playerName: string): void {
+    this.sessions.set(sessionId, { roomId, playerId, playerName });
+    console.log(`[RoomManager] Session saved: ${sessionId} -> ${playerName} in room ${roomId}`);
+  }
+
+  /**
+   * Reconnect player using session
+   */
+  reconnectSession(sessionId: string, newSocketId: string): { room: Room; oldPlayerId: string } | null {
+    const session = this.sessions.get(sessionId);
+    if (!session) {
+      console.log(`[RoomManager] Session not found: ${sessionId}`);
+      return null;
+    }
+
+    const { roomId, playerId: oldPlayerId, playerName } = session;
+    const room = this.rooms.get(roomId);
+
+    if (!room) {
+      console.log(`[RoomManager] Room not found for session: ${roomId}`);
+      // Clean up invalid session
+      this.sessions.delete(sessionId);
+      return null;
+    }
+
+    // Find the old player
+    const oldPlayer = room.players.find((p) => p.id === oldPlayerId);
+    if (!oldPlayer) {
+      console.log(`[RoomManager] Player not found in room: ${oldPlayerId}`);
+      this.sessions.delete(sessionId);
+      return null;
+    }
+
+    // Update player's socket ID
+    oldPlayer.id = newSocketId;
+    oldPlayer.connected = true;
+
+    // Update session with new player ID
+    this.sessions.set(sessionId, { roomId, playerId: newSocketId, playerName });
+
+    console.log(`[RoomManager] Session reconnected: ${playerName} (${oldPlayerId} -> ${newSocketId}) in room ${roomId}`);
+
+    return { room, oldPlayerId };
+  }
+
+  /**
+   * Clear session
+   */
+  clearSession(sessionId: string): void {
+    this.sessions.delete(sessionId);
+    console.log(`[RoomManager] Session cleared: ${sessionId}`);
   }
 
   /**

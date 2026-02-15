@@ -11,6 +11,14 @@ import { useGameStore } from '@/store/useGameStore';
 import { getSocketUrl, socketOptions } from '@/lib/socket-config';
 import type { CallerMode } from '@/types';
 import { deserializeRoom } from '@/types';
+import {
+  getSession,
+  saveSession,
+  clearSession,
+  updateSessionPlayerId,
+  generateSessionId,
+  type PlayerSession,
+} from '@/lib/session-storage';
 
 interface SocketContextValue {
   socket: Socket | null;
@@ -28,6 +36,7 @@ interface SocketContextValue {
   changeCaller: (targetPlayerId: string) => void;
   changeMarkingMode: (manualMarkingMode: boolean) => void;
   resetGame: () => void;
+  renamePlayer: (newName: string) => void;
 }
 
 const SocketContext = createContext<SocketContextValue | null>(null);
@@ -37,6 +46,8 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   const [connected, setConnected] = useState(false);
   const [connecting, setConnectingState] = useState(false);
   const hasInitialized = useRef(false);
+  const sessionIdRef = useRef<string | null>(null);
+  const isReconnectingRef = useRef(false);
 
   // Zustand actions
   const setRoom = useGameStore((state) => state.setRoom);
@@ -77,6 +88,21 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       setConnecting(false);
       setCurrentPlayerId(socket.id || null);
       clearError();
+
+      // Check for existing session and attempt reconnection
+      const existingSession = getSession();
+      if (existingSession && !isReconnectingRef.current) {
+        console.log('[Socket Provider] Found existing session, attempting to reconnect to room:', existingSession.roomId);
+        isReconnectingRef.current = true;
+
+        // Emit reconnect event to server
+        socket.emit('reconnect_session', {
+          sessionId: existingSession.sessionId,
+          roomId: existingSession.roomId,
+          oldPlayerId: existingSession.playerId,
+          playerName: existingSession.playerName,
+        });
+      }
     });
 
     socket.on('connect_error', (error) => {
@@ -95,7 +121,23 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     // Game event listeners
     socket.on('room_update', (data) => {
       console.log('[Socket Provider] Room update received');
-      setRoom(deserializeRoom(data.room));
+      const room = deserializeRoom(data.room);
+      setRoom(room);
+
+      // Update session with current room data if player is in the room
+      if (socket.id && room && sessionIdRef.current) {
+        const currentPlayer = room.players.find((p) => p.id === socket.id);
+        if (currentPlayer) {
+          const session: PlayerSession = {
+            sessionId: sessionIdRef.current,
+            playerId: socket.id,
+            playerName: currentPlayer.name,
+            roomId: room.id,
+            timestamp: Date.now(),
+          };
+          saveSession(session);
+        }
+      }
     });
 
     socket.on('player_joined', (data) => {
@@ -158,6 +200,33 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       console.log('[Socket Provider] Marking mode changed to:', data.manualMarkingMode);
     });
 
+    socket.on('player_renamed', (data) => {
+      console.log('[Socket Provider] Player renamed from', data.oldName, 'to', data.newName);
+    });
+
+    // Session reconnection success
+    socket.on('session_reconnected', () => {
+      console.log('[Socket Provider] Session reconnected successfully');
+      isReconnectingRef.current = false;
+
+      // Update session with new socket ID
+      if (socket.id) {
+        updateSessionPlayerId(socket.id);
+      }
+
+      // Room update will be sent automatically by server
+    });
+
+    // Session reconnection failed
+    socket.on('session_reconnect_failed', (data) => {
+      console.log('[Socket Provider] Session reconnection failed:', data.message);
+      isReconnectingRef.current = false;
+
+      // Clear invalid session
+      clearSession();
+      sessionIdRef.current = null;
+    });
+
     // Cleanup on unmount
     return () => {
       console.log('[Socket Provider] Cleaning up');
@@ -175,6 +244,9 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       socket.off('caller_mode_changed');
       socket.off('caller_changed');
       socket.off('marking_mode_changed');
+      socket.off('player_renamed');
+      socket.off('session_reconnected');
+      socket.off('session_reconnect_failed');
       socket.disconnect();
       socketRef.current = null;
       hasInitialized.current = false;
@@ -189,8 +261,17 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // Generate new session ID
+    const newSessionId = generateSessionId();
+    sessionIdRef.current = newSessionId;
+
     console.log('[Socket Provider] Creating room:', { playerName, cardCount });
-    socket.emit('create_room', { playerName, cardCount, callerMode: 'machine' as CallerMode });
+    socket.emit('create_room', {
+      playerName,
+      cardCount,
+      callerMode: 'machine' as CallerMode,
+      sessionId: newSessionId,
+    });
   };
 
   const joinRoom = (roomId: string, playerName: string, cardCount: number) => {
@@ -200,8 +281,17 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // Generate new session ID
+    const newSessionId = generateSessionId();
+    sessionIdRef.current = newSessionId;
+
     console.log('[Socket Provider] Joining room:', { roomId, playerName, cardCount });
-    socket.emit('join_room', { roomId, playerName, cardCount });
+    socket.emit('join_room', {
+      roomId,
+      playerName,
+      cardCount,
+      sessionId: newSessionId,
+    });
   };
 
   const startGame = () => {
@@ -271,6 +361,10 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
     console.log('[Socket Provider] Leaving room');
     socket.emit('leave_room', { roomId });
+
+    // Clear session when leaving room
+    clearSession();
+    sessionIdRef.current = null;
   };
 
   const kickPlayer = (playerId: string) => {
@@ -348,6 +442,21 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     socket.emit('reset_game', { roomId });
   };
 
+  const renamePlayer = (newName: string) => {
+    const socket = socketRef.current;
+    if (!socket || !socket.connected) {
+      setError('Not connected to server');
+      return;
+    }
+    if (!roomId) {
+      setError('Not in a room');
+      return;
+    }
+
+    console.log('[Socket Provider] Renaming player to:', newName);
+    socket.emit('rename_player', { roomId, newName });
+  };
+
   const value: SocketContextValue = {
     socket: socketRef.current,
     connected,
@@ -364,6 +473,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     changeCaller,
     changeMarkingMode,
     resetGame,
+    renamePlayer,
   };
 
   return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>;

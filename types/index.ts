@@ -555,6 +555,19 @@ export const ClientChangeMarkingModeEventSchema = z.object({
   manualMarkingMode: z.boolean()
 });
 
+/**
+ * Player changes their name
+ */
+export interface ClientRenamePlayerEvent {
+  roomId: string;
+  newName: string;
+}
+
+export const ClientRenamePlayerEventSchema = z.object({
+  roomId: z.string().min(1),
+  newName: z.string().min(1).max(50)
+});
+
 // ============================================================================
 // SOCKET EVENT TYPES - SERVER TO CLIENT
 // ============================================================================
@@ -753,6 +766,64 @@ export const ServerMarkingModeChangedEventSchema = z.object({
   manualMarkingMode: z.boolean()
 });
 
+/**
+ * Server confirms player name changed
+ */
+export interface ServerPlayerRenamedEvent {
+  playerId: string;
+  oldName: string;
+  newName: string;
+}
+
+export const ServerPlayerRenamedEventSchema = z.object({
+  playerId: z.string().min(1),
+  oldName: z.string().min(1),
+  newName: z.string().min(1)
+});
+
+/**
+ * Server event: Session reconnection successful
+ */
+export interface ServerSessionReconnectedEvent {
+  roomId: string;
+  playerId: string;
+}
+
+export const ServerSessionReconnectedEventSchema = z.object({
+  roomId: z.string().min(1),
+  playerId: z.string().min(1),
+});
+
+/**
+ * Server event: Session reconnection failed
+ */
+export interface ServerSessionReconnectFailedEvent {
+  message: string;
+  code: string;
+}
+
+export const ServerSessionReconnectFailedEventSchema = z.object({
+  message: z.string(),
+  code: z.string(),
+});
+
+/**
+ * Client event: Reconnect with session
+ */
+export interface ClientReconnectSessionEvent {
+  sessionId: string;
+  roomId: string;
+  oldPlayerId: string;
+  playerName: string;
+}
+
+export const ClientReconnectSessionEventSchema = z.object({
+  sessionId: z.string().min(1),
+  roomId: z.string().min(1),
+  oldPlayerId: z.string().min(1),
+  playerName: z.string().min(1),
+});
+
 // ============================================================================
 // SOCKET EVENT TYPE UNIONS
 // ============================================================================
@@ -773,7 +844,8 @@ export type ClientEvent =
   | { type: 'change_caller'; data: ClientChangeCallerEvent }
   | { type: 'select_card'; data: ClientSelectCardEvent }
   | { type: 'deselect_card'; data: ClientDeselectCardEvent }
-  | { type: 'change_marking_mode'; data: ClientChangeMarkingModeEvent };
+  | { type: 'change_marking_mode'; data: ClientChangeMarkingModeEvent }
+  | { type: 'rename_player'; data: ClientRenamePlayerEvent };
 
 /**
  * All possible server-to-client events
@@ -791,7 +863,8 @@ export type ServerEvent =
   | { type: 'caller_changed'; data: ServerCallerChangedEvent }
   | { type: 'card_selected'; data: ServerCardSelectedEvent }
   | { type: 'card_deselected'; data: ServerCardDeselectedEvent }
-  | { type: 'marking_mode_changed'; data: ServerMarkingModeChangedEvent };
+  | { type: 'marking_mode_changed'; data: ServerMarkingModeChangedEvent }
+  | { type: 'player_renamed'; data: ServerPlayerRenamedEvent };
 
 // ============================================================================
 // UTILITY TYPE GUARDS

@@ -341,7 +341,7 @@ export default function RoomPage() {
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         onClick={handleLeaveRoom}
-        className="fixed bottom-6 left-6 z-40 p-4 bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 hover:shadow-xl transition-all duration-200 cursor-pointer active:scale-95"
+        className="fixed top-20 left-6 z-40 p-4 bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 hover:shadow-xl transition-all duration-200 cursor-pointer active:scale-95"
         aria-label="Rời phòng"
       >
         <LogOut className="w-6 h-6" />
@@ -525,7 +525,7 @@ export default function RoomPage() {
           <motion.div
             initial={false}
             animate={{
-              y: isSheetOpen ? 0 : "calc(100% - 80px)",
+              y: isSheetOpen ? 0 : "calc(100% - 70px)",
             }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className={cn(

@@ -19,7 +19,7 @@
 "use client";
 
 import { memo } from "react";
-import { Crown, Mic, Wifi, WifiOff, UserX } from "lucide-react";
+import { Crown, Mic, Wifi, WifiOff, UserX, Edit } from "lucide-react";
 import type { Player } from "@/types";
 
 // ============================================================================
@@ -38,6 +38,9 @@ interface PlayerCardProps {
 
   /** Callback when kick button is clicked */
   onKick?: (playerId: string) => void;
+
+  /** Callback when edit name button is clicked */
+  onEditName?: () => void;
 }
 
 // ============================================================================
@@ -49,6 +52,7 @@ export const PlayerCard = memo(function PlayerCard({
   isCurrentUserHost,
   isCurrentUser,
   onKick,
+  onEditName,
 }: PlayerCardProps) {
   // Can only kick if: user is host AND not kicking themselves
   const canKick = isCurrentUserHost && !isCurrentUser;
@@ -92,6 +96,24 @@ export const PlayerCard = memo(function PlayerCard({
           >
             {player.name}
           </span>
+
+          {/* Edit name button (only for current user) */}
+          {isCurrentUser && onEditName && (
+            <button
+              onClick={onEditName}
+              className="
+                flex-shrink-0 p-1 rounded-md
+                text-gray-500 hover:text-loto-green
+                hover:bg-loto-green/10
+                transition-colors
+                focus:outline-none focus:ring-2 focus:ring-loto-green focus:ring-offset-1
+              "
+              aria-label="Edit name"
+              title="Đổi tên"
+            >
+              <Edit className="w-3.5 h-3.5" aria-hidden="true" />
+            </button>
+          )}
 
           {/* Badges */}
           <div className="flex items-center gap-1">
