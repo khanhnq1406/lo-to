@@ -5,11 +5,11 @@
  * Shown when player has no cards or wants to regenerate
  */
 
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { RefreshCw, Ticket } from 'lucide-react';
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { RefreshCw, Ticket } from "lucide-react";
 
 interface CardGeneratorProps {
   /** Whether cards already exist (affects button text) */
@@ -63,18 +63,18 @@ export function CardGenerator({
         {/* Content */}
         <div className="flex-1">
           <h3 className="text-lg font-bold text-gray-800 mb-2">
-            {hasCards ? 'Tạo lại thẻ' : 'Tạo thẻ chơi'}
+            {hasCards ? "Tạo lại phiếu dò" : "Tạo phiếu dò chơi"}
           </h3>
           <p className="text-sm text-gray-600 mb-4">
             {hasCards
-              ? 'Bạn có thể tạo lại thẻ với số lượng khác trước khi bắt đầu trò chơi.'
-              : 'Chọn số lượng thẻ bạn muốn chơi (1-5 thẻ).'}
+              ? "Bạn có thể tạo lại phiếu dò với số lượng khác trước khi bắt đầu trò chơi."
+              : "Chọn số lượng phiếu dò bạn muốn chơi (1-5 phiếu dò)."}
           </p>
 
           {/* Card count selector */}
           <div className="mb-4">
             <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Số lượng thẻ:
+              Số lượng phiếu dò:
             </label>
             <div className="flex gap-2">
               {[1, 2, 3, 4, 5].map((count) => (
@@ -85,11 +85,11 @@ export function CardGenerator({
                     w-12 h-12 rounded-lg font-bold text-lg transition-all
                     ${
                       selectedCount === count
-                        ? 'bg-blue-500 text-white shadow-lg scale-110'
-                        : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-blue-400'
+                        ? "bg-blue-500 text-white shadow-lg scale-110"
+                        : "bg-white text-gray-700 border-2 border-gray-300 hover:border-blue-400"
                     }
                   `}
-                  aria-label={`${count} thẻ`}
+                  aria-label={`${count} phiếu dò`}
                 >
                   {count}
                 </button>
@@ -105,12 +105,12 @@ export function CardGenerator({
             {hasCards ? (
               <>
                 <RefreshCw className="w-5 h-5" />
-                Tạo lại thẻ
+                Tạo lại phiếu dò
               </>
             ) : (
               <>
                 <Ticket className="w-5 h-5" />
-                Tạo thẻ
+                Tạo phiếu dò
               </>
             )}
           </button>

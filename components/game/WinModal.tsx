@@ -22,13 +22,13 @@
  * ```
  */
 
-'use client';
+"use client";
 
-import { useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import confetti from 'canvas-confetti';
-import type { WinResult, Card } from '@/types';
-import { Trophy, Sparkles, RefreshCw } from 'lucide-react';
+import { useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import confetti from "canvas-confetti";
+import type { WinResult, Card } from "@/types";
+import { Trophy, Sparkles, RefreshCw } from "lucide-react";
 
 /**
  * Component props
@@ -111,13 +111,13 @@ export function WinModal({
         ...defaults,
         particleCount,
         origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
-        colors: ['#D4AF37', '#FFD700', '#FFA500', '#FF6347', '#DC143C'],
+        colors: ["#D4AF37", "#FFD700", "#FFA500", "#FF6347", "#DC143C"],
       });
       confetti({
         ...defaults,
         particleCount,
         origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
-        colors: ['#D4AF37', '#FFD700', '#FFA500', '#FF6347', '#DC143C'],
+        colors: ["#D4AF37", "#FFD700", "#FFA500", "#FF6347", "#DC143C"],
       });
     }, 250);
   };
@@ -149,7 +149,7 @@ export function WinModal({
         gainNode.connect(ctx.destination);
 
         // Configure oscillator
-        oscillator.type = 'sine';
+        oscillator.type = "sine";
         oscillator.frequency.setValueAtTime(freq, now);
 
         // Configure envelope (ADSR)
@@ -171,7 +171,7 @@ export function WinModal({
       finalOscillator.connect(finalGain);
       finalGain.connect(ctx.destination);
 
-      finalOscillator.type = 'sine';
+      finalOscillator.type = "sine";
       finalOscillator.frequency.setValueAtTime(523.25, now + 0.3); // C5
 
       finalGain.gain.setValueAtTime(0, now + 0.3);
@@ -181,7 +181,7 @@ export function WinModal({
       finalOscillator.start(now + 0.3);
       finalOscillator.stop(now + 0.9);
     } catch (error) {
-      console.error('[WinModal] Error playing win sound:', error);
+      console.error("[WinModal] Error playing win sound:", error);
     }
   };
 
@@ -190,16 +190,16 @@ export function WinModal({
    */
   const getWinTypeText = (type: string): string => {
     switch (type) {
-      case 'row':
-        return 'Hoàn thành 1 hàng!';
-      case 'twoRows':
-        return 'Hoàn thành 2 hàng!';
-      case 'fourCorners':
-        return 'Hoàn thành 4 góc!';
-      case 'fullBoard':
-        return 'Hoàn thành toàn bộ!';
+      case "row":
+        return "Hoàn thành 1 hàng!";
+      case "twoRows":
+        return "Hoàn thành 2 hàng!";
+      case "fourCorners":
+        return "Hoàn thành 4 góc!";
+      case "fullBoard":
+        return "Hoàn thành toàn bộ!";
       default:
-        return 'Chiến thắng!';
+        return "Chiến thắng!";
     }
   };
 
@@ -226,7 +226,7 @@ export function WinModal({
             initial={{ opacity: 0, scale: 0.8, y: 50 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 50 }}
-            transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+            transition={{ type: "spring", damping: 20, stiffness: 300 }}
             className="fixed inset-0 flex items-center justify-center z-50 p-4"
             onClick={(e) => e.stopPropagation()}
           >
@@ -243,14 +243,18 @@ export function WinModal({
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
-                  transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                  transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
                   className="flex justify-center mb-6"
                 >
                   <div className="relative">
                     <Trophy className="w-20 h-20 text-amber-500 drop-shadow-lg" />
                     <motion.div
                       animate={{ rotate: 360 }}
-                      transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
                       className="absolute -top-2 -right-2"
                     >
                       <Sparkles className="w-8 h-8 text-yellow-400" />
@@ -292,8 +296,9 @@ export function WinModal({
                   {/* Card and row info */}
                   {winner.cardIndex !== undefined && (
                     <p className="text-sm text-center text-amber-700 mt-2">
-                      Thẻ số {winner.cardIndex + 1}
-                      {winner.rowIndex !== undefined && ` - Hàng ${winner.rowIndex + 1}`}
+                      Phiếu dò số {winner.cardIndex + 1}
+                      {winner.rowIndex !== undefined &&
+                        ` - Hàng ${winner.rowIndex + 1}`}
                     </p>
                   )}
                 </motion.div>
@@ -310,16 +315,17 @@ export function WinModal({
                       Hàng chiến thắng:
                     </p>
                     <div className="flex justify-center gap-2">
-                      {winningCard[winner.rowIndex]?.map((cell, idx) => (
-                        cell !== null && (
-                          <div
-                            key={idx}
-                            className="w-10 h-10 bg-amber-400 text-amber-900 font-bold rounded flex items-center justify-center text-sm shadow-md"
-                          >
-                            {cell}
-                          </div>
-                        )
-                      ))}
+                      {winningCard[winner.rowIndex]?.map(
+                        (cell, idx) =>
+                          cell !== null && (
+                            <div
+                              key={idx}
+                              className="w-10 h-10 bg-amber-400 text-amber-900 font-bold rounded flex items-center justify-center text-sm shadow-md"
+                            >
+                              {cell}
+                            </div>
+                          ),
+                      )}
                     </div>
                   </motion.div>
                 )}

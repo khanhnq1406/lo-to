@@ -1,6 +1,7 @@
 # Task 12: Win Detection and Celebration - COMPLETED
 
 ## Overview
+
 Complete implementation of win detection and celebration system for the Vietnamese Lô Tô game.
 
 ## Files Created
@@ -70,6 +71,7 @@ Complete implementation of win detection and celebration system for the Vietname
 ## Features Implemented
 
 ### Automatic Win Detection
+
 ✅ Monitors called numbers in real-time
 ✅ Checks player's cards after each number
 ✅ Detects row wins (authentic Vietnamese Lô Tô)
@@ -79,61 +81,72 @@ Complete implementation of win detection and celebration system for the Vietname
 ✅ Server validates all claims
 
 ### Win Celebration
+
 ✅ Confetti animation (canvas-confetti)
-  - Multi-burst effect
-  - Traditional Vietnamese colors (gold, orange, red)
-  - 3-second animation
-  - Launches from both sides
+
+- Multi-burst effect
+- Traditional Vietnamese colors (gold, orange, red)
+- 3-second animation
+- Launches from both sides
 
 ✅ Win sound effect (Web Audio API)
-  - Triumphant chord (C major 7th)
-  - ADSR envelope for natural sound
-  - Frequencies: C4, E4, G4, B4
-  - Respects sound enabled setting
+
+- Triumphant chord (C major 7th)
+- ADSR envelope for natural sound
+- Frequencies: C4, E4, G4, B4
+- Respects sound enabled setting
 
 ✅ Modal UI
-  - Framer Motion animations
-  - Trophy icon with rotating sparkles
-  - Winner name display
-  - Win type in Vietnamese
-  - Card and row information
-  - Winning row numbers display
-  - Gradient background with pattern
-  - Backdrop overlay with blur
+
+- Framer Motion animations
+- Trophy icon with rotating sparkles
+- Winner name display
+- Win type in Vietnamese
+- Card and row information
+- Winning row numbers display
+- Gradient background with pattern
+- Backdrop overlay with blur
 
 ✅ Host Controls
-  - "Chơi Lại" button for host only
-  - Waiting message for non-hosts
-  - Play again callback support
+
+- "Chơi Lại" button for host only
+- Waiting message for non-hosts
+- Play again callback support
 
 ### Visual Design
+
 ✅ Traditional Vietnamese styling
-  - Gold, orange, red color scheme
-  - Vietnamese text throughout
-  - Festive and celebratory feel
-  - Border decoration
+
+- Gold, orange, red color scheme
+- Vietnamese text throughout
+- Festive and celebratory feel
+- Border decoration
 
 ✅ Animations
-  - Spring animations for playful feel
-  - Trophy rotation entrance
-  - Sparkles rotation
-  - Modal scale and slide
-  - Smooth backdrop fade
+
+- Spring animations for playful feel
+- Trophy rotation entrance
+- Sparkles rotation
+- Modal scale and slide
+- Smooth backdrop fade
 
 ✅ Responsive
-  - Works on all screen sizes
-  - Mobile-optimized layout
-  - Touch-friendly buttons
-  - Proper z-index layering
+
+- Works on all screen sizes
+- Mobile-optimized layout
+- Touch-friendly buttons
+- Proper z-index layering
 
 ## Technical Details
 
 ### Dependencies Used
+
 - `canvas-confetti` (^1.9.3) - Already installed
 - `framer-motion` (^11.15.0) - Already installed
 - Web Audio API - Browser native
 
 ### Performance
+
 - Efficient Set lookups for called numbers
 - Memoized with useEffect dependencies
 - Audio context reused (not recreated)
@@ -141,12 +154,14 @@ Complete implementation of win detection and celebration system for the Vietname
 - No unnecessary rerenders
 
 ### Type Safety
+
 - Full TypeScript coverage
 - Proper type exports
 - Type guards included
 - Zod schema compatible
 
 ### Code Quality
+
 - ✅ TypeScript compiles without errors
 - ✅ Pure functions (testable)
 - ✅ Clear documentation
@@ -156,12 +171,12 @@ Complete implementation of win detection and celebration system for the Vietname
 ## Integration Example
 
 ```tsx
-'use client';
+"use client";
 
-import { useSocket } from '@/hooks/useSocket';
-import { useWinDetection } from '@/hooks/useWinDetection';
-import { WinModal } from '@/components/game';
-import { useGameStore } from '@/store/useGameStore';
+import { useSocket } from "@/hooks/useSocket";
+import { useWinDetection } from "@/hooks/useWinDetection";
+import { WinModal } from "@/components/game";
+import { useGameStore } from "@/store/useGameStore";
 
 export default function GameRoomPage() {
   const socket = useSocket();
@@ -169,12 +184,12 @@ export default function GameRoomPage() {
   // Automatic win detection
   useWinDetection(socket.connected ? socket : undefined);
 
-  const winner = useGameStore(state => state.room?.winner);
-  const isHost = useGameStore(state => state.isHost());
-  const soundEnabled = useGameStore(state => state.soundEnabled);
+  const winner = useGameStore((state) => state.room?.winner);
+  const isHost = useGameStore((state) => state.isHost());
+  const soundEnabled = useGameStore((state) => state.soundEnabled);
 
   const handlePlayAgain = () => {
-    socket.emit('reset_game', { roomId: socket.roomId });
+    socket.emit("reset_game", { roomId: socket.roomId });
   };
 
   return (
@@ -197,15 +212,12 @@ export default function GameRoomPage() {
 The server must validate win claims:
 
 ```typescript
-socket.on('claim_win', ({ roomId, ticketIndex, boardIndex, type }) => {
+socket.on("claim_win", ({ roomId, ticketIndex, boardIndex, type }) => {
   const room = rooms.get(roomId);
-  const player = room.players.find(p => p.id === socket.id);
+  const player = room.players.find((p) => p.id === socket.id);
 
   // Validate using game engine
-  const win = checkPlayerWin(
-    player.tickets,
-    new Set(room.calledHistory)
-  );
+  const win = checkPlayerWin(player.tickets, new Set(room.calledHistory));
 
   if (win) {
     const winner = {
@@ -213,17 +225,17 @@ socket.on('claim_win', ({ roomId, ticketIndex, boardIndex, type }) => {
       playerName: player.name,
       cardIndex: ticketIndex,
       rowIndex: win.rowIndices[0],
-      type: 'row'
+      type: "row",
     };
 
     // Broadcast to all players
-    io.to(roomId).emit('game_finished', { winner });
+    io.to(roomId).emit("game_finished", { winner });
 
     // Update room state
-    room.gameState = 'finished';
+    room.gameState = "finished";
     room.winner = winner;
   } else {
-    socket.emit('error', { message: 'Invalid win claim' });
+    socket.emit("error", { message: "Invalid win claim" });
   }
 });
 ```
@@ -237,6 +249,7 @@ socket.on('claim_win', ({ roomId, ticketIndex, boardIndex, type }) => {
 - [x] Documentation is comprehensive
 
 ### Manual Testing Needed
+
 - [ ] Win detected when row completed
 - [ ] Confetti plays correctly
 - [ ] Sound plays (if enabled)
@@ -256,7 +269,7 @@ socket.on('claim_win', ({ roomId, ticketIndex, boardIndex, type }) => {
 - "Chúc Mừng!" - Congratulations!
 - "Hoàn thành 1 hàng!" - Completed 1 row!
 - "Chơi Lại" - Play Again
-- "Thẻ số X" - Card number X
+- "Phiếu dò số X" - Card number X
 - "Hàng X" - Row X
 - "Hàng chiến thắng:" - Winning row:
 - "Chờ chủ phòng bắt đầu ván mới..." - Wait for host to start new round...
@@ -264,6 +277,7 @@ socket.on('claim_win', ({ roomId, ticketIndex, boardIndex, type }) => {
 ## Color Palette
 
 Traditional Vietnamese festive colors:
+
 - Gold: `#D4AF37`, `#FFD700` - Prosperity
 - Orange: `#FFA500` - Joy
 - Red: `#FF6347`, `#DC143C` - Good fortune
@@ -283,15 +297,15 @@ Traditional Vietnamese festive colors:
 
 ## Files Summary
 
-| File | Lines | Size | Purpose |
-|------|-------|------|---------|
-| `/lib/winDetection.ts` | 277 | 6.9KB | Win detection logic |
-| `/hooks/useWinDetection.ts` | 192 | 4.6KB | React hook |
-| `/components/game/WinModal.tsx` | 364 | 12KB | Celebration UI |
-| `WIN_DETECTION_GUIDE.md` | - | 15KB | Complete guide |
-| `WIN_DETECTION_SUMMARY.md` | - | 3.9KB | Quick reference |
-| `WinModal.example.tsx` | - | 9KB | Usage examples |
-| **Total** | **833** | **51KB** | Complete system |
+| File                            | Lines   | Size     | Purpose             |
+| ------------------------------- | ------- | -------- | ------------------- |
+| `/lib/winDetection.ts`          | 277     | 6.9KB    | Win detection logic |
+| `/hooks/useWinDetection.ts`     | 192     | 4.6KB    | React hook          |
+| `/components/game/WinModal.tsx` | 364     | 12KB     | Celebration UI      |
+| `WIN_DETECTION_GUIDE.md`        | -       | 15KB     | Complete guide      |
+| `WIN_DETECTION_SUMMARY.md`      | -       | 3.9KB    | Quick reference     |
+| `WinModal.example.tsx`          | -       | 9KB      | Usage examples      |
+| **Total**                       | **833** | **51KB** | Complete system     |
 
 ## Next Steps
 

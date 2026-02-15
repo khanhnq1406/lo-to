@@ -406,7 +406,9 @@ export default function RoomPage() {
             {/* Selected Cards Display - Show card images */}
             <div className="bg-white/95 backdrop-blur-sm rounded-2xl border-2 border-loto-green shadow-lg overflow-hidden flex flex-col transition-all duration-300 hover:shadow-xl">
               <div className="px-6 pt-6 pb-4 border-b border-gray-200 bg-gradient-to-r from-loto-green/5 to-transparent">
-                <h3 className="text-xl font-bold text-gray-800">Vé của bạn</h3>
+                <h3 className="text-xl font-bold text-gray-800">
+                  Phiếu dò của bạn
+                </h3>
               </div>
               <div className="p-6">
                 <SelectedCardsDisplay
@@ -493,7 +495,7 @@ export default function RoomPage() {
               className="bg-white rounded-xl p-4 border-2 border-loto-green shadow-lg"
             >
               <h3 className="text-lg font-bold text-gray-800 mb-4">
-                Vé của bạn
+                Phiếu dò của bạn
               </h3>
               <SelectedCardsDisplay
                 selectedCards={selectedCards}

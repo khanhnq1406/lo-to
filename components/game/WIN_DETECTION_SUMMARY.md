@@ -3,27 +3,33 @@
 ## Files Created
 
 ### 1. `/lib/winDetection.ts`
+
 Pure functions for win detection logic.
 
 **Key Functions:**
+
 - `detectWin(cards, calledNumbers)` - Find first win
 - `detectAllWins(cards, calledNumbers)` - Find all wins
 - `numbersNeededToWin(card, calledNumbers)` - Check proximity
 - `getClosestRow(card, calledNumbers)` - Find closest row
 
 ### 2. `/hooks/useWinDetection.ts`
+
 React hook for automatic win monitoring.
 
 **Features:**
+
 - Auto-detects wins when numbers are called
 - Auto-claims via Socket.io
 - Prevents duplicate claims
 - Resets on game state changes
 
 ### 3. `/components/game/WinModal.tsx`
+
 Celebration modal with confetti and sound.
 
 **Features:**
+
 - Confetti animation (canvas-confetti)
 - Win sound (Web Audio API)
 - Vietnamese styling
@@ -33,12 +39,12 @@ Celebration modal with confetti and sound.
 ## Quick Integration
 
 ```tsx
-'use client';
+"use client";
 
-import { useSocket } from '@/hooks/useSocket';
-import { useWinDetection } from '@/hooks/useWinDetection';
-import { WinModal } from '@/components/game';
-import { useGameStore } from '@/store/useGameStore';
+import { useSocket } from "@/hooks/useSocket";
+import { useWinDetection } from "@/hooks/useWinDetection";
+import { WinModal } from "@/components/game";
+import { useGameStore } from "@/store/useGameStore";
 
 export default function GameRoomPage() {
   // 1. Socket connection
@@ -48,13 +54,13 @@ export default function GameRoomPage() {
   useWinDetection(socket.connected ? socket : undefined);
 
   // 3. Get game state
-  const winner = useGameStore(state => state.room?.winner);
-  const isHost = useGameStore(state => state.isHost());
-  const soundEnabled = useGameStore(state => state.soundEnabled);
+  const winner = useGameStore((state) => state.room?.winner);
+  const isHost = useGameStore((state) => state.isHost());
+  const soundEnabled = useGameStore((state) => state.soundEnabled);
 
   // 4. Play again handler
   const handlePlayAgain = () => {
-    socket.emit('reset_game', { roomId: socket.roomId });
+    socket.emit("reset_game", { roomId: socket.roomId });
   };
 
   return (
@@ -92,29 +98,26 @@ WinModal shows celebration
 ## Server-Side (Must Implement)
 
 ```typescript
-socket.on('claim_win', ({ roomId, ticketIndex }) => {
+socket.on("claim_win", ({ roomId, ticketIndex }) => {
   const room = rooms.get(roomId);
-  const player = room.players.find(p => p.id === socket.id);
+  const player = room.players.find((p) => p.id === socket.id);
 
   // Validate win
-  const win = checkPlayerWin(
-    player.tickets,
-    new Set(room.calledHistory)
-  );
+  const win = checkPlayerWin(player.tickets, new Set(room.calledHistory));
 
   if (win) {
     // Broadcast winner
-    io.to(roomId).emit('game_finished', {
+    io.to(roomId).emit("game_finished", {
       winner: {
         playerId: player.id,
         playerName: player.name,
         cardIndex: ticketIndex,
         rowIndex: win.rowIndices[0],
-        type: 'row'
-      }
+        type: "row",
+      },
     });
 
-    room.gameState = 'finished';
+    room.gameState = "finished";
     room.winner = winner;
   }
 });
@@ -153,7 +156,7 @@ socket.on('claim_win', ({ roomId, ticketIndex }) => {
 - "Chúc Mừng!" - Congratulations!
 - "Hoàn thành 1 hàng!" - Completed 1 row!
 - "Chơi Lại" - Play Again
-- "Thẻ số X" - Card number X
+- "Phiếu dò số X" - Card number X
 - "Hàng X" - Row X
 
 ## Colors Used

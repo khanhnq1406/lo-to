@@ -129,7 +129,7 @@ export function PlayableCardImage({
               shadow-lg
             `}
           >
-            Thẻ #{cardId}
+            Phiếu dò #{cardId}
           </div> */}
 
           {/* Winning Badge */}
@@ -168,7 +168,6 @@ export function PlayableCardImage({
                   style={{ gap: "1.5%" }}
                 >
                   {cardData.map((row, rowIndex) => {
-                    const rowComplete = isRowComplete(rowIndex);
                     const isWinningRowHighlight =
                       isWinning && winningRow === rowIndex;
 
@@ -313,7 +312,7 @@ export function PlayableCardImage({
       {/* Card Position Label */}
       <div className="mt-2 text-center">
         <span className="text-sm font-semibold text-gray-600">
-          Thẻ {cardIndex + 1} - {config.color}
+          Phiếu dò {cardIndex + 1} - {config.color}
         </span>
       </div>
     </div>

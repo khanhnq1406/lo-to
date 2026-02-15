@@ -12,10 +12,10 @@
  * - Responsive text sizing
  */
 
-'use client';
+"use client";
 
-import { memo } from 'react';
-import { motion } from 'framer-motion';
+import { memo } from "react";
+import { motion } from "framer-motion";
 
 // ============================================================================
 // PROPS
@@ -53,7 +53,7 @@ export const CardHeader = memo(function CardHeader({
     <div className="flex items-center justify-between mb-2 px-1">
       {/* Card title */}
       <h3 className="text-sm sm:text-base md:text-lg font-bold text-loto-green">
-        Thẻ {cardIndex + 1}
+        Phiếu dò {cardIndex + 1}
       </h3>
 
       {/* Win indicator or progress */}
@@ -67,9 +67,9 @@ export const CardHeader = memo(function CardHeader({
               rotate: 0,
             }}
             transition={{
-              type: 'spring',
+              type: "spring",
               stiffness: 400,
-              damping: 20
+              damping: 20,
             }}
           >
             <motion.svg
@@ -101,9 +101,7 @@ export const CardHeader = memo(function CardHeader({
               {calledNumbers}
             </span>
             <span>/</span>
-            <span className="text-gray-500">
-              {totalNumbers}
-            </span>
+            <span className="text-gray-500">{totalNumbers}</span>
           </div>
         )}
       </div>

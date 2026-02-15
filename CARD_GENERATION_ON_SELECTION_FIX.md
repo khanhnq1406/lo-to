@@ -2,13 +2,15 @@
 
 ## Problem
 
-After selecting cards in "Chọn Thẻ Chơi", the TicketDisplay still showed:
+After selecting cards in "Chọn Phiếu Dò", the TicketDisplay still showed:
+
 ```
-Chưa có thẻ
-Bạn chưa có thẻ nào. Hãy tạo thẻ mới để tham gia chơi!
+Chưa có phiếu dò
+Bạn chưa có phiếu dò nào. Hãy tạo phiếu dò mới để tham gia chơi!
 ```
 
 And when trying to start the game:
+
 ```
 Error: At least one player must have cards to start the game
 ```
@@ -23,13 +25,14 @@ Error: At least one player must have cards to start the game
 
 ```typescript
 // When selecting card #1:
-room.selectedCards[1] = "player-socket-id"  // ✅ Card tracked
+room.selectedCards[1] = "player-socket-id"; // ✅ Card tracked
 
 // But:
-player.tickets = []  // ❌ Still empty! No actual card data
+player.tickets = []; // ❌ Still empty! No actual card data
 ```
 
 **Result:**
+
 - CardSelector showed cards as selected (green border)
 - But `player.tickets` array was still empty
 - TicketDisplay had no cards to show
@@ -56,11 +59,12 @@ const CARD_SEEDS = {
 // Generate card by ID (deterministic)
 export function generatePredefinedCard(cardId: number): Card {
   const seed = CARD_SEEDS[cardId];
-  return generateCard(seed);  // Uses existing game.ts logic
+  return generateCard(seed); // Uses existing game.ts logic
 }
 ```
 
 **Key Points:**
+
 - Each card ID (1-16) has a unique seed
 - Same card ID always generates same card layout
 - Deterministic and reproducible
@@ -71,12 +75,14 @@ export function generatePredefinedCard(cardId: number): Card {
 **File**: `server/socket-handler.ts`
 
 **Before:**
+
 ```typescript
 // Only tracked selection
 room.selectedCards[cardId] = playerId;
 ```
 
 **After:**
+
 ```typescript
 // Track selection
 room.selectedCards[cardId] = playerId;
@@ -88,9 +94,9 @@ const cardData = generatePredefinedCard(cardId);
 player.tickets.push(cardData);
 
 // Notify player (so TicketDisplay updates)
-socket.emit('tickets_generated', {
+socket.emit("tickets_generated", {
   playerId: socket.id,
-  tickets: player.tickets
+  tickets: player.tickets,
 });
 ```
 
@@ -99,12 +105,14 @@ socket.emit('tickets_generated', {
 **File**: `server/socket-handler.ts`
 
 **Before:**
+
 ```typescript
 // Only removed from selectedCards
 delete room.selectedCards[cardId];
 ```
 
 **After:**
+
 ```typescript
 // Find position in tickets array
 const playerCardIds = Object.entries(room.selectedCards)
@@ -123,9 +131,9 @@ if (cardPosition !== -1) {
 delete room.selectedCards[cardId];
 
 // Update player
-socket.emit('tickets_generated', {
+socket.emit("tickets_generated", {
   playerId: socket.id,
-  tickets: player.tickets
+  tickets: player.tickets,
 });
 ```
 
@@ -207,12 +215,14 @@ player.tickets = [
 ## Benefits
 
 ### For Players
+
 ✅ See actual card content immediately after selection
 ✅ Can mark numbers as they're called
 ✅ Win detection works properly
 ✅ No "empty tickets" message
 
 ### For Game Logic
+
 ✅ Start game validation passes (players have cards)
 ✅ Win detection has cards to check
 ✅ Number marking works on real cards
@@ -288,8 +298,9 @@ player.tickets = [
 **The system now works end-to-end!** 🎉
 
 Test it out:
+
 1. Refresh your browser
 2. Create a room
 3. Select multiple cards (1-5)
-4. Watch them appear in "Vé của bạn" section!
+4. Watch them appear in "Phiếu dò của bạn" section!
 5. Start the game!

@@ -4,11 +4,11 @@
  * Shows which cards are already selected by other players
  */
 
-'use client';
+"use client";
 
-import { motion } from 'framer-motion';
-import { Check, Lock, User } from 'lucide-react';
-import { CARD_CONFIGS, getCardColorClasses } from '@/lib/card-configs';
+import { motion } from "framer-motion";
+import { Check, Lock, User } from "lucide-react";
+import { CARD_CONFIGS, getCardColorClasses } from "@/lib/card-configs";
 
 interface CardSelectorProps {
   /** Currently selected cards: Map of cardId to playerId */
@@ -47,7 +47,7 @@ export function CardSelector({
 
   const getPlayerName = (playerId: string): string => {
     const player = players.find((p) => p.id === playerId);
-    return player?.name || 'Unknown';
+    return player?.name || "Unknown";
   };
 
   const isCardSelected = (cardId: number): boolean => {
@@ -79,7 +79,7 @@ export function CardSelector({
 
     // Check if player already has max cards
     if (mySelectedCardIds.length >= MAX_CARDS_PER_PLAYER) {
-      alert(`Bạn chỉ có thể chọn tối đa ${MAX_CARDS_PER_PLAYER} thẻ!`);
+      alert(`Bạn chỉ có thể chọn tối đa ${MAX_CARDS_PER_PLAYER} phiếu dò!`);
       return;
     }
 
@@ -95,22 +95,21 @@ export function CardSelector({
   return (
     <div className="w-full">
       <div className="mb-4">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">
-          Chọn Thẻ Chơi
-        </h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">Chọn Phiếu Dò</h2>
         <p className="text-gray-600">
-          Chọn từ 1-5 thẻ trong 16 thẻ để chơi. Mỗi thẻ chỉ có thể được chọn bởi 1 người chơi.
+          Chọn từ 1-5 phiếu dò trong 16 phiếu dò để chơi. Mỗi phiếu dò chỉ có
+          thể được chọn bởi 1 người chơi.
         </p>
         {mySelectedCardIds.length > 0 && (
           <div className="mt-2 p-3 bg-green-50 border-2 border-green-500 rounded-lg">
             <p className="text-green-800 font-semibold">
-              ✓ Bạn đã chọn {mySelectedCardIds.length} thẻ: {mySelectedCardIds.sort((a, b) => a - b).join(', ')}
+              ✓ Bạn đã chọn {mySelectedCardIds.length} phiếu dò:{" "}
+              {mySelectedCardIds.sort((a, b) => a - b).join(", ")}
             </p>
             <p className="text-sm text-green-700 mt-1">
               {mySelectedCardIds.length < MAX_CARDS_PER_PLAYER
-                ? `Bạn có thể chọn thêm ${MAX_CARDS_PER_PLAYER - mySelectedCardIds.length} thẻ nữa.`
-                : 'Bạn đã chọn đủ số lượng thẻ tối đa.'
-              }
+                ? `Bạn có thể chọn thêm ${MAX_CARDS_PER_PLAYER - mySelectedCardIds.length} phiếu dò nữa.`
+                : "Bạn đã chọn đủ số lượng phiếu dò tối đa."}
             </p>
           </div>
         )}
@@ -135,11 +134,12 @@ export function CardSelector({
               className={`
                 relative aspect-[3/4] rounded-xl overflow-hidden
                 border-4 transition-all
-                ${isMyCard
-                  ? `${colorClasses.border} ${colorClasses.ring} ring-4 ring-offset-2`
-                  : isDisabled
-                  ? 'border-gray-300 opacity-50 cursor-not-allowed'
-                  : `${colorClasses.border} ${colorClasses.hover} cursor-pointer hover:shadow-lg`
+                ${
+                  isMyCard
+                    ? `${colorClasses.border} ${colorClasses.ring} ring-4 ring-offset-2`
+                    : isDisabled
+                      ? "border-gray-300 opacity-50 cursor-not-allowed"
+                      : `${colorClasses.border} ${colorClasses.hover} cursor-pointer hover:shadow-lg`
                 }
               `}
             >
@@ -149,7 +149,7 @@ export function CardSelector({
                   src={`/sample/${card.imageFile}`}
                   alt={card.name}
                   className={`w-full h-full object-cover ${
-                    isDisabled ? 'grayscale' : ''
+                    isDisabled ? "grayscale" : ""
                   }`}
                 />
 
@@ -176,11 +176,12 @@ export function CardSelector({
                 className={`
                   absolute bottom-2 left-2 px-2 py-1 rounded-md
                   font-bold text-sm
-                  ${isMyCard
-                    ? 'bg-green-500 text-white'
-                    : isDisabled
-                    ? 'bg-gray-500 text-white'
-                    : `${colorClasses.bg} ${colorClasses.text}`
+                  ${
+                    isMyCard
+                      ? "bg-green-500 text-white"
+                      : isDisabled
+                        ? "bg-gray-500 text-white"
+                        : `${colorClasses.bg} ${colorClasses.text}`
                   }
                 `}
               >
@@ -193,14 +194,15 @@ export function CardSelector({
                   className={`
                     absolute top-2 left-2 px-2 py-1 rounded-md
                     text-xs font-semibold flex items-center gap-1
-                    ${isMyCard
-                      ? 'bg-green-500 text-white'
-                      : 'bg-gray-700 text-white'
+                    ${
+                      isMyCard
+                        ? "bg-green-500 text-white"
+                        : "bg-gray-700 text-white"
                     }
                   `}
                 >
                   <User className="w-3 h-3" />
-                  {isMyCard ? 'Bạn' : owner}
+                  {isMyCard ? "Bạn" : owner}
                 </div>
               )}
             </motion.button>
@@ -214,7 +216,7 @@ export function CardSelector({
         <div className="flex flex-wrap gap-4 text-sm mb-2">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-green-500 rounded"></div>
-            <span>Thẻ của bạn</span>
+            <span>Phiếu dò của bạn</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-gray-400 rounded"></div>
@@ -226,7 +228,8 @@ export function CardSelector({
           </div>
         </div>
         <p className="text-xs text-gray-600">
-          💡 Nhấn vào thẻ của bạn để bỏ chọn. Bạn có thể chọn tối đa {MAX_CARDS_PER_PLAYER} thẻ.
+          💡 Nhấn vào phiếu dò của bạn để bỏ chọn. Bạn có thể chọn tối đa{" "}
+          {MAX_CARDS_PER_PLAYER} phiếu dò.
         </p>
       </div>
     </div>

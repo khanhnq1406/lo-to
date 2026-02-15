@@ -9,7 +9,7 @@ TicketDisplay                          # Container (all player cards)
 └── Grid of Cards
     └── CardGrid (×N)                  # Single card (repeated)
         ├── CardHeader                 # Card title & status
-        │   ├── Card Title ("Thẻ 1")
+        │   ├── Card Title ("Phiếu dò 1")
         │   └── Progress or Win Badge
         ├── Card Container (Paper)     # 3×9 grid container
         │   ├── Paper Background
@@ -44,6 +44,7 @@ NumberCell (for each cell)
 ## State Management
 
 ### Store State (Zustand)
+
 ```tsx
 // Global state (read from store)
 - cards: Card[]              // Player's cards
@@ -53,6 +54,7 @@ NumberCell (for each cell)
 ```
 
 ### Local State (Component)
+
 ```tsx
 // CardGrid local state
 - markedCells: Set<string>   // Manually marked cells
@@ -63,19 +65,22 @@ NumberCell (for each cell)
 ```
 
 ### Props (Parent to Child)
+
 ```tsx
 // Passed down through component tree
-- cards                     // Card data
-- calledNumbers            // Set of called numbers
-- onCellClick              // User interaction handler
-- winningCardIndex         // Highlight winning card
-- winningRow               // Highlight winning row
+-cards - // Card data
+  calledNumbers - // Set of called numbers
+  onCellClick - // User interaction handler
+  winningCardIndex - // Highlight winning card
+  winningRow; // Highlight winning row
 ```
 
 ## Component Responsibilities
 
 ### TicketDisplay
+
 **Responsibilities:**
+
 - Display multiple cards in responsive grid
 - Show overall statistics
 - Handle empty state (no cards)
@@ -83,13 +88,16 @@ NumberCell (for each cell)
 - Coordinate card layout
 
 **Does NOT:**
+
 - Manage game logic
 - Call numbers
 - Generate cards
 - Validate wins
 
 ### CardGrid
+
 **Responsibilities:**
+
 - Display single 3×9 card
 - Apply traditional paper styling
 - Track manual marking (local state)
@@ -97,13 +105,16 @@ NumberCell (for each cell)
 - Handle cell click events
 
 **Does NOT:**
+
 - Know about other cards
 - Call numbers
 - Determine if game is won
 - Generate card data
 
 ### NumberCell
+
 **Responsibilities:**
+
 - Display single number or blank
 - Show visual state (called/marked/winning)
 - Animate state changes
@@ -111,18 +122,22 @@ NumberCell (for each cell)
 - Provide accessibility
 
 **Does NOT:**
+
 - Know about card structure
 - Track which numbers are called
 - Determine if row is complete
 - Manage mark state
 
 ### CardHeader
+
 **Responsibilities:**
+
 - Display card title (Vietnamese)
 - Show progress or win status
 - Animate win celebration
 
 **Does NOT:**
+
 - Know about cell states
 - Calculate statistics
 - Handle interactions
@@ -202,9 +217,9 @@ const onClick = useCallback(...)  // Cache handlers
 
 ```tsx
 // Only rerender when these change:
-NumberCell: [value, isCalled, isMarked, isWinning]
-CardGrid:   [card, calledNumbers, isWinning, winningRow]
-TicketDisplay: [cards, calledNumbers, winningCardIndex]
+NumberCell: [value, isCalled, isMarked, isWinning];
+CardGrid: [card, calledNumbers, isWinning, winningRow];
+TicketDisplay: [cards, calledNumbers, winningCardIndex];
 ```
 
 ### Data Structure Choice
@@ -218,6 +233,7 @@ calledNumbers: number[]     // ❌ Slow: calledNumbers.includes(5)
 ## Animation Performance
 
 ### GPU Acceleration
+
 ```tsx
 // Use transform and opacity (GPU-accelerated)
 transform: scale(1.1)   ✅
@@ -231,24 +247,26 @@ top: 50px       ❌
 ```
 
 ### Animation Types
+
 ```tsx
 // Spring (realistic physics)
-type: 'spring'
-stiffness: 400
-damping: 25
+type: "spring";
+stiffness: 400;
+damping: 25;
 
 // Tween (smooth interpolation)
-duration: 0.4
-ease: 'easeOut'
+duration: 0.4;
+ease: "easeOut";
 
 // Infinite (continuous)
-repeat: Infinity
-ease: 'linear'
+repeat: Infinity;
+ease: "linear";
 ```
 
 ## Accessibility Architecture
 
 ### Semantic HTML
+
 ```tsx
 <div role="grid">              // Card container
   <div role="gridcell">        // Non-interactive cell
@@ -256,6 +274,7 @@ ease: 'linear'
 ```
 
 ### ARIA Labels
+
 ```tsx
 aria-label="Number 5 - called, marked"
 aria-label="Blank cell at row 1, column 2"
@@ -263,6 +282,7 @@ aria-pressed={isMarked}
 ```
 
 ### Keyboard Navigation
+
 ```tsx
 tabIndex={0}                   // Focusable
 onKeyDown={(e) => {
@@ -274,18 +294,20 @@ onKeyDown={(e) => {
 ## Styling Architecture
 
 ### Tailwind Strategy
+
 ```tsx
 // Responsive modifiers
-className="text-sm sm:text-base md:text-lg lg:text-xl"
+className = "text-sm sm:text-base md:text-lg lg:text-xl";
 
 // State variants
-className="hover:bg-green active:scale-95"
+className = "hover:bg-green active:scale-95";
 
 // Custom utilities
-className="bg-paper border-loto-green shadow-loto-ticket"
+className = "bg-paper border-loto-green shadow-loto-ticket";
 ```
 
 ### Color System
+
 ```tsx
 // Traditional Vietnamese Lô Tô palette
 paper:           #FBF9F4  // Off-white paper
@@ -297,6 +319,7 @@ loto-red:        #C41E3A  // Red accent
 ```
 
 ### Component Styling Layers
+
 ```
 1. Base layout (Tailwind utility classes)
 2. State classes (hover, focus, active)
@@ -308,27 +331,30 @@ loto-red:        #C41E3A  // Red accent
 ## Testing Architecture
 
 ### Unit Testing (Future)
+
 ```tsx
 // Test individual components
-describe('NumberCell', () => {
-  it('displays number correctly')
-  it('shows blank cell as green')
-  it('highlights called numbers')
-  it('marks on click')
-})
+describe("NumberCell", () => {
+  it("displays number correctly");
+  it("shows blank cell as green");
+  it("highlights called numbers");
+  it("marks on click");
+});
 ```
 
 ### Integration Testing (Future)
+
 ```tsx
 // Test component interactions
-describe('CardGrid', () => {
-  it('renders all 27 cells')
-  it('marks cells on click')
-  it('detects complete rows')
-})
+describe("CardGrid", () => {
+  it("renders all 27 cells");
+  it("marks cells on click");
+  it("detects complete rows");
+});
 ```
 
 ### Visual Testing (Manual)
+
 ```tsx
 // See TEST.md for checklist
 - Visual appearance
@@ -342,6 +368,7 @@ describe('CardGrid', () => {
 ## Error Handling
 
 ### Prop Validation
+
 ```tsx
 // TypeScript provides compile-time validation
 cards: Card[]              // Must be Card array
@@ -353,6 +380,7 @@ if (!row || row.length !== 9) continue;
 ```
 
 ### Null Safety
+
 ```tsx
 // Optional chaining
 const topLeft = card[0]?.[0];
@@ -365,6 +393,7 @@ const rowNumbers = row.filter((cell): cell is number => cell !== null);
 ```
 
 ### Edge Cases
+
 ```tsx
 // Empty arrays
 if (cards.length === 0) return <EmptyState />;
@@ -379,6 +408,7 @@ if (number < 1 || number > 90) return;
 ## Future Enhancements
 
 ### Planned Features
+
 - [ ] Sound effects on number call
 - [ ] Confetti animation on win
 - [ ] Card flip animation on generate
@@ -388,12 +418,14 @@ if (number < 1 || number > 90) return;
 - [ ] Heat map visualization
 
 ### Performance Improvements
+
 - [ ] Virtual scrolling for 100+ cards
 - [ ] Web Workers for calculations
 - [ ] Lazy loading for off-screen cards
 - [ ] Progressive enhancement
 
 ### Accessibility Improvements
+
 - [ ] High contrast mode
 - [ ] Reduced motion mode
 - [ ] Voice commands
@@ -402,6 +434,7 @@ if (number < 1 || number > 90) return;
 ## Summary
 
 This architecture provides:
+
 - ✅ Clear separation of concerns
 - ✅ Unidirectional data flow
 - ✅ Performance optimization

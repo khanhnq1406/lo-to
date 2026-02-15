@@ -16,11 +16,11 @@
  * - Conditional rendering based on permissions
  */
 
-'use client';
+"use client";
 
-import { memo } from 'react';
-import { Crown, Mic, Wifi, WifiOff, UserX } from 'lucide-react';
-import type { Player } from '@/types';
+import { memo } from "react";
+import { Crown, Mic, Wifi, WifiOff, UserX } from "lucide-react";
+import type { Player } from "@/types";
 
 // ============================================================================
 // PROPS
@@ -57,11 +57,12 @@ export const PlayerCard = memo(function PlayerCard({
     <div
       className={`
         relative flex items-center gap-3 p-3 rounded-lg border-2 transition-all
-        ${isCurrentUser
-          ? 'bg-gradient-to-r from-loto-gold/10 via-loto-gold-light/10 to-loto-gold/10 border-loto-gold'
-          : 'bg-paper border-loto-green/20 hover:border-loto-green/40'
+        ${
+          isCurrentUser
+            ? "bg-gradient-to-r from-loto-gold/10 via-loto-gold-light/10 to-loto-gold/10 border-loto-gold"
+            : "bg-paper border-loto-green/20 hover:border-loto-green/40"
         }
-        ${!player.connected ? 'opacity-60' : ''}
+        ${!player.connected ? "opacity-60" : ""}
       `}
       role="article"
       aria-label={`Player ${player.name}`}
@@ -69,7 +70,7 @@ export const PlayerCard = memo(function PlayerCard({
       {/* Connection status indicator */}
       <div
         className="flex-shrink-0 w-3 h-3 rounded-full"
-        aria-label={player.connected ? 'Connected' : 'Disconnected'}
+        aria-label={player.connected ? "Connected" : "Disconnected"}
       >
         {player.connected ? (
           <Wifi className="w-3 h-3 text-green-500" aria-hidden="true" />
@@ -85,7 +86,7 @@ export const PlayerCard = memo(function PlayerCard({
           <span
             className={`
               font-semibold truncate
-              ${isCurrentUser ? 'text-loto-gold-dark' : 'text-gray-800'}
+              ${isCurrentUser ? "text-loto-gold-dark" : "text-gray-800"}
             `}
             title={player.name}
           >
@@ -122,7 +123,7 @@ export const PlayerCard = memo(function PlayerCard({
 
         {/* Card count */}
         <div className="flex items-center gap-1.5 mt-1 text-xs text-gray-600">
-          <span>Số thẻ:</span>
+          <span>Số phiếu dò:</span>
           <span className="font-bold text-loto-green">
             {player.tickets.length}
           </span>

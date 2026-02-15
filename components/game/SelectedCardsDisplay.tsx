@@ -50,15 +50,18 @@ export function SelectedCardsDisplay({
 
   // Toggle function - only for host
   const handleToggleMarkingMode = () => {
-    console.log('[SelectedCardsDisplay] Toggle clicked', {
+    console.log("[SelectedCardsDisplay] Toggle clicked", {
       isHost,
       hasCallback: !!onChangeMarkingMode,
       currentMode: manualMarkingMode,
-      newMode: !manualMarkingMode
+      newMode: !manualMarkingMode,
     });
 
     if (!isHost || !onChangeMarkingMode) {
-      console.log('[SelectedCardsDisplay] Toggle blocked', { isHost, hasCallback: !!onChangeMarkingMode });
+      console.log("[SelectedCardsDisplay] Toggle blocked", {
+        isHost,
+        hasCallback: !!onChangeMarkingMode,
+      });
       return;
     }
 
@@ -94,10 +97,10 @@ export function SelectedCardsDisplay({
           />
         </svg>
         <h3 className="text-lg sm:text-xl font-bold text-gray-400 mb-2">
-          Chưa chọn thẻ
+          Chưa chọn phiếu dò
         </h3>
         <p className="text-sm sm:text-base text-gray-500 max-w-md">
-          Hãy chọn thẻ từ lưới bên trên để bắt đầu chơi!
+          Hãy chọn phiếu dò từ lưới bên trên để bắt đầu chơi!
         </p>
       </motion.div>
     );
@@ -142,7 +145,7 @@ export function SelectedCardsDisplay({
         <div className="flex items-center gap-3">
           <Sparkles className="w-5 h-5 text-loto-gold" />
           <span className="text-base font-semibold text-gray-700">
-            Thẻ của bạn:{" "}
+            Phiếu dò của bạn:{" "}
             <span className="text-loto-green">{mySelectedCardIds.length}</span>
           </span>
         </div>
@@ -208,13 +211,13 @@ export function SelectedCardsDisplay({
           {manualMarkingMode ? (
             <>
               <strong className="text-blue-700">🖱️ Chế độ thủ công:</strong>{" "}
-              Nhấn vào số trên thẻ để đánh dấu. Số được gọi sẽ nhấp nháy màu
-              vàng để nhắc nhở bạn.
+              Nhấn vào số trên phiếu dò để đánh dấu. Số được gọi sẽ nhấp nháy
+              màu vàng để nhắc nhở bạn.
             </>
           ) : (
             <>
               <strong className="text-green-700">⚡ Chế độ tự động:</strong> Số
-              được gọi sẽ tự động được đánh dấu vàng trên thẻ của bạn.
+              được gọi sẽ tự động được đánh dấu vàng trên phiếu dò của bạn.
             </>
           )}
         </p>
@@ -269,8 +272,9 @@ export function SelectedCardsDisplay({
           <div className="flex-1 text-sm text-gray-700">
             <p className="font-semibold text-loto-green mb-1">Cách chơi:</p>
             <p>
-              Khi trò chơi bắt đầu, các số sẽ được gọi. Đánh dấu các số trên thẻ
-              của bạn. Người đầu tiên hoàn thành một dòng ngang sẽ thắng!
+              Khi trò chơi bắt đầu, các số sẽ được gọi. Đánh dấu các số trên
+              phiếu dò của bạn. Người đầu tiên hoàn thành một dòng ngang sẽ
+              thắng!
             </p>
           </div>
         </div>

@@ -9,15 +9,18 @@ Successfully updated the card selection system to support **multiple card select
 ## 🎯 Changes Made
 
 ### 1. ✅ Removed Card Count from Create/Join Forms
+
 **File**: `app/page.tsx`
 
 **Removed:**
+
 - "Số lượng vé (1-5)" selector from Create Room form
 - "Số lượng vé (1-5)" selector from Join Room form
 - Both forms now only ask for player name
 - Auto-joins with cardCount = 0 (cards selected later)
 
 **Updated schemas:**
+
 ```typescript
 // Before:
 const createRoomSchema = z.object({
@@ -34,16 +37,19 @@ const createRoomSchema = z.object({
 ---
 
 ### 2. ✅ Updated CardSelector for Multiple Selection
+
 **File**: `components/game/CardSelector.tsx`
 
 **Changes:**
+
 - Players can now select **multiple cards** (up to 5)
 - Clicking a selected card **deselects** it (toggle behavior)
-- Shows count: "Bạn đã chọn 3 thẻ: 1, 5, 9"
-- Shows remaining slots: "Bạn có thể chọn thêm 2 thẻ nữa"
+- Shows count: "Bạn đã chọn 3 phiếu dò: 1, 5, 9"
+- Shows remaining slots: "Bạn có thể chọn thêm 2 phiếu dò nữa"
 - Alert when trying to select more than 5 cards
 
 **Key Logic:**
+
 ```typescript
 // Find ALL cards selected by player (not just one)
 const mySelectedCardIds = Object.entries(selectedCards)
@@ -55,7 +61,7 @@ const MAX_CARDS_PER_PLAYER = 5;
 
 // Check limit before allowing selection
 if (mySelectedCardIds.length >= MAX_CARDS_PER_PLAYER) {
-  alert('Bạn chỉ có thể chọn tối đa 5 thẻ!');
+  alert("Bạn chỉ có thể chọn tối đa 5 phiếu dò!");
   return;
 }
 ```
@@ -63,74 +69,85 @@ if (mySelectedCardIds.length >= MAX_CARDS_PER_PLAYER) {
 ---
 
 ### 3. ✅ Updated Server-Side Logic
+
 **File**: `server/socket-handler.ts`
 
 **Changes:**
+
 - Server now **KEEPS** previous card selections (doesn't auto-deselect)
 - Validates max 5 cards per player
 - Prevents selecting same card twice
 - Allows deselecting specific cards
 
 **Before (Single Selection):**
+
 ```typescript
 // Remove player's previous card selection
 for (const [cardId, playerId] of Object.entries(room.selectedCards)) {
   if (playerId === socket.id) {
-    delete room.selectedCards[parseInt(cardId, 10)];  // ❌ Removed ALL
+    delete room.selectedCards[parseInt(cardId, 10)]; // ❌ Removed ALL
   }
 }
 ```
 
 **After (Multiple Selection):**
+
 ```typescript
 // Check max limit
-const playerCardCount = Object.values(room.selectedCards)
-  .filter((playerId) => playerId === socket.id).length;
+const playerCardCount = Object.values(room.selectedCards).filter(
+  (playerId) => playerId === socket.id,
+).length;
 
 if (playerCardCount >= MAX_CARDS_PER_PLAYER) {
-  throw new Error('You can only select up to 5 cards');  // ✅ Enforce limit
+  throw new Error("You can only select up to 5 cards"); // ✅ Enforce limit
 }
 
 // Add card (keep previous selections)
-room.selectedCards[validated.cardId] = socket.id;  // ✅ Additive
+room.selectedCards[validated.cardId] = socket.id; // ✅ Additive
 ```
 
 ---
 
 ### 4. ✅ Updated Deselect Logic
+
 **Files**: `types/index.ts`, `hooks/useCardSelection.ts`, `server/socket-handler.ts`
 
 **Changes:**
+
 - `deselect_card` event now requires `cardId` parameter
 - Client passes specific cardId to deselect
 - Server validates ownership before deselecting
 
 **Type Update:**
+
 ```typescript
 // Before:
 export interface ClientDeselectCardEvent {
-  roomId: string;  // ❌ Which card to deselect?
+  roomId: string; // ❌ Which card to deselect?
 }
 
 // After:
 export interface ClientDeselectCardEvent {
   roomId: string;
-  cardId: number;  // ✅ Specific card to deselect
+  cardId: number; // ✅ Specific card to deselect
 }
 ```
 
 ---
 
 ### 5. ✅ Removed CardGenerator Component
+
 **File**: `app/room/[id]/page.tsx`
 
 **Removed:**
+
 - CardGenerator component from both desktop and mobile layouts
 - `handleGenerateCards` function
 - `generateTickets` from useSocket destructuring
 - localStorage cardCount storage
 
 **Result:**
+
 - Clean UI with only CardSelector for card selection
 - No more random card generation
 - Players must select cards from the 16 predefined options
@@ -138,9 +155,11 @@ export interface ClientDeselectCardEvent {
 ---
 
 ### 6. ✅ Optimized Hook
+
 **File**: `hooks/useCardSelection.ts`
 
 **Simplified:**
+
 - Removed duplicate room state listeners
 - Relies on `room_update` event from SocketProvider
 - Only emits `select_card` and `deselect_card` events
@@ -151,6 +170,7 @@ export interface ClientDeselectCardEvent {
 ## 🎮 New User Flow
 
 ### Before
+
 1. Join room
 2. Choose card count (1-5)
 3. Click "Generate Cards" button
@@ -158,6 +178,7 @@ export interface ClientDeselectCardEvent {
 5. Start game
 
 ### After
+
 1. Join room (no card count selection)
 2. See 16 card grid
 3. **Click to select multiple cards** (1-5 cards)
@@ -170,6 +191,7 @@ export interface ClientDeselectCardEvent {
 ## 🎨 UI Changes
 
 ### Create/Join Room Forms
+
 ```
 Before:
 ┌─────────────────────────┐
@@ -187,6 +209,7 @@ After:
 ```
 
 ### Room Page Layout
+
 ```
 Before:
 ├── RoomInfo
@@ -209,19 +232,22 @@ After:
 ## 💡 Key Features
 
 ### Multiple Selection
+
 - ✅ Select **1 to 5 cards** per player
 - ✅ Toggle selection by clicking
 - ✅ Visual feedback for each selected card
-- ✅ Counter shows "Đã chọn X thẻ"
+- ✅ Counter shows "Đã chọn X phiếu dò"
 - ✅ Remaining slots shown
 
 ### Real-time Sync
+
 - ✅ All players see selections instantly
 - ✅ Server enforces max 5 cards
 - ✅ No duplicate selections allowed
 - ✅ Cards lock when game starts
 
 ### Visual Feedback
+
 - ✅ Green border + checkmark for YOUR cards (all of them)
 - ✅ Gray + lock icon for OTHER players' cards
 - ✅ Colored borders for available cards
@@ -232,6 +258,7 @@ After:
 ## 🧪 Testing Checklist
 
 ### Manual Testing
+
 - ⏳ Create a room (no card count selection)
 - ⏳ Select card 1 (should select)
 - ⏳ Select card 2 (should ADD to selection)
@@ -247,6 +274,7 @@ After:
 - ⏳ Try selecting/deselecting (should be disabled)
 
 ### Commands
+
 ```bash
 # Type check (should pass)
 pnpm type-check
@@ -263,10 +291,11 @@ npx tsx test-card-configs.ts
 ## 🔧 Technical Details
 
 ### State Management
+
 ```typescript
 // Room state
 interface Room {
-  selectedCards: Record<number, string>  // cardId -> playerId
+  selectedCards: Record<number, string>; // cardId -> playerId
   // Multiple entries per player now!
   // Example: { 1: "player1", 2: "player1", 5: "player2", 8: "player1" }
 }
@@ -276,6 +305,7 @@ interface Room {
 ```
 
 ### Socket Events
+
 ```typescript
 // Select card (additive)
 socket.emit('select_card', { roomId, cardId: 3 })
@@ -290,6 +320,7 @@ socket.on('room_update', { room: { selectedCards: {...} } })
 ```
 
 ### Validation Rules
+
 1. ✅ Max 5 cards per player
 2. ✅ Each card can only be selected by ONE player
 3. ✅ Must own card to deselect it
@@ -300,20 +331,21 @@ socket.on('room_update', { room: { selectedCards: {...} } })
 
 ## 📊 Comparison
 
-| Feature | Before | After |
-|---------|--------|-------|
-| Card selection | ❌ Random generation | ✅ Manual selection from 16 |
-| Cards per player | Set at join (1-5) | Select dynamically (1-5) |
-| Card choice | ❌ No choice | ✅ Full choice |
-| Change cards | Only before game | Toggle anytime before game |
-| Visual preview | ❌ None | ✅ See all 16 cards with images |
-| Pre-game setup | Click "Generate" | Select from grid |
+| Feature          | Before               | After                           |
+| ---------------- | -------------------- | ------------------------------- |
+| Card selection   | ❌ Random generation | ✅ Manual selection from 16     |
+| Cards per player | Set at join (1-5)    | Select dynamically (1-5)        |
+| Card choice      | ❌ No choice         | ✅ Full choice                  |
+| Change cards     | Only before game     | Toggle anytime before game      |
+| Visual preview   | ❌ None              | ✅ See all 16 cards with images |
+| Pre-game setup   | Click "Generate"     | Select from grid                |
 
 ---
 
 ## 🎯 Benefits
 
 ### For Players
+
 1. **Full Control**: Choose exactly which cards to play
 2. **Visual Selection**: See card designs before selecting
 3. **Flexibility**: Add/remove cards before game starts
@@ -321,6 +353,7 @@ socket.on('room_update', { room: { selectedCards: {...} } })
 5. **Strategy**: Select cards with preferred number distributions
 
 ### For Game Experience
+
 1. **More Engaging**: Pre-game selection adds excitement
 2. **Fair Competition**: Everyone sees available cards
 3. **No Random**: Eliminates luck from card assignment
@@ -332,6 +365,7 @@ socket.on('room_update', { room: { selectedCards: {...} } })
 ## 🚀 What Changed - Summary
 
 ### Removed Features
+
 - ❌ Card count selector in create/join forms
 - ❌ CardGenerator component
 - ❌ Random card generation
@@ -339,6 +373,7 @@ socket.on('room_update', { room: { selectedCards: {...} } })
 - ❌ localStorage card count
 
 ### New Features
+
 - ✅ Multiple card selection (1-5 cards)
 - ✅ Toggle selection by clicking
 - ✅ Card counter display
@@ -347,6 +382,7 @@ socket.on('room_update', { room: { selectedCards: {...} } })
 - ✅ Cleaner create/join forms
 
 ### Improved Features
+
 - ✅ Real-time synchronization (same as before)
 - ✅ Visual feedback (enhanced for multiple)
 - ✅ Server validation (enforces max 5)
@@ -357,6 +393,7 @@ socket.on('room_update', { room: { selectedCards: {...} } })
 ## 🎮 How to Use
 
 ### Creating/Joining Room
+
 ```
 1. Enter name: "Khanh"
 2. Click "Tạo Phòng" (no card count needed!)
@@ -364,6 +401,7 @@ socket.on('room_update', { room: { selectedCards: {...} } })
 ```
 
 ### Selecting Cards
+
 ```
 1. See grid of 16 cards
 2. Click card 1 → Selected (green border + ✓)
@@ -379,6 +417,7 @@ socket.on('room_update', { room: { selectedCards: {...} } })
 ## ✨ Success!
 
 All changes implemented and tested:
+
 - ✅ TypeScript: 0 errors
 - ✅ Multiple selection working
 - ✅ Server validation enforcing max 5

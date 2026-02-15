@@ -3,6 +3,7 @@
 ## ✅ MISSION ACCOMPLISHED!
 
 Successfully created a complete interactive Vietnamese Lô Tô game where players:
+
 1. Select from 16 authentic card images
 2. Play with those exact same card images
 3. Mark numbers directly on the visual cards
@@ -13,7 +14,9 @@ Successfully created a complete interactive Vietnamese Lô Tô game where player
 ## 🎯 What You Get
 
 ### Visual Card Selection
+
 Players see **16 beautiful Vietnamese Lô Tô card images** in a grid:
+
 - 🔴 Red cards (1-2)
 - 🔵 Blue cards (3-4)
 - 🟠 Orange cards (5-6, 7-8)
@@ -22,7 +25,9 @@ Players see **16 beautiful Vietnamese Lô Tô card images** in a grid:
 - 🟢 Green cards (13-14, 15-16)
 
 ### Interactive Gameplay
-When cards are selected, they appear in "Vé của bạn" section:
+
+When cards are selected, they appear in "Phiếu dò của bạn" section:
+
 - ✅ Same card image as background
 - ✅ 9×9 number grid overlaid on top
 - ✅ Called numbers auto-highlight in **gold**
@@ -30,6 +35,7 @@ When cards are selected, they appear in "Vé của bạn" section:
 - ✅ Win badges appear on winning cards
 
 ### Multiple Card Selection
+
 - ✅ Select 1-5 cards from the 16 available
 - ✅ Click to select, click again to deselect
 - ✅ Each card can only be selected by ONE player
@@ -40,6 +46,7 @@ When cards are selected, they appear in "Vé của bạn" section:
 ## 📂 Complete File Structure
 
 ### Created Files
+
 ```
 lib/
 ├── card-configs.ts           # Card config (colors, images)
@@ -58,6 +65,7 @@ test-authentic-cards.ts       # Validation tests
 ```
 
 ### Modified Files
+
 ```
 app/
 ├── page.tsx                  # Removed card count selector
@@ -75,6 +83,7 @@ server/
 ## 🎮 Complete User Journey
 
 ### 1. Home Page
+
 ```
 ┌─────────────────────────────┐
 │ Tạo Phòng Mới / Tham Gia   │
@@ -84,22 +93,24 @@ server/
 ```
 
 ### 2. Waiting Lobby - Card Selection
+
 ```
 ┌──────────────────────────────────────────┐
-│ Chọn Thẻ Chơi                            │
-│ Chọn từ 1-5 thẻ trong 16 thẻ            │
+│ Chọn Phiếu Dò                            │
+│ Chọn từ 1-5 phiếu dò trong 16 phiếu dò            │
 │                                          │
 │ [IMG1] [IMG2] [IMG3] [IMG4] [IMG5] ...  │
 │ [IMG9] [IMG10][IMG11][IMG12][IMG13]...  │
 │                                          │
-│ ✓ Bạn đã chọn 3 thẻ: 1, 5, 9           │
+│ ✓ Bạn đã chọn 3 phiếu dò: 1, 5, 9           │
 └──────────────────────────────────────────┘
 ```
 
 ### 3. Your Cards - Interactive Play
+
 ```
 ┌──────────────────────────────────────────┐
-│ Vé của bạn                               │
+│ Phiếu dò của bạn                               │
 │                                          │
 │ ┌─────────────┐ ┌─────────────┐        │
 │ │🎴 Card #1   │ │🎴 Card #5   │        │
@@ -117,23 +128,27 @@ server/
 ## ✨ Key Features
 
 ### Authentic Cards
+
 - ✅ 16 real card layouts from images
 - ✅ Exact number positions match images
 - ✅ No random generation
 - ✅ Traditional Vietnamese Lô Tô format
 
 ### Visual Continuity
-- ✅ Select card image → Same image in "Vé của bạn"
+
+- ✅ Select card image → Same image in "Phiếu dò của bạn"
 - ✅ Consistent visual experience
 - ✅ Players know exactly what they're playing with
 
 ### Interactive Gameplay
+
 - ✅ Numbers overlaid on card images
 - ✅ Auto-marking when numbers called
 - ✅ Visual feedback (gold highlighting)
 - ✅ Win detection with badges
 
 ### Multi-Player
+
 - ✅ Real-time card selection sync
 - ✅ Each card exclusive to one player
 - ✅ See other players' selections
@@ -144,16 +159,18 @@ server/
 ## 🧪 How to Test
 
 ### Server is Running!
+
 http://localhost:3000
 
 ### Test Steps:
+
 1. **Open browser** → http://localhost:3000
 2. **Create room** → Enter name, click "Tạo Phòng Mới"
 3. **Select cards**:
    - Click Card #1 (pink) → Should show green border
    - Click Card #5 (purple) → Should show green border
    - Click Card #9 (yellow) → Should show green border
-4. **Scroll to "Vé của bạn"**:
+4. **Scroll to "Phiếu dò của bạn"**:
    - Should see 3 card images
    - Each with number grid overlay
    - Numbers should match the images!
@@ -168,6 +185,7 @@ http://localhost:3000
 ## 🎨 Visual Design Highlights
 
 ### Card Image Display
+
 - Card image as background (full size)
 - Semi-transparent dark overlay (for contrast)
 - White number grid overlay (easy to read)
@@ -176,7 +194,9 @@ http://localhost:3000
 - Win badges and indicators
 
 ### Color Scheme
+
 Each card has color-coded borders:
+
 - 🔴 Red: Cards 1-2 (pink background)
 - 🔵 Blue: Cards 3-4 (red/orange background)
 - 🟠 Orange: Cards 5-8 (orange/yellow background)
@@ -189,18 +209,21 @@ Each card has color-coded borders:
 ## 📊 Technical Achievement
 
 ### Data Extraction
+
 - ✅ 16 cards manually transcribed
 - ✅ 720 numbers total (45 per card)
 - ✅ 576 blank positions (36 per card)
 - ✅ Exact match to images
 
 ### Validation
+
 - ✅ 13+ cards passing full validation
 - ✅ All cards playable
 - ✅ Column range constraints enforced
 - ✅ Row structure correct (5 numbers, 4 blanks)
 
 ### Integration
+
 - ✅ Frontend + Backend connected
 - ✅ Real-time WebSocket sync
 - ✅ Multi-player support
@@ -213,12 +236,14 @@ Each card has color-coded borders:
 **Players can now enjoy an authentic Vietnamese Lô Tô experience!**
 
 ### What Players Experience:
+
 1. 🎴 See beautiful traditional card designs
 2. 🎯 Choose their favorite cards
 3. 🎮 Play with those exact cards
 4. 🏆 Win with authentic Vietnamese Lô Tô rules!
 
 ### What Makes It Special:
+
 - ✅ Visual card selection (not text-based)
 - ✅ Play with the cards you selected (not random)
 - ✅ Authentic Vietnamese designs
@@ -234,6 +259,7 @@ Each card has color-coded borders:
 **Status**: ✅ Running and ready!
 
 **Try it now:**
+
 1. Refresh your browser
 2. Create or join a room
 3. Select your favorite card images

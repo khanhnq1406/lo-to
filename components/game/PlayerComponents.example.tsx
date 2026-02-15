@@ -5,14 +5,14 @@
  * These are complete, working examples that can be copied into your application.
  */
 
-'use client';
+"use client";
 
 import {
   PlayerCard,
   PlayerList,
   RoomInfo,
   ShareButton,
-} from '@/components/game';
+} from "@/components/game";
 import {
   useRoom,
   usePlayers,
@@ -20,9 +20,9 @@ import {
   useIsHost,
   useGameState,
   useRoomId,
-} from '@/store/useGameStore';
-import { useSocket } from '@/providers/SocketProvider';
-import type { Player } from '@/types';
+} from "@/store/useGameStore";
+import { useSocket } from "@/providers/SocketProvider";
+import type { Player } from "@/types";
 
 // ============================================================================
 // EXAMPLE 1: Complete Room Sidebar
@@ -94,18 +94,18 @@ export function CompactRoomHeader() {
             <span className="w-1 h-1 bg-gray-400 rounded-full" />
             <span
               className={`font-semibold ${
-                gameState === 'playing'
-                  ? 'text-green-600'
-                  : gameState === 'finished'
-                  ? 'text-gray-600'
-                  : 'text-yellow-600'
+                gameState === "playing"
+                  ? "text-green-600"
+                  : gameState === "finished"
+                    ? "text-gray-600"
+                    : "text-yellow-600"
               }`}
             >
-              {gameState === 'playing'
-                ? 'Đang chơi'
-                : gameState === 'finished'
-                ? 'Kết thúc'
-                : 'Chờ'}
+              {gameState === "playing"
+                ? "Đang chơi"
+                : gameState === "finished"
+                  ? "Kết thúc"
+                  : "Chờ"}
             </span>
           </div>
         </div>
@@ -136,7 +136,7 @@ export function PlayerGrid() {
     if (!player) return;
 
     const confirmed = window.confirm(
-      `Bạn có chắc muốn đuổi ${player.name} khỏi phòng?`
+      `Bạn có chắc muốn đuổi ${player.name} khỏi phòng?`,
     );
     if (confirmed) {
       kickPlayer(playerId);
@@ -209,13 +209,13 @@ export function ExtendedPlayerCard({ player }: { player: Player }) {
 
   const handlePromote = () => {
     // Custom action: Promote player to caller
-    console.log('Promoting player to caller:', player.id);
+    console.log("Promoting player to caller:", player.id);
     // Implement your logic here
   };
 
   const handleViewCards = () => {
     // Custom action: View player's cards (if permitted)
-    console.log('Viewing cards for player:', player.id);
+    console.log("Viewing cards for player:", player.id);
     // Implement your logic here
   };
 
@@ -241,7 +241,7 @@ export function ExtendedPlayerCard({ player }: { player: Player }) {
             onClick={handleViewCards}
             className="flex-1 px-3 py-1.5 text-sm font-semibold text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
           >
-            Xem thẻ
+            Xem phiếu dò
           </button>
         </div>
       )}
@@ -287,8 +287,18 @@ export function MobilePlayerSheet({
             onClick={onClose}
             className="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100"
           >
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -330,11 +340,11 @@ export function RoomInfoCard() {
         <div>
           <p className="text-xs text-gray-600 mb-1">Trạng thái</p>
           <p className="text-xl font-bold text-gray-800">
-            {room.gameState === 'playing'
-              ? '🎮'
-              : room.gameState === 'finished'
-              ? '🏆'
-              : '⏳'}
+            {room.gameState === "playing"
+              ? "🎮"
+              : room.gameState === "finished"
+                ? "🏆"
+                : "⏳"}
           </p>
         </div>
       </div>

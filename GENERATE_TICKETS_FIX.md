@@ -1,7 +1,9 @@
 # Generate Tickets Error Fix
 
 ## Problem
-When clicking "Tạo thẻ" button, got this error:
+
+When clicking "Tạo phiếu dò" button, got this error:
+
 ```
 [Socket Provider] Error: [
   {
@@ -15,14 +17,17 @@ When clicking "Tạo thẻ" button, got this error:
 ```
 
 ## Root Cause
+
 The `generateTickets` function in `SocketProvider.tsx` was missing the `roomId` parameter when emitting the `generate_tickets` event to the server.
 
 **Before:**
+
 ```typescript
-socket.emit('generate_tickets', { cardCount, boardsPerCard });
+socket.emit("generate_tickets", { cardCount, boardsPerCard });
 ```
 
 The server's schema validation (`ClientGenerateTicketsEventSchema`) requires:
+
 - `roomId`: string (required)
 - `cardCount`: number (required)
 - `boardsPerTicket`: number (optional, deprecated)
@@ -32,31 +37,37 @@ The server's schema validation (`ClientGenerateTicketsEventSchema`) requires:
 **File: `providers/SocketProvider.tsx`**
 
 Added:
+
 1. Validation check for `roomId` existence
 2. Include `roomId` in the emit payload
 3. Enhanced console logging
 
 **After:**
+
 ```typescript
 const generateTickets = (cardCount: number, boardsPerCard: number) => {
   const socket = socketRef.current;
   if (!socket || !socket.connected) {
-    setError('Not connected to server');
+    setError("Not connected to server");
     return;
   }
   if (!roomId) {
-    setError('Not in a room');
+    setError("Not in a room");
     return;
   }
 
-  console.log('[Socket Provider] Generating tickets:', { roomId, cardCount, boardsPerCard });
-  socket.emit('generate_tickets', { roomId, cardCount, boardsPerCard });
+  console.log("[Socket Provider] Generating tickets:", {
+    roomId,
+    cardCount,
+    boardsPerCard,
+  });
+  socket.emit("generate_tickets", { roomId, cardCount, boardsPerCard });
 };
 ```
 
 ## How It Works Now
 
-1. User clicks "Tạo thẻ" button
+1. User clicks "Tạo phiếu dò" button
 2. `handleGenerateCards(cardCount)` is called
 3. Calls `generateTickets(cardCount, 1)`
 4. Function validates:
@@ -68,15 +79,18 @@ const generateTickets = (cardCount: number, boardsPerCard: number) => {
 8. Client updates the store with new cards
 
 ## Testing Checklist
-- [x] Click "Tạo thẻ" button
+
+- [x] Click "Tạo phiếu dò" button
 - [x] Select different card counts (1-5)
 - [x] Cards should generate without errors
 - [x] No more "roomId required" validation errors
 
 ## Files Modified
+
 - `providers/SocketProvider.tsx` - Added roomId to generateTickets function
 
 ## Related Context
+
 - Server schema: `ClientGenerateTicketsEventSchema` in `types/index.ts`
 - Server handler: `socket.on('generate_tickets')` in `server/socket-handler.ts`
 - The `boardsPerCard` parameter is for future use; currently not validated by server

@@ -3,6 +3,7 @@
 ## Overview
 
 Added a **manual marking mode** that allows players to choose between:
+
 - **Auto-marking** (⚡): Numbers automatically marked when called
 - **Manual marking** (🖱️): Players click numbers to mark them manually
 
@@ -11,10 +12,12 @@ Added a **manual marking mode** that allows players to choose between:
 ## 🎯 Features
 
 ### Toggle Button
-Located in "Vé của bạn" header:
+
+Located in "Phiếu dò của bạn" header:
+
 ```
 ┌────────────────────────────────────────┐
-│ Thẻ của bạn: 3    [⚡ Tự động đánh dấu]│
+│ Phiếu dò của bạn: 3    [⚡ Tự động đánh dấu]│
 │                   ↕️ Click to toggle   │
 │                   [🖱️ Đánh dấu thủ công]│
 └────────────────────────────────────────┘
@@ -23,12 +26,14 @@ Located in "Vé của bạn" header:
 ### Two Modes
 
 #### ⚡ Auto Mode (Default - Green Button)
+
 - Numbers automatically marked when called
 - Highlighted in **gold** immediately
 - No clicking needed
 - Best for fast-paced games
 
 #### 🖱️ Manual Mode (Blue Button)
+
 - Players must click numbers to mark them
 - Called numbers **pulse yellow** (reminder)
 - Marked numbers turn **gold**
@@ -39,6 +44,7 @@ Located in "Vé của bạn" header:
 ## 🎮 How It Works
 
 ### Auto Mode (Default)
+
 ```
 1. Number called: 45
    ↓
@@ -48,6 +54,7 @@ Located in "Vé của bạn" header:
 ```
 
 ### Manual Mode
+
 ```
 1. Number called: 45
    ↓
@@ -63,11 +70,13 @@ Located in "Vé của bạn" header:
 ## 🎨 Visual Feedback
 
 ### Auto Mode
+
 - **Gold (🟡)**: Number has been called (auto-marked)
 - **White**: Number not yet called
 - **Green**: Complete row
 
 ### Manual Mode
+
 - **Yellow Pulse (⚠️)**: Number called but not marked yet
 - **Gold (🟡)**: Number marked by player
 - **White**: Not called or not marked
@@ -79,15 +88,19 @@ Located in "Vé của bạn" header:
 ## 💾 State Management
 
 ### Stored in localStorage
+
 The preference is saved and persists across sessions:
+
 ```typescript
 localStorage: {
-  manualMarkingMode: true/false
+  manualMarkingMode: true / false;
 }
 ```
 
 ### Per-Card State
+
 Each card tracks its own manually marked numbers:
+
 ```typescript
 // Card maintains local state
 const [manuallyMarked, setManuallyMarked] = useState<Set<number>>(new Set());
@@ -100,20 +113,22 @@ const [manuallyMarked, setManuallyMarked] = useState<Set<number>>(new Set());
 ### Files Modified
 
 **1. store/useGameStore.ts**
+
 ```typescript
 interface GameStore {
-  manualMarkingMode: boolean;  // NEW!
+  manualMarkingMode: boolean; // NEW!
   toggleManualMarkingMode: () => void;
   setManualMarkingMode: (enabled: boolean) => void;
 }
 
 // Persisted to localStorage
 partialize: (state) => ({
-  manualMarkingMode: state.manualMarkingMode,  // NEW!
+  manualMarkingMode: state.manualMarkingMode, // NEW!
 });
 ```
 
 **2. components/game/PlayableCardImage.tsx**
+
 ```typescript
 // Track manual marks
 const [manuallyMarked, setManuallyMarked] = useState<Set<number>>(new Set());
@@ -131,6 +146,7 @@ const toggleManualMark = (number: number) => {
 ```
 
 **3. components/game/SelectedCardsDisplay.tsx**
+
 ```typescript
 // Toggle button in header
 <button onClick={toggleManualMode}>
@@ -151,14 +167,18 @@ const toggleManualMark = (number: number) => {
 ## 🎯 User Experience
 
 ### Traditional Players
+
 Can use **manual mode**:
+
 - Click numbers as they're called
 - More engaging, hands-on
 - Like traditional paper cards
 - See which numbers they haven't marked (yellow pulse)
 
 ### Modern Players
+
 Can use **auto mode**:
+
 - No clicking needed
 - Faster gameplay
 - Focus on strategy
@@ -169,25 +189,28 @@ Can use **auto mode**:
 ## 📊 Visual States Comparison
 
 ### Auto Mode
-| State | Color | Meaning |
-|-------|-------|---------|
-| White | ⚪ | Not called |
-| Gold | 🟡 | Called (auto-marked) |
-| Green | 🟢 | Row complete |
+
+| State | Color | Meaning              |
+| ----- | ----- | -------------------- |
+| White | ⚪    | Not called           |
+| Gold  | 🟡    | Called (auto-marked) |
+| Green | 🟢    | Row complete         |
 
 ### Manual Mode
-| State | Color | Meaning |
-|-------|-------|---------|
-| White | ⚪ | Not called / Not marked |
-| Yellow Pulse | ⚠️ | Called, needs marking! |
-| Gold | 🟡 | Manually marked |
-| Green | 🟢 | Row complete |
+
+| State        | Color | Meaning                 |
+| ------------ | ----- | ----------------------- |
+| White        | ⚪    | Not called / Not marked |
+| Yellow Pulse | ⚠️    | Called, needs marking!  |
+| Gold         | 🟡    | Manually marked         |
+| Green        | 🟢    | Row complete            |
 
 ---
 
 ## 🧪 Testing
 
 ### Test Auto Mode (Default)
+
 1. Create room, select cards
 2. Start game
 3. Numbers get called
@@ -195,6 +218,7 @@ Can use **auto mode**:
 5. No clicking needed
 
 ### Test Manual Mode
+
 1. Create room, select cards
 2. **Click toggle button** → Changes to "🖱️ Đánh dấu thủ công"
 3. Start game
@@ -204,6 +228,7 @@ Can use **auto mode**:
 7. Complete row → Win!
 
 ### Test Toggle During Game
+
 1. Start in auto mode
 2. Numbers auto-mark
 3. **Switch to manual mode**
@@ -217,6 +242,7 @@ Can use **auto mode**:
 ## 💡 Use Cases
 
 ### When to Use Auto Mode ⚡
+
 - Fast-paced games
 - Many players
 - Quick rounds
@@ -224,6 +250,7 @@ Can use **auto mode**:
 - Don't want to miss numbers
 
 ### When to Use Manual Mode 🖱️
+
 - Traditional gameplay
 - More engaging experience
 - Want control over marking
@@ -235,18 +262,21 @@ Can use **auto mode**:
 ## ✨ Benefits
 
 ### Flexibility
+
 - ✅ Players choose their preference
 - ✅ Can switch anytime
 - ✅ Preference saved
 - ✅ Different play styles supported
 
 ### Accessibility
+
 - ✅ Auto mode for accessibility needs
 - ✅ Manual mode for traditional players
 - ✅ Visual reminders (yellow pulse)
 - ✅ Clear mode indicators
 
 ### Game Balance
+
 - ✅ Manual mode adds skill element
 - ✅ Auto mode removes chance of missing
 - ✅ Fair for all play styles
@@ -259,13 +289,15 @@ Can use **auto mode**:
 **Server is running**: http://localhost:3000
 
 **Try it now:**
+
 1. Open browser
 2. Create room and select cards
-3. Look for toggle button in "Vé của bạn" header
+3. Look for toggle button in "Phiếu dò của bạn" header
 4. Click to switch between modes
 5. Start game and test both modes!
 
 **Features:**
+
 - ✅ Toggle button added
 - ✅ Manual marking working
 - ✅ Auto marking working

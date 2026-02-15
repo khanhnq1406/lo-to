@@ -1,15 +1,18 @@
 # Debug: Card Selector Not Showing
 
 ## Problem
-The "Chọn Thẻ Chơi" (Card Selector) UI is not visible when joining a room.
+
+The "Chọn Phiếu Dò" (Card Selector) UI is not visible when joining a room.
 
 ## Root Causes
 
 The CardSelector is conditionally rendered in `/app/room/[id]/page.tsx` at:
+
 - Lines 350-361 (Desktop layout)
 - Lines 418-434 (Mobile layout)
 
 It only shows when **ALL** of these conditions are true:
+
 ```tsx
 {gameState === 'waiting' && currentPlayerId && currentPlayer && (
   <CardSelector ... />
@@ -38,28 +41,32 @@ Add this temporarily to see what's happening:
 ```tsx
 // In /app/room/[id]/page.tsx, before the CardSelector render
 
-console.log('=== CARD SELECTOR DEBUG ===');
-console.log('gameState:', gameState);
-console.log('currentPlayerId:', currentPlayerId);
-console.log('currentPlayer:', currentPlayer);
-console.log('Should show CardSelector:',
-  gameState === 'waiting' && currentPlayerId && currentPlayer
+console.log("=== CARD SELECTOR DEBUG ===");
+console.log("gameState:", gameState);
+console.log("currentPlayerId:", currentPlayerId);
+console.log("currentPlayer:", currentPlayer);
+console.log(
+  "Should show CardSelector:",
+  gameState === "waiting" && currentPlayerId && currentPlayer,
 );
 ```
 
 ## Common Issues:
 
 ### Issue 1: Game Already Started
+
 **Symptom:** CardSelector doesn't show
 **Reason:** `gameState !== 'waiting'`
 **Solution:** Create a new room or reset the current game
 
 ### Issue 2: Not Fully Joined
+
 **Symptom:** CardSelector doesn't show
 **Reason:** `currentPlayerId` or `currentPlayer` is null
 **Solution:** Wait for connection to complete, or check server logs
 
 ### Issue 3: Component Hidden by CSS
+
 **Symptom:** Component exists in DOM but not visible
 **Reason:** CSS styling issue or z-index problem
 **Solution:** Check browser DevTools Elements tab
@@ -89,15 +96,17 @@ console.log('Should show CardSelector:',
 If you want to force-show the CardSelector for testing, temporarily remove the conditions:
 
 ```tsx
-{/* Always show for testing */}
+{
+  /* Always show for testing */
+}
 <CardSelector
   selectedCards={selectedCards}
-  currentPlayerId={currentPlayerId || 'test-id'}
+  currentPlayerId={currentPlayerId || "test-id"}
   players={players}
-  gameStarted={false}  // Force to false
+  gameStarted={false} // Force to false
   onSelectCard={selectCard}
   onDeselectCard={deselectCard}
-/>
+/>;
 ```
 
 **Remember to revert this after debugging!**

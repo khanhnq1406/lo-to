@@ -30,11 +30,11 @@
  * ```
  */
 
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { TicketDisplay } from './TicketDisplay';
-import type { Card } from '@/types';
+import { useState } from "react";
+import { TicketDisplay } from "./TicketDisplay";
+import type { Card } from "@/types";
 
 // Sample authentic Vietnamese Lô Tô cards (3×9 format)
 const SAMPLE_CARDS: Card[] = [
@@ -63,7 +63,7 @@ const INITIAL_CALLED_NUMBERS = [5, 12, 23, 45, 56, 67, 89];
 
 export function TicketDisplayExample() {
   const [calledNumbers, setCalledNumbers] = useState<Set<number>>(
-    new Set(INITIAL_CALLED_NUMBERS)
+    new Set(INITIAL_CALLED_NUMBERS),
   );
   const [autoCall, setAutoCall] = useState(false);
 
@@ -73,7 +73,7 @@ export function TicketDisplayExample() {
     const remaining = allNumbers.filter((n) => !calledNumbers.has(n));
 
     if (remaining.length === 0) {
-      alert('All numbers have been called!');
+      alert("All numbers have been called!");
       return;
     }
 
@@ -106,7 +106,7 @@ export function TicketDisplayExample() {
             Lô Tô Việt Nam
           </h1>
           <p className="text-lg text-gray-600 mb-6">
-            Demo thẻ Lô Tô truyền thống 3×9
+            Demo phiếu dò Lô Tô truyền thống 3×9
           </p>
 
           {/* Controls */}
@@ -122,11 +122,11 @@ export function TicketDisplayExample() {
               onClick={() => setAutoCall(!autoCall)}
               className={`px-6 py-3 font-bold rounded-lg shadow-loto-button transition-all hover:scale-105 active:scale-95 ${
                 autoCall
-                  ? 'bg-loto-red hover:bg-loto-red-light text-white'
-                  : 'bg-loto-blue hover:bg-loto-blue-light text-white'
+                  ? "bg-loto-red hover:bg-loto-red-light text-white"
+                  : "bg-loto-blue hover:bg-loto-blue-light text-white"
               }`}
             >
-              {autoCall ? 'Dừng tự động' : 'Gọi tự động'}
+              {autoCall ? "Dừng tự động" : "Gọi tự động"}
             </button>
 
             <button
@@ -150,7 +150,7 @@ export function TicketDisplayExample() {
             <div>
               <span className="text-gray-600">Số cuối:</span>
               <span className="ml-2 font-bold text-loto-green">
-                {Array.from(calledNumbers).pop() || '-'}
+                {Array.from(calledNumbers).pop() || "-"}
               </span>
             </div>
           </div>
@@ -162,21 +162,20 @@ export function TicketDisplayExample() {
           calledNumbers={calledNumbers}
           onCellClick={(cardIndex, row, col) => {
             console.log(
-              `Clicked: Card ${cardIndex + 1}, Row ${row + 1}, Col ${col + 1}`
+              `Clicked: Card ${cardIndex + 1}, Row ${row + 1}, Col ${col + 1}`,
             );
           }}
         />
 
         {/* Instructions */}
         <div className="mt-8 p-6 bg-white rounded-lg border-2 border-loto-green/20">
-          <h2 className="text-xl font-bold text-loto-green mb-4">
-            Hướng dẫn:
-          </h2>
+          <h2 className="text-xl font-bold text-loto-green mb-4">Hướng dẫn:</h2>
           <ul className="space-y-2 text-gray-700">
             <li className="flex items-start gap-2">
               <span className="text-loto-green font-bold">•</span>
               <span>
-                <strong>Gọi số ngẫu nhiên:</strong> Gọi một số ngẫu nhiên từ 1-90
+                <strong>Gọi số ngẫu nhiên:</strong> Gọi một số ngẫu nhiên từ
+                1-90
               </span>
             </li>
             <li className="flex items-start gap-2">
@@ -194,7 +193,8 @@ export function TicketDisplayExample() {
             <li className="flex items-start gap-2">
               <span className="text-loto-green font-bold">•</span>
               <span>
-                <strong>Thắng:</strong> Hoàn thành một dòng ngang (5 số) để thắng
+                <strong>Thắng:</strong> Hoàn thành một dòng ngang (5 số) để
+                thắng
               </span>
             </li>
           </ul>

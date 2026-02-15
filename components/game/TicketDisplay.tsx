@@ -15,12 +15,12 @@
  * - Accessibility support
  */
 
-'use client';
+"use client";
 
-import { memo, useMemo } from 'react';
-import type { Card } from '@/types';
-import { CardGrid } from './CardGrid';
-import { motion, AnimatePresence } from 'framer-motion';
+import { memo, useMemo } from "react";
+import type { Card } from "@/types";
+import { CardGrid } from "./CardGrid";
+import { motion, AnimatePresence } from "framer-motion";
 
 // ============================================================================
 // PROPS
@@ -86,7 +86,7 @@ export const TicketDisplay = memo(function TicketDisplay({
       card.some((row) => {
         const rowNumbers = row.filter((cell): cell is number => cell !== null);
         return rowNumbers.every((num) => calledNumbers.has(num));
-      })
+      }),
     );
   }, [cards, calledNumbers]);
 
@@ -107,7 +107,7 @@ export const TicketDisplay = memo(function TicketDisplay({
       opacity: 1,
       y: 0,
       transition: {
-        type: 'spring',
+        type: "spring",
         stiffness: 300,
         damping: 30,
       },
@@ -121,7 +121,7 @@ export const TicketDisplay = memo(function TicketDisplay({
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+          transition={{ type: "spring", stiffness: 400, damping: 25 }}
         >
           <svg
             className="w-16 h-16 sm:w-20 sm:h-20 text-gray-300 mb-4"
@@ -137,10 +137,10 @@ export const TicketDisplay = memo(function TicketDisplay({
             />
           </svg>
           <h3 className="text-lg sm:text-xl font-bold text-gray-400 mb-2">
-            Chưa có thẻ
+            Chưa có phiếu dò
           </h3>
           <p className="text-sm sm:text-base text-gray-500 max-w-md">
-            Bạn chưa có thẻ nào. Hãy tạo thẻ mới để tham gia chơi!
+            Bạn chưa có phiếu dò nào. Hãy tạo phiếu dò mới để tham gia chơi!
           </p>
         </motion.div>
       </div>
@@ -154,7 +154,7 @@ export const TicketDisplay = memo(function TicketDisplay({
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <span className="text-sm sm:text-base text-gray-600">
-              Tổng số thẻ:
+              Tổng số phiếu dò:
             </span>
             <span className="text-lg sm:text-xl font-bold text-loto-green">
               {cards.length}
@@ -181,7 +181,7 @@ export const TicketDisplay = memo(function TicketDisplay({
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               exit={{ scale: 0, rotate: 180 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+              transition={{ type: "spring", stiffness: 400, damping: 20 }}
               className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-loto-gold via-loto-gold-light to-loto-gold rounded-full border-2 border-loto-gold-dark"
             >
               <svg
@@ -211,11 +211,7 @@ export const TicketDisplay = memo(function TicketDisplay({
         animate="show"
       >
         {cards.map((card, index) => (
-          <motion.div
-            key={index}
-            variants={cardVariants}
-            layout
-          >
+          <motion.div key={index} variants={cardVariants} layout>
             <CardGrid
               card={card}
               calledNumbers={calledNumbers}
@@ -248,12 +244,11 @@ export const TicketDisplay = memo(function TicketDisplay({
             />
           </svg>
           <div className="flex-1 text-sm text-gray-700">
-            <p className="font-semibold text-loto-green mb-1">
-              Mẹo chơi:
-            </p>
+            <p className="font-semibold text-loto-green mb-1">Mẹo chơi:</p>
             <p>
-              Bấm vào các ô số để đánh dấu thủ công. Các số đã được gọi sẽ tự động
-              được tô màu vàng. Hoàn thành một dòng ngang (5 số) để chiến thắng!
+              Bấm vào các ô số để đánh dấu thủ công. Các số đã được gọi sẽ tự
+              động được tô màu vàng. Hoàn thành một dòng ngang (5 số) để chiến
+              thắng!
             </p>
           </div>
         </div>

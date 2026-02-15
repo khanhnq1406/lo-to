@@ -19,7 +19,7 @@ All components for displaying authentic Vietnamese Lô Tô cards have been succe
 
 2. **`CardHeader.tsx`** (3.3 KB)
    - Header component showing card title and status
-   - Displays Vietnamese text: "Thẻ 1", "Thẻ 2", etc.
+   - Displays Vietnamese text: "Phiếu dò 1", "Phiếu dò 2", etc.
    - Progress indicator (called/total numbers)
    - Win status badge with celebration animation
    - Compact design to maximize card space
@@ -80,6 +80,7 @@ All components for displaying authentic Vietnamese Lô Tô cards have been succe
 ### Authentic Vietnamese Lô Tô Format ✅
 
 All components follow the authentic format:
+
 - ✅ 3 rows × 9 columns = 27 cells per card
 - ✅ 15 numbers (1-90) + 12 blanks per card
 - ✅ 5 numbers + 4 blanks per row
@@ -89,6 +90,7 @@ All components follow the authentic format:
 ### Traditional Paper Style ✅
 
 Design matches Vietnamese Lô Tô aesthetics:
+
 - ✅ Off-white paper background (#FBF9F4)
 - ✅ Dark green borders (#2D5016)
 - ✅ Bold typography for numbers
@@ -100,6 +102,7 @@ Design matches Vietnamese Lô Tô aesthetics:
 ### Responsive Layout ✅
 
 Fully responsive across all devices:
+
 - ✅ Desktop (lg+): 3 cards per row, max width
 - ✅ Tablet (md): 2 cards per row
 - ✅ Mobile (sm): Stacked vertically, 1 per row
@@ -110,6 +113,7 @@ Fully responsive across all devices:
 ### Visual States ✅
 
 All required cell states implemented:
+
 - ✅ Normal: White background, black border
 - ✅ Blank: Green background, no number
 - ✅ Called: Yellow/gold highlight with pulse
@@ -119,6 +123,7 @@ All required cell states implemented:
 ### Animations (Framer Motion) ✅
 
 Smooth animations for all interactions:
+
 - ✅ Cell appearance: Fade in + scale spring
 - ✅ Number called: Pulse animation (scale)
 - ✅ Manual mark: Stamp/press effect
@@ -130,6 +135,7 @@ Smooth animations for all interactions:
 ### Interactions ✅
 
 Full interaction support:
+
 - ✅ Click cell to mark/unmark (toggle)
 - ✅ Hover effects on desktop
 - ✅ Touch-friendly on mobile
@@ -140,6 +146,7 @@ Full interaction support:
 ### TypeScript ✅
 
 Strict type safety:
+
 - ✅ All components fully typed
 - ✅ Props interfaces exported
 - ✅ Imports from `/types/index.ts`
@@ -150,6 +157,7 @@ Strict type safety:
 ### Zustand Integration ✅
 
 Store integration examples provided:
+
 - ✅ `usePlayerCards()` selector usage
 - ✅ `useCalledHistory()` selector usage
 - ✅ Set conversion for performance
@@ -159,6 +167,7 @@ Store integration examples provided:
 ### Performance ✅
 
 Optimized for smooth experience:
+
 - ✅ All components memoized (`React.memo`)
 - ✅ Expensive calculations memoized (`useMemo`)
 - ✅ Callbacks memoized (`useCallback`)
@@ -169,6 +178,7 @@ Optimized for smooth experience:
 ### Accessibility ✅
 
 WCAG 2.1 AA compliance:
+
 - ✅ ARIA labels on all cells
 - ✅ ARIA roles (grid, gridcell, button)
 - ✅ Keyboard navigation (Tab, Enter, Space)
@@ -180,57 +190,61 @@ WCAG 2.1 AA compliance:
 ## Component APIs
 
 ### TicketDisplay
+
 ```tsx
 interface TicketDisplayProps {
-  cards: Card[];                    // Player's cards
-  calledNumbers: Set<number>;       // Called numbers (1-90)
+  cards: Card[]; // Player's cards
+  calledNumbers: Set<number>; // Called numbers (1-90)
   onCellClick?: (cardIndex, row, col) => void;
-  winningCardIndex?: number;        // Optional win highlight
-  winningRow?: number;              // Optional win row
+  winningCardIndex?: number; // Optional win highlight
+  winningRow?: number; // Optional win row
 }
 ```
 
 ### CardGrid
+
 ```tsx
 interface CardGridProps {
-  card: Card;                       // 3×9 card data
-  calledNumbers: Set<number>;       // Called numbers
-  cardIndex: number;                // Card index
+  card: Card; // 3×9 card data
+  calledNumbers: Set<number>; // Called numbers
+  cardIndex: number; // Card index
   onCellClick?: (row, col) => void; // Click handler
-  isWinning?: boolean;              // Is winning card
-  winningRow?: number;              // Winning row (0-2)
+  isWinning?: boolean; // Is winning card
+  winningRow?: number; // Winning row (0-2)
 }
 ```
 
 ### NumberCell
+
 ```tsx
 interface NumberCellProps {
-  value: CellValue;                 // Number or null
-  isCalled: boolean;                // Is called
-  isMarked: boolean;                // Is marked
-  onClick?: () => void;             // Click handler
-  isWinning?: boolean;              // Is winning
-  row?: number;                     // Row (accessibility)
-  col?: number;                     // Col (accessibility)
+  value: CellValue; // Number or null
+  isCalled: boolean; // Is called
+  isMarked: boolean; // Is marked
+  onClick?: () => void; // Click handler
+  isWinning?: boolean; // Is winning
+  row?: number; // Row (accessibility)
+  col?: number; // Col (accessibility)
 }
 ```
 
 ### CardHeader
+
 ```tsx
 interface CardHeaderProps {
-  cardIndex: number;                // Card index
-  isWinning?: boolean;              // Is winning
-  winningRow?: number;              // Winning row
-  totalNumbers?: number;            // Total (default: 15)
-  calledNumbers?: number;           // Called count
+  cardIndex: number; // Card index
+  isWinning?: boolean; // Is winning
+  winningRow?: number; // Winning row
+  totalNumbers?: number; // Total (default: 15)
+  calledNumbers?: number; // Called count
 }
 ```
 
 ## Usage Example
 
 ```tsx
-import { TicketDisplay } from '@/components/game';
-import { usePlayerCards, useCalledHistory } from '@/store/useGameStore';
+import { TicketDisplay } from "@/components/game";
+import { usePlayerCards, useCalledHistory } from "@/store/useGameStore";
 
 export default function GamePage() {
   const cards = usePlayerCards();
@@ -252,6 +266,7 @@ export default function GamePage() {
 ## Dependencies Used
 
 All dependencies already in `package.json`:
+
 - ✅ `framer-motion` - Animations
 - ✅ `react` - Component framework
 - ✅ `tailwindcss` - Styling
@@ -262,16 +277,19 @@ No new dependencies added.
 ## Testing Status
 
 ### TypeScript Compilation
+
 - ✅ No errors in game components
 - ✅ Strict type checking passes
 - ✅ All imports resolve correctly
 
 ### Visual Verification
+
 - ⚠️ Requires browser testing (see TEST.md)
 - ✅ Example component provided for testing
 - ✅ Test guide documented
 
 ### Accessibility
+
 - ⚠️ Requires manual testing with screen readers
 - ✅ ARIA labels implemented
 - ✅ Keyboard navigation implemented
@@ -281,22 +299,22 @@ No new dependencies added.
 To use these components in your app:
 
 1. **Import in your game page:**
+
    ```tsx
-   import { TicketDisplay } from '@/components/game';
+   import { TicketDisplay } from "@/components/game";
    ```
 
 2. **Connect to Zustand store:**
+
    ```tsx
    const cards = usePlayerCards();
    const calledHistory = useCalledHistory();
    ```
 
 3. **Render component:**
+
    ```tsx
-   <TicketDisplay
-     cards={cards}
-     calledNumbers={new Set(calledHistory)}
-   />
+   <TicketDisplay cards={cards} calledNumbers={new Set(calledHistory)} />
    ```
 
 4. **Test visually:**

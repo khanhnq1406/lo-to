@@ -27,6 +27,7 @@ From https://www.bachhoaxanh.com/kinh-nghiem-hay/huong-dan-cach-choi-lo-to-giay-
 ### 8 Colors for 16 Tickets
 
 Traditional Vietnamese Lô Tô sets use **8 different colors** for the 16 tickets:
+
 - **2 tickets per color** (16 tickets ÷ 8 colors = 2 tickets each)
 - This helps players identify their tickets during gameplay
 - Colors make it easier to verify winning tickets
@@ -49,22 +50,26 @@ Common colors used in authentic Vietnamese Lô Tô sets:
 ## Implementation Implications:
 
 ### Current Implementation
+
 Our digital version generates cards dynamically without preset colors.
 
 ### Authentic Enhancement Options
 
 #### Option 1: Visual Color Borders (Recommended)
+
 - Add color-coded borders to each card
 - Each player's cards get assigned colors from the 8-color palette
 - Maintains traditional visual identification
 - Example: Player 1 gets red borders, Player 2 gets yellow borders
 
 #### Option 2: Color Themes
+
 - Full card background with subtle color tints
 - Preserves traditional paper texture with color overlay
 - More visually prominent
 
 #### Option 3: Color Labels Only
+
 - Add small color indicator/badge to each card
 - Minimal visual change
 - Still helps with card identification
@@ -74,6 +79,7 @@ Our digital version generates cards dynamically without preset colors.
 ## Visual Examples:
 
 ### Traditional Physical Cards:
+
 ```
 Card 1 (Red border):          Card 2 (Red border):
 ┌────────────────────┐       ┌────────────────────┐
@@ -89,13 +95,17 @@ Card 1 (Red border):          Card 2 (Red border):
 ```
 
 ### Digital Implementation:
+
 ```tsx
 // Card with color-coded border
-<div className="card-container" style={{
-  borderColor: cardColors[colorIndex],
-  borderWidth: '4px',
-  borderStyle: 'solid'
-}}>
+<div
+  className="card-container"
+  style={{
+    borderColor: cardColors[colorIndex],
+    borderWidth: "4px",
+    borderStyle: "solid",
+  }}
+>
   {/* Card grid content */}
 </div>
 ```
@@ -109,53 +119,53 @@ Card 1 (Red border):          Card 2 (Red border):
 ```typescript
 export const LOTO_CARD_COLORS = {
   red: {
-    primary: '#E53E3E',    // Red
-    light: '#FC8181',
-    dark: '#C53030',
-    name: 'Đỏ'
+    primary: "#E53E3E", // Red
+    light: "#FC8181",
+    dark: "#C53030",
+    name: "Đỏ",
   },
   yellow: {
-    primary: '#ECC94B',    // Yellow
-    light: '#F6E05E',
-    dark: '#D69E2E',
-    name: 'Vàng'
+    primary: "#ECC94B", // Yellow
+    light: "#F6E05E",
+    dark: "#D69E2E",
+    name: "Vàng",
   },
   green: {
-    primary: '#48BB78',    // Green
-    light: '#68D391',
-    dark: '#38A169',
-    name: 'Xanh lá'
+    primary: "#48BB78", // Green
+    light: "#68D391",
+    dark: "#38A169",
+    name: "Xanh lá",
   },
   blue: {
-    primary: '#4299E1',    // Blue
-    light: '#63B3ED',
-    dark: '#3182CE',
-    name: 'Xanh dương'
+    primary: "#4299E1", // Blue
+    light: "#63B3ED",
+    dark: "#3182CE",
+    name: "Xanh dương",
   },
   purple: {
-    primary: '#9F7AEA',    // Purple
-    light: '#B794F4',
-    dark: '#805AD5',
-    name: 'Tím'
+    primary: "#9F7AEA", // Purple
+    light: "#B794F4",
+    dark: "#805AD5",
+    name: "Tím",
   },
   orange: {
-    primary: '#ED8936',    // Orange
-    light: '#F6AD55',
-    dark: '#DD6B20',
-    name: 'Cam'
+    primary: "#ED8936", // Orange
+    light: "#F6AD55",
+    dark: "#DD6B20",
+    name: "Cam",
   },
   pink: {
-    primary: '#ED64A6',    // Pink
-    light: '#F687B3',
-    dark: '#D53F8C',
-    name: 'Hồng'
+    primary: "#ED64A6", // Pink
+    light: "#F687B3",
+    dark: "#D53F8C",
+    name: "Hồng",
   },
   brown: {
-    primary: '#A0826D',    // Brown
-    light: '#BFA094',
-    dark: '#8B6F47',
-    name: 'Nâu'
-  }
+    primary: "#A0826D", // Brown
+    light: "#BFA094",
+    dark: "#8B6F47",
+    name: "Nâu",
+  },
 };
 ```
 
@@ -208,7 +218,15 @@ export const LOTO_CARD_COLORS = {
 interface CardGridProps {
   card: Card;
   cardIndex: number;
-  colorTheme: 'red' | 'yellow' | 'green' | 'blue' | 'purple' | 'orange' | 'pink' | 'brown';
+  colorTheme:
+    | "red"
+    | "yellow"
+    | "green"
+    | "blue"
+    | "purple"
+    | "orange"
+    | "pink"
+    | "brown";
   // ... other props
 }
 
@@ -217,23 +235,26 @@ interface CardGridProps {
   className="card-container"
   style={{
     border: `4px solid ${LOTO_CARD_COLORS[colorTheme].primary}`,
-    boxShadow: `0 4px 6px ${LOTO_CARD_COLORS[colorTheme].light}40`
+    boxShadow: `0 4px 6px ${LOTO_CARD_COLORS[colorTheme].light}40`,
   }}
 >
   {/* Card header with color badge */}
   <div className="card-header">
-    <span className="color-badge" style={{
-      backgroundColor: LOTO_CARD_COLORS[colorTheme].primary,
-      color: 'white'
-    }}>
+    <span
+      className="color-badge"
+      style={{
+        backgroundColor: LOTO_CARD_COLORS[colorTheme].primary,
+        color: "white",
+      }}
+    >
       {LOTO_CARD_COLORS[colorTheme].name}
     </span>
-    <span>Vé #{cardIndex + 1}</span>
+    <span>Phiếu dò #{cardIndex + 1}</span>
   </div>
 
   {/* Card grid */}
   {/* ... */}
-</div>
+</div>;
 ```
 
 ---
@@ -246,4 +267,3 @@ interface CardGridProps {
 - ⭐ **Recommendation**: Add color-coded borders to match authentic sets
 
 This feature would make the digital version even more authentic by matching the traditional physical Lô Tô sets used during Tết celebrations! 🎨
-

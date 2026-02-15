@@ -28,17 +28,19 @@ The components follow the authentic Vietnamese Lô Tô format:
 Container component that displays all cards owned by a player.
 
 **Props:**
+
 ```tsx
 interface TicketDisplayProps {
-  cards: Card[];                    // Array of cards (each card is 3×9)
-  calledNumbers: Set<number>;       // Set of called numbers (1-90)
+  cards: Card[]; // Array of cards (each card is 3×9)
+  calledNumbers: Set<number>; // Set of called numbers (1-90)
   onCellClick?: (cardIndex: number, row: number, col: number) => void;
-  winningCardIndex?: number;        // Index of winning card
-  winningRow?: number;              // Winning row index (0-2)
+  winningCardIndex?: number; // Index of winning card
+  winningRow?: number; // Winning row index (0-2)
 }
 ```
 
 **Features:**
+
 - Responsive grid layout (3 cards per row on desktop, 2 on tablet, 1 on mobile)
 - Statistics header showing total cards and called numbers
 - Empty state when no cards
@@ -46,9 +48,10 @@ interface TicketDisplayProps {
 - Helpful tips for players
 
 **Usage:**
+
 ```tsx
-import { TicketDisplay } from '@/components/game';
-import { usePlayerCards, useCalledHistory } from '@/store/useGameStore';
+import { TicketDisplay } from "@/components/game";
+import { usePlayerCards, useCalledHistory } from "@/store/useGameStore";
 
 export default function GamePage() {
   const cards = usePlayerCards();
@@ -72,18 +75,20 @@ export default function GamePage() {
 Displays a single Vietnamese Lô Tô card with traditional paper style.
 
 **Props:**
+
 ```tsx
 interface CardGridProps {
-  card: Card;                     // Card data (3×9 grid)
-  calledNumbers: Set<number>;     // Set of called numbers
-  cardIndex: number;              // Card index in player's array
+  card: Card; // Card data (3×9 grid)
+  calledNumbers: Set<number>; // Set of called numbers
+  cardIndex: number; // Card index in player's array
   onCellClick?: (row: number, col: number) => void;
-  isWinning?: boolean;            // Is this card winning?
-  winningRow?: number;            // Winning row index (0-2)
+  isWinning?: boolean; // Is this card winning?
+  winningRow?: number; // Winning row index (0-2)
 }
 ```
 
 **Features:**
+
 - Traditional paper background (#FBF9F4)
 - Dark green borders (#2D5016)
 - 3×9 grid layout
@@ -93,6 +98,7 @@ interface CardGridProps {
 - Decorative bottom border
 
 **Styling:**
+
 - Off-white paper gradient background
 - Green decorative borders
 - Shadow effect for depth
@@ -104,19 +110,21 @@ interface CardGridProps {
 Individual cell component displaying a number or blank.
 
 **Props:**
+
 ```tsx
 interface NumberCellProps {
-  value: CellValue;               // Number (1-90) or null (blank)
-  isCalled: boolean;              // Is number called?
-  isMarked: boolean;              // Is manually marked?
-  onClick?: () => void;           // Click handler
-  isWinning?: boolean;            // Is part of winning row?
-  row?: number;                   // Row index (for accessibility)
-  col?: number;                   // Col index (for accessibility)
+  value: CellValue; // Number (1-90) or null (blank)
+  isCalled: boolean; // Is number called?
+  isMarked: boolean; // Is manually marked?
+  onClick?: () => void; // Click handler
+  isWinning?: boolean; // Is part of winning row?
+  row?: number; // Row index (for accessibility)
+  col?: number; // Col index (for accessibility)
 }
 ```
 
 **Visual States:**
+
 - **Normal**: White background, black border
 - **Blank**: Green background, no number
 - **Called**: Yellow/gold highlight with pulse animation
@@ -124,12 +132,14 @@ interface NumberCellProps {
 - **Winning**: Gold gradient with sparkle animation
 
 **Animations:**
+
 - Initial appearance: Fade in + scale
 - Number called: Pulse animation
 - Manual mark: Stamp/press effect
 - Winning: Celebration animation with sparkle
 
 **Accessibility:**
+
 - ARIA labels for screen readers
 - Keyboard navigation support (Enter/Space)
 - Touch-friendly (min 44px on mobile)
@@ -140,18 +150,20 @@ interface NumberCellProps {
 Header component displaying card title and status.
 
 **Props:**
+
 ```tsx
 interface CardHeaderProps {
-  cardIndex: number;              // Card index (0-based)
-  isWinning?: boolean;            // Is winning card?
-  winningRow?: number;            // Winning row (0-2)
-  totalNumbers?: number;          // Total numbers on card (default: 15)
-  calledNumbers?: number;         // Called numbers on card
+  cardIndex: number; // Card index (0-based)
+  isWinning?: boolean; // Is winning card?
+  winningRow?: number; // Winning row (0-2)
+  totalNumbers?: number; // Total numbers on card (default: 15)
+  calledNumbers?: number; // Called numbers on card
 }
 ```
 
 **Features:**
-- Card title (Vietnamese: "Thẻ 1", "Thẻ 2", etc.)
+
+- Card title (Vietnamese: "Phiếu dò 1", "Phiếu dò 2", etc.)
 - Progress indicator (called/total)
 - Win status badge with animation
 - Compact design
@@ -162,12 +174,12 @@ interface CardHeaderProps {
 
 ```tsx
 // Traditional Vietnamese Lô Tô colors
-bg-paper          // #FBF9F4 - Off-white paper
-bg-paper-dark     // #F5F2EA - Darker paper shade
-border-loto-green // #2D5016 - Dark green borders
-text-loto-green   // #2D5016 - Green text
-bg-loto-gold      // #FFD700 - Called number highlight
-bg-loto-green-light // #4A7C2C - Marked cell background
+bg - paper; // #FBF9F4 - Off-white paper
+bg - paper - dark; // #F5F2EA - Darker paper shade
+border - loto - green; // #2D5016 - Dark green borders
+text - loto - green; // #2D5016 - Green text
+bg - loto - gold; // #FFD700 - Called number highlight
+bg - loto - green - light; // #4A7C2C - Marked cell background
 ```
 
 ### Typography
@@ -179,7 +191,7 @@ bg-loto-green-light // #4A7C2C - Marked cell background
 ### Shadows
 
 ```tsx
-shadow-loto-ticket  // Paper card shadow
+shadow - loto - ticket; // Paper card shadow
 ```
 
 ### Responsive Breakpoints
@@ -193,10 +205,10 @@ shadow-loto-ticket  // Paper card shadow
 ### Basic Usage with Zustand Store
 
 ```tsx
-'use client';
+"use client";
 
-import { TicketDisplay } from '@/components/game';
-import { usePlayerCards, useCalledHistory } from '@/store/useGameStore';
+import { TicketDisplay } from "@/components/game";
+import { usePlayerCards, useCalledHistory } from "@/store/useGameStore";
 
 export default function GamePage() {
   const cards = usePlayerCards();
@@ -223,12 +235,12 @@ export default function GamePage() {
 ### With Win Detection
 
 ```tsx
-'use client';
+"use client";
 
-import { TicketDisplay } from '@/components/game';
-import { usePlayerCards, useCalledHistory } from '@/store/useGameStore';
-import { checkRowWin } from '@/lib/game';
-import { useMemo } from 'react';
+import { TicketDisplay } from "@/components/game";
+import { usePlayerCards, useCalledHistory } from "@/store/useGameStore";
+import { checkRowWin } from "@/lib/game";
+import { useMemo } from "react";
 
 export default function GamePage() {
   const cards = usePlayerCards();
@@ -262,8 +274,8 @@ export default function GamePage() {
 ### Standalone CardGrid
 
 ```tsx
-import { CardGrid } from '@/components/game';
-import type { Card } from '@/types';
+import { CardGrid } from "@/components/game";
+import type { Card } from "@/types";
 
 const sampleCard: Card = [
   [5, null, null, 32, null, 56, null, 71, null],
@@ -373,6 +385,7 @@ winning: {
 ### Screen Reader Support
 
 Example ARIA labels:
+
 - "Number 5 - called, marked"
 - "Blank cell at row 1, column 2"
 - "Number 45"
@@ -395,6 +408,7 @@ Example ARIA labels:
 ### Responsive Testing
 
 Test on multiple screen sizes:
+
 - iPhone SE (375px)
 - iPad (768px)
 - Desktop (1920px)
@@ -404,6 +418,7 @@ Test on multiple screen sizes:
 ### Cards not displaying
 
 Check that:
+
 1. Cards are in correct format (3×9 array)
 2. calledNumbers is a Set, not an array
 3. Card data is not null/undefined
@@ -411,6 +426,7 @@ Check that:
 ### Numbers not highlighting
 
 Check that:
+
 1. calledNumbers Set contains the numbers
 2. Numbers are in range 1-90
 3. Store is updating correctly
@@ -418,6 +434,7 @@ Check that:
 ### Animations not working
 
 Check that:
+
 1. framer-motion is installed
 2. Components are client-side ('use client')
 3. No CSS conflicts with transform/opacity
@@ -425,6 +442,7 @@ Check that:
 ### Performance issues
 
 If experiencing lag:
+
 1. Ensure components are memoized
 2. Use specific store selectors
 3. Limit number of cards displayed
@@ -433,6 +451,7 @@ If experiencing lag:
 ## Future Enhancements
 
 Potential improvements:
+
 - [ ] Sound effects on number call
 - [ ] Confetti animation on win
 - [ ] Card flip animation when generated
