@@ -22,13 +22,13 @@
  *   - Bottom (expandable sheet): CalledHistory, PlayerList, Controls
  */
 
-'use client';
+"use client";
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronUp, ChevronDown, LogOut, AlertCircle } from 'lucide-react';
-import { useSocket } from '@/providers/SocketProvider';
+import { useEffect, useState, useCallback, useMemo } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronUp, ChevronDown, LogOut, AlertCircle } from "lucide-react";
+import { useSocket } from "@/providers/SocketProvider";
 import {
   useGameStore,
   useRoom,
@@ -43,17 +43,17 @@ import {
   useMachineInterval,
   useError,
   useSelectedCards,
-} from '@/store/useGameStore';
-import { CallerPanel } from '@/components/game/CallerPanel';
-import { CurrentNumber } from '@/components/game/CurrentNumber';
-import { CalledHistory } from '@/components/game/CalledHistory';
-import { CardSelector } from '@/components/game/CardSelector';
-import { SelectedCardsDisplay } from '@/components/game/SelectedCardsDisplay';
-import { PlayerList } from '@/components/game/PlayerList';
-import { RoomInfo } from '@/components/game/RoomInfo';
-import { CallerControls } from '@/components/game/CallerControls';
-import { useCardSelection } from '@/hooks/useCardSelection';
-import { cn } from '@/lib/utils';
+} from "@/store/useGameStore";
+import { CallerPanel } from "@/components/game/CallerPanel";
+import { CurrentNumber } from "@/components/game/CurrentNumber";
+import { CalledHistory } from "@/components/game/CalledHistory";
+import { CardSelector } from "@/components/game/CardSelector";
+import { SelectedCardsDisplay } from "@/components/game/SelectedCardsDisplay";
+import { PlayerList } from "@/components/game/PlayerList";
+import { RoomInfo } from "@/components/game/RoomInfo";
+import { CallerControls } from "@/components/game/CallerControls";
+import { useCardSelection } from "@/hooks/useCardSelection";
+import { cn } from "@/lib/utils";
 
 // ============================================================================
 // COMPONENT
@@ -65,7 +65,18 @@ export default function RoomPage() {
   const roomId = params.id as string;
 
   // Socket connection and actions
-  const { connected, connecting, joinRoom, leaveRoom, startGame, callNumber, changeCallerMode, changeCaller, changeMarkingMode, resetGame } = useSocket();
+  const {
+    connected,
+    connecting,
+    joinRoom,
+    leaveRoom,
+    startGame,
+    callNumber,
+    changeCallerMode,
+    changeCaller,
+    changeMarkingMode,
+    resetGame,
+  } = useSocket();
 
   // Store state
   const room = useRoom();
@@ -87,11 +98,11 @@ export default function RoomPage() {
   const currentPlayer = players.find((p) => p.id === currentPlayerId) || null;
 
   // Debug logging for card selector visibility
-  if (typeof window !== 'undefined') {
-    console.log('[CardSelector Debug]', {
+  if (typeof window !== "undefined") {
+    console.log("[CardSelector Debug]", {
       gameState,
       currentPlayerId,
-      playerIdsInRoom: players.map(p => p.id),
+      playerIdsInRoom: players.map((p) => p.id),
       hasCurrentPlayer: !!currentPlayer,
       playersCount: players.length,
     });
@@ -121,7 +132,7 @@ export default function RoomPage() {
 
   useEffect(() => {
     // Only run on client side
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     // Wait for connection
     if (!connected || connecting) return;
@@ -136,10 +147,11 @@ export default function RoomPage() {
     if (hasJoined) return;
 
     // Get player name from localStorage or generate default
-    const storedName = localStorage.getItem('loto-player-name');
-    const playerName = storedName || `Player_${Math.random().toString(36).substr(2, 4)}`;
+    const storedName = localStorage.getItem("loto-player-name");
+    const playerName =
+      storedName || `Player_${Math.random().toString(36).substr(2, 4)}`;
 
-    console.log('[RoomPage] Auto-joining room:', { roomId, playerName });
+    console.log("[RoomPage] Auto-joining room:", { roomId, playerName });
 
     try {
       // Join the room (cardCount = 0, cards will be selected later)
@@ -147,10 +159,10 @@ export default function RoomPage() {
       setHasJoined(true);
 
       // Store for future use
-      localStorage.setItem('loto-player-name', playerName);
+      localStorage.setItem("loto-player-name", playerName);
     } catch (err) {
-      console.error('[RoomPage] Failed to join room:', err);
-      setJoinError('Không thể tham gia phòng. Vui lòng thử lại.');
+      console.error("[RoomPage] Failed to join room:", err);
+      setJoinError("Không thể tham gia phòng. Vui lòng thử lại.");
     }
   }, [connected, connecting, room?.id, roomId, hasJoined, joinRoom]);
 
@@ -162,8 +174,8 @@ export default function RoomPage() {
     // Wait a bit before redirecting to allow connection
     if (!connected && !connecting && hasJoined) {
       const timeout = setTimeout(() => {
-        console.log('[RoomPage] Not connected, redirecting to home');
-        router.push('/');
+        console.log("[RoomPage] Not connected, redirecting to home");
+        router.push("/");
       }, 5000);
 
       return () => clearTimeout(timeout);
@@ -176,11 +188,11 @@ export default function RoomPage() {
 
   useEffect(() => {
     // If we've tried to join but error indicates room not found
-    if (error && error.toLowerCase().includes('not found')) {
-      setJoinError('Phòng không tồn tại. Vui lòng kiểm tra lại mã phòng.');
+    if (error && error.toLowerCase().includes("not found")) {
+      setJoinError("Phòng không tồn tại. Vui lòng kiểm tra lại mã phòng.");
 
       const timeout = setTimeout(() => {
-        router.push('/');
+        router.push("/");
       }, 3000);
 
       return () => clearTimeout(timeout);
@@ -192,11 +204,11 @@ export default function RoomPage() {
   // ===========================
 
   const handleLeaveRoom = useCallback(() => {
-    const confirmed = window.confirm('Bạn có chắc muốn rời khỏi phòng?');
+    const confirmed = window.confirm("Bạn có chắc muốn rời khỏi phòng?");
     if (confirmed) {
       leaveRoom();
       reset();
-      router.push('/');
+      router.push("/");
     }
   }, [leaveRoom, reset, router]);
 
@@ -206,7 +218,7 @@ export default function RoomPage() {
 
   const handleCallNumber = useCallback(() => {
     if (remainingNumbers.length === 0) {
-      console.warn('No remaining numbers to call');
+      console.warn("No remaining numbers to call");
       return;
     }
 
@@ -218,14 +230,19 @@ export default function RoomPage() {
   }, [callNumber, remainingNumbers]);
 
   const handleResetGame = useCallback(() => {
-    if (confirm('Bạn có chắc muốn đặt lại trò chơi? Mọi tiến trình sẽ bị mất.')) {
+    if (
+      confirm("Bạn có chắc muốn đặt lại trò chơi? Mọi tiến trình sẽ bị mất.")
+    ) {
       resetGame();
     }
   }, [resetGame]);
 
-  const handleChangeCallerMode = useCallback((mode: 'machine' | 'manual', _interval?: number) => {
-    changeCallerMode(mode);
-  }, [changeCallerMode]);
+  const handleChangeCallerMode = useCallback(
+    (mode: "machine" | "manual", _interval?: number) => {
+      changeCallerMode(mode);
+    },
+    [changeCallerMode],
+  );
 
   // ===========================
   // LOADING STATE
@@ -255,7 +272,7 @@ export default function RoomPage() {
               <>
                 <div className="w-16 h-16 border-4 border-loto-green border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                  {connecting ? 'Đang kết nối...' : 'Đang tham gia phòng...'}
+                  {connecting ? "Đang kết nối..." : "Đang tham gia phòng..."}
                 </h2>
                 <p className="text-gray-600">Mã phòng: {roomId}</p>
               </>
@@ -285,7 +302,7 @@ export default function RoomPage() {
             </h2>
             <p className="text-gray-600 mb-6">{error}</p>
             <button
-              onClick={() => router.push('/')}
+              onClick={() => router.push("/")}
               className="px-6 py-3 bg-loto-green text-white font-bold rounded-lg hover:bg-loto-green-light transition-colors"
             >
               Về trang chủ
@@ -301,7 +318,7 @@ export default function RoomPage() {
   // ===========================
 
   return (
-    <div className="min-h-screen bg-paper">
+    <div className="min-h-screen bg-gradient-to-br from-paper via-paper to-paper-dark">
       {/* Error toast */}
       <AnimatePresence>
         {error && (
@@ -324,14 +341,14 @@ export default function RoomPage() {
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         onClick={handleLeaveRoom}
-        className="fixed top-4 right-4 z-40 p-3 bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 transition-colors"
+        className="fixed top-6 right-6 z-40 p-4 bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 hover:shadow-xl transition-all duration-200 cursor-pointer active:scale-95"
         aria-label="Rời phòng"
       >
-        <LogOut className="w-5 h-5" />
+        <LogOut className="w-6 h-6" />
       </motion.button>
 
       {/* DESKTOP LAYOUT (lg+) */}
-      <div className="hidden lg:grid lg:grid-cols-[60%_40%] lg:gap-6 lg:p-6 lg:min-h-screen">
+      <div className="hidden lg:grid lg:grid-cols-[30%_70%] lg:gap-8 lg:px-8 lg:py-6 lg:min-h-screen">
         {/* Left Panel: Caller Panel */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -342,64 +359,70 @@ export default function RoomPage() {
           <CallerPanel className="flex-1" />
         </motion.div>
 
-        {/* Right Panel: Player Info */}
+        {/* Right Panel: Player Info - Fixed sidebar with internal scroll */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="relative flex flex-col gap-6 overflow-y-auto max-h-screen pb-6 z-10"
+          className="relative flex flex-col gap-6 z-10 "
         >
-          {/* Room Info */}
-          <RoomInfo
-            roomId={room.id}
-            playerCount={players.length}
-            gameState={gameState}
-            createdAt={room.createdAt}
-          />
-
-          {/* Card Selector (only show during waiting state) */}
-          {(() => {
-            const shouldShow = gameState === 'waiting' && currentPlayerId && currentPlayer;
-            console.log('[CardSelector Desktop] Debug:', {
-              gameState,
-              currentPlayerId,
-              hasCurrentPlayer: !!currentPlayer,
-              shouldShow,
-              players: players.length,
-            });
-            return shouldShow ? (
-              <div className="bg-white rounded-xl p-6 border-2 border-loto-green shadow-lg">
-                <CardSelector
-                  selectedCards={selectedCards}
-                  currentPlayerId={currentPlayerId}
-                  players={players}
-                  gameStarted={gameState !== 'waiting'}
-                  onSelectCard={selectCard}
-                  onDeselectCard={deselectCard}
-                />
-              </div>
-            ) : null;
-          })()}
-
-          {/* Selected Cards Display - Show card images */}
-          <div className="bg-white rounded-xl border-2 border-loto-green shadow-lg overflow-hidden flex flex-col max-h-[70vh]">
-            <div className="px-6 pt-6 pb-4 border-b border-gray-200">
-              <h3 className="text-xl font-bold text-gray-800">Vé của bạn</h3>
-            </div>
-            <div className="flex-1 overflow-y-auto p-6">
-              <SelectedCardsDisplay
-                selectedCards={selectedCards}
-                currentPlayerId={currentPlayerId || ''}
-                calledNumbers={calledNumbersSet}
-                cards={playerCards}
-                onChangeMarkingMode={changeMarkingMode}
-              />
-            </div>
+          {/* Room Info - Fixed at top */}
+          <div className="flex-shrink-0">
+            <RoomInfo
+              roomId={room.id}
+              playerCount={players.length}
+              gameState={gameState}
+              createdAt={room.createdAt}
+            />
           </div>
 
-          {/* Player List */}
-          <div className="bg-white rounded-xl p-6 border-2 border-loto-green shadow-lg">
-            <PlayerList />
+          {/* Scrollable content area */}
+          <div className="flex-1 overflow-y-auto space-y-6 pr-2 custom-scrollbar">
+            {/* Card Selector (only show during waiting state) */}
+            {(() => {
+              const shouldShow =
+                gameState === "waiting" && currentPlayerId && currentPlayer;
+              console.log("[CardSelector Desktop] Debug:", {
+                gameState,
+                currentPlayerId,
+                hasCurrentPlayer: !!currentPlayer,
+                shouldShow,
+                players: players.length,
+              });
+              return shouldShow ? (
+                <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 border-2 border-loto-blue shadow-lg transition-all duration-300 hover:shadow-xl">
+                  <CardSelector
+                    selectedCards={selectedCards}
+                    currentPlayerId={currentPlayerId}
+                    players={players}
+                    gameStarted={gameState !== "waiting"}
+                    onSelectCard={selectCard}
+                    onDeselectCard={deselectCard}
+                  />
+                </div>
+              ) : null;
+            })()}
+
+            {/* Selected Cards Display - Show card images */}
+            <div className="bg-white/95 backdrop-blur-sm rounded-2xl border-2 border-loto-green shadow-lg overflow-hidden flex flex-col transition-all duration-300 hover:shadow-xl">
+              <div className="px-6 pt-6 pb-4 border-b border-gray-200 bg-gradient-to-r from-loto-green/5 to-transparent">
+                <h3 className="text-xl font-bold text-gray-800">Vé của bạn</h3>
+              </div>
+              <div className="p-6">
+                <SelectedCardsDisplay
+                  selectedCards={selectedCards}
+                  currentPlayerId={currentPlayerId || ""}
+                  calledNumbers={calledNumbersSet}
+                  cards={playerCards}
+                  onChangeMarkingMode={changeMarkingMode}
+                />
+              </div>
+            </div>
+
+            {/* Player List */}
+            <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 border-2 border-loto-green shadow-lg transition-all duration-300 hover:shadow-xl">
+              <PlayerList />
+            </div>
           </div>
         </motion.div>
       </div>
@@ -415,8 +438,10 @@ export default function RoomPage() {
           <div className="p-4">
             <CurrentNumber
               currentNumber={currentNumber}
-              hideNumber={callerMode === 'manual' && !isCaller}
-              showGenerateButton={isCaller && callerMode === 'manual' && gameState === 'playing'}
+              hideNumber={callerMode === "manual" && !isCaller}
+              showGenerateButton={
+                isCaller && callerMode === "manual" && gameState === "playing"
+              }
               onGenerateNumber={handleCallNumber}
               className="h-40"
             />
@@ -441,7 +466,7 @@ export default function RoomPage() {
             </motion.div>
 
             {/* Card Selector (only show during waiting state) */}
-            {gameState === 'waiting' && currentPlayerId && currentPlayer && (
+            {gameState === "waiting" && currentPlayerId && currentPlayer && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -452,7 +477,7 @@ export default function RoomPage() {
                   selectedCards={selectedCards}
                   currentPlayerId={currentPlayerId}
                   players={players}
-                  gameStarted={gameState !== 'waiting'}
+                  gameStarted={gameState !== "waiting"}
                   onSelectCard={selectCard}
                   onDeselectCard={deselectCard}
                 />
@@ -466,10 +491,12 @@ export default function RoomPage() {
               transition={{ delay: 0.2 }}
               className="bg-white rounded-xl p-4 border-2 border-loto-green shadow-lg"
             >
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Vé của bạn</h3>
+              <h3 className="text-lg font-bold text-gray-800 mb-4">
+                Vé của bạn
+              </h3>
               <SelectedCardsDisplay
                 selectedCards={selectedCards}
-                currentPlayerId={currentPlayerId || ''}
+                currentPlayerId={currentPlayerId || ""}
                 calledNumbers={calledNumbersSet}
                 cards={playerCards}
                 onChangeMarkingMode={changeMarkingMode}
@@ -495,20 +522,22 @@ export default function RoomPage() {
           <motion.div
             initial={false}
             animate={{
-              y: isSheetOpen ? 0 : 'calc(100% - 80px)',
+              y: isSheetOpen ? 0 : "calc(100% - 80px)",
             }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className={cn(
-              'relative bg-white rounded-t-3xl shadow-2xl overflow-hidden pointer-events-auto',
-              'border-t-4 border-loto-green',
-              'h-[calc(100vh-180px)]'
+              "relative bg-white rounded-t-3xl shadow-2xl overflow-hidden pointer-events-auto",
+              "border-t-4 border-loto-green",
+              "h-[calc(100vh-180px)]",
             )}
           >
             {/* Sheet Handle */}
             <button
               onClick={() => setIsSheetOpen(!isSheetOpen)}
               className="w-full p-4 flex flex-col items-center gap-2 cursor-pointer hover:bg-gray-50 transition-colors"
-              aria-label={isSheetOpen ? 'Đóng bảng điều khiển' : 'Mở bảng điều khiển'}
+              aria-label={
+                isSheetOpen ? "Đóng bảng điều khiển" : "Mở bảng điều khiển"
+              }
             >
               <div className="w-12 h-1 bg-gray-300 rounded-full" />
               <div className="flex items-center gap-2 text-gray-700">
@@ -527,22 +556,29 @@ export default function RoomPage() {
             </button>
 
             {/* Sheet Content */}
-            <div className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 240px)' }}>
+            <div
+              className="overflow-y-auto"
+              style={{ maxHeight: "calc(100vh - 240px)" }}
+            >
               <div className="p-4 space-y-6">
                 {/* Called History */}
                 <div>
-                  <h3 className="text-lg font-bold text-gray-800 mb-3">Lịch sử gọi số</h3>
+                  <h3 className="text-lg font-bold text-gray-800 mb-3">
+                    Lịch sử gọi số
+                  </h3>
                   <CalledHistory
                     calledNumbers={calledHistory}
                     currentNumber={currentNumber}
-                    hideHistory={callerMode === 'manual' && !isCaller}
+                    hideHistory={callerMode === "manual" && !isCaller}
                   />
                 </div>
 
                 {/* Caller Controls (if host/caller) */}
                 {(isHost || isCaller) && (
                   <div>
-                    <h3 className="text-lg font-bold text-gray-800 mb-3">Điều khiển</h3>
+                    <h3 className="text-lg font-bold text-gray-800 mb-3">
+                      Điều khiển
+                    </h3>
                     <CallerControls
                       gameState={gameState}
                       callerMode={callerMode}
@@ -561,7 +597,9 @@ export default function RoomPage() {
 
                 {/* Player List */}
                 <div>
-                  <h3 className="text-lg font-bold text-gray-800 mb-3">Người chơi</h3>
+                  <h3 className="text-lg font-bold text-gray-800 mb-3">
+                    Người chơi
+                  </h3>
                   <PlayerList />
                 </div>
 
@@ -581,7 +619,8 @@ export default function RoomPage() {
                         />
                       </svg>
                       <p className="text-sm text-blue-800">
-                        Chỉ chủ phòng và người gọi số mới có thể điều khiển trò chơi.
+                        Chỉ chủ phòng và người gọi số mới có thể điều khiển trò
+                        chơi.
                       </p>
                     </div>
                   </div>

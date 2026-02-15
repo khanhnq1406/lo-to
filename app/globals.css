@@ -56,6 +56,30 @@
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     @apply bg-gray-500 dark:bg-gray-500;
   }
+
+  /* Custom Scrollbar for Desktop Panel */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #4A7C2C #F5F2EA;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #F5F2EA;
+    border-radius: 3px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #4A7C2C;
+    border-radius: 3px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #2D5016;
+  }
 }
 
 /* Vietnamese Font Optimization */

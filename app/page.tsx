@@ -175,17 +175,17 @@ export default function HomePage() {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="container mx-auto px-4 py-8 lg:py-12 max-w-7xl">
         {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-12"
+          className="text-center mb-16 lg:mb-20"
         >
           <h1
             className={cn(
-              'text-5xl md:text-7xl font-bold mb-4 font-vietnam',
+              'text-5xl md:text-7xl lg:text-8xl font-bold mb-6 font-vietnam tracking-tight',
               darkMode
                 ? 'text-transparent bg-clip-text bg-gradient-to-r from-loto-red-light to-loto-gold'
                 : 'text-loto-green'
@@ -193,14 +193,14 @@ export default function HomePage() {
           >
             Lô Tô Việt Nam
           </h1>
-          <p className="text-xl md:text-2xl text-loto-red font-vietnam">
+          <p className="text-xl md:text-2xl lg:text-3xl text-loto-red font-vietnam font-medium">
             Trò chơi truyền thống Tết Nguyên Đán
           </p>
 
           {/* Vietnamese Flag Colors Accent */}
-          <div className="flex justify-center gap-4 mt-6">
-            <div className="w-12 h-3 bg-loto-red rounded-full"></div>
-            <div className="w-12 h-3 bg-loto-gold rounded-full"></div>
+          <div className="flex justify-center gap-6 mt-8">
+            <div className="w-16 h-4 bg-loto-red rounded-full shadow-lg"></div>
+            <div className="w-16 h-4 bg-loto-gold rounded-full shadow-lg"></div>
           </div>
         </motion.div>
 
@@ -246,7 +246,7 @@ export default function HomePage() {
         )}
 
         {/* Forms Section */}
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
+        <div className="grid md:grid-cols-2 gap-8 lg:gap-12 mb-16 lg:mb-20">
           {/* Create Room Form */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -255,14 +255,14 @@ export default function HomePage() {
           >
             <div
               className={cn(
-                'rounded-xl p-6 shadow-loto-ticket border-3',
+                'rounded-2xl p-8 shadow-loto-ticket border-3 transition-all duration-300 hover:shadow-xl',
                 darkMode
                   ? 'bg-gray-800 border-loto-green-light'
                   : 'bg-white border-loto-green'
               )}
             >
-              <h2 className="text-2xl font-bold mb-6 text-loto-green flex items-center gap-2">
-                <Play size={28} />
+              <h2 className="text-2xl lg:text-3xl font-bold mb-6 text-loto-green flex items-center gap-3">
+                <Play size={32} />
                 Tạo Phòng Mới
               </h2>
 
@@ -286,7 +286,7 @@ export default function HomePage() {
                       setCreateForm({ ...createForm, playerName: e.target.value })
                     }
                     className={cn(
-                      'w-full px-4 py-2 rounded-lg border-2 transition-colors',
+                      'w-full px-4 py-3 text-lg rounded-lg border-2 transition-all duration-200',
                       darkMode
                         ? 'bg-gray-700 border-gray-600 text-gray-100 focus:border-loto-green-light'
                         : 'bg-white border-gray-300 text-gray-900 focus:border-loto-green',
@@ -306,10 +306,10 @@ export default function HomePage() {
                   type="submit"
                   disabled={!connected || isCreating}
                   className={cn(
-                    'w-full py-3 rounded-lg font-bold text-white text-lg transition-all shadow-loto-button',
+                    'w-full py-4 rounded-lg font-bold text-white text-lg transition-all duration-200 shadow-loto-button',
                     !connected || isCreating
                       ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-loto-green hover:bg-loto-green-light active:scale-95'
+                      : 'bg-loto-green hover:bg-loto-green-light hover:shadow-xl active:scale-98 cursor-pointer'
                   )}
                 >
                   {isCreating ? 'Đang tạo phòng...' : 'Tạo Phòng Mới'}
@@ -326,14 +326,14 @@ export default function HomePage() {
           >
             <div
               className={cn(
-                'rounded-xl p-6 shadow-loto-ticket border-3',
+                'rounded-2xl p-8 shadow-loto-ticket border-3 transition-all duration-300 hover:shadow-xl',
                 darkMode
                   ? 'bg-gray-800 border-loto-green-light'
                   : 'bg-white border-loto-green'
               )}
             >
-              <h2 className="text-2xl font-bold mb-6 text-loto-green flex items-center gap-2">
-                <Users size={28} />
+              <h2 className="text-2xl lg:text-3xl font-bold mb-6 text-loto-green flex items-center gap-3">
+                <Users size={32} />
                 Tham Gia Phòng
               </h2>
 
@@ -357,7 +357,7 @@ export default function HomePage() {
                       setJoinForm({ ...joinForm, roomId: e.target.value.toUpperCase() })
                     }
                     className={cn(
-                      'w-full px-4 py-2 rounded-lg border-2 transition-colors uppercase font-mono',
+                      'w-full px-4 py-3 text-lg rounded-lg border-2 transition-all duration-200 uppercase font-mono',
                       darkMode
                         ? 'bg-gray-700 border-gray-600 text-gray-100 focus:border-loto-green-light'
                         : 'bg-white border-gray-300 text-gray-900 focus:border-loto-green',
@@ -391,7 +391,7 @@ export default function HomePage() {
                       setJoinForm({ ...joinForm, playerName: e.target.value })
                     }
                     className={cn(
-                      'w-full px-4 py-2 rounded-lg border-2 transition-colors',
+                      'w-full px-4 py-3 text-lg rounded-lg border-2 transition-all duration-200',
                       darkMode
                         ? 'bg-gray-700 border-gray-600 text-gray-100 focus:border-loto-green-light'
                         : 'bg-white border-gray-300 text-gray-900 focus:border-loto-green',
@@ -411,10 +411,10 @@ export default function HomePage() {
                   type="submit"
                   disabled={!connected || isJoining}
                   className={cn(
-                    'w-full py-3 rounded-lg font-bold text-white text-lg transition-all shadow-loto-button',
+                    'w-full py-4 rounded-lg font-bold text-white text-lg transition-all duration-200 shadow-loto-button',
                     !connected || isJoining
                       ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-loto-blue hover:bg-loto-blue-light active:scale-95'
+                      : 'bg-loto-blue hover:bg-loto-blue-light hover:shadow-xl active:scale-98 cursor-pointer'
                   )}
                 >
                   {isJoining ? 'Đang tham gia...' : 'Tham Gia Phòng'}
@@ -432,7 +432,7 @@ export default function HomePage() {
         >
           <div
             className={cn(
-              'rounded-xl p-6 shadow-loto-ticket border-3',
+              'rounded-2xl p-8 shadow-loto-ticket border-3 transition-all duration-300 hover:shadow-xl',
               darkMode
                 ? 'bg-gray-800 border-loto-green-light'
                 : 'bg-white border-loto-green'
@@ -440,9 +440,9 @@ export default function HomePage() {
           >
             <button
               onClick={() => setShowInstructions(!showInstructions)}
-              className="w-full flex items-center justify-between text-left"
+              className="w-full flex items-center justify-between text-left cursor-pointer"
             >
-              <h2 className="text-2xl font-bold text-loto-green">
+              <h2 className="text-2xl lg:text-3xl font-bold text-loto-green">
                 Hướng Dẫn Chơi
               </h2>
               {showInstructions ? (

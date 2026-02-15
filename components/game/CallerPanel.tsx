@@ -16,10 +16,10 @@
  * - Automatic game state management
  */
 
-'use client';
+"use client";
 
-import { memo, useCallback, useEffect, useRef, useMemo } from 'react';
-import { useSocket } from '@/providers/SocketProvider';
+import { memo, useCallback, useEffect, useRef, useMemo } from "react";
+import { useSocket } from "@/providers/SocketProvider";
 import {
   useGameStore,
   useGameState,
@@ -30,11 +30,11 @@ import {
   useCallerMode,
   useMachineInterval,
   useSoundEnabled,
-} from '@/store/useGameStore';
-import { CurrentNumber } from './CurrentNumber';
-import { CallerControls } from './CallerControls';
-import { CalledHistory } from './CalledHistory';
-import { motion } from 'framer-motion';
+} from "@/store/useGameStore";
+import { CurrentNumber } from "./CurrentNumber";
+import { CallerControls } from "./CallerControls";
+import { CalledHistory } from "./CalledHistory";
+import { motion } from "framer-motion";
 
 // ============================================================================
 // PROPS
@@ -50,7 +50,7 @@ interface CallerPanelProps {
 // ============================================================================
 
 export const CallerPanel = memo(function CallerPanel({
-  className = '',
+  className = "",
 }: CallerPanelProps) {
   // Socket actions
   const { startGame, callNumber, changeCallerMode, changeCaller } = useSocket();
@@ -78,8 +78,10 @@ export const CallerPanel = memo(function CallerPanel({
 
   // Initialize audio context
   useEffect(() => {
-    if (typeof window !== 'undefined' && soundEnabled) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    if (typeof window !== "undefined" && soundEnabled) {
+      audioContextRef.current = new (
+        window.AudioContext || (window as any).webkitAudioContext
+      )();
     }
     return () => {
       audioContextRef.current?.close();
@@ -99,7 +101,7 @@ export const CallerPanel = memo(function CallerPanel({
       gainNode.connect(ctx.destination);
 
       // Configure sound
-      oscillator.type = 'sine';
+      oscillator.type = "sine";
       oscillator.frequency.setValueAtTime(800, ctx.currentTime); // 800Hz beep
       gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
@@ -108,7 +110,7 @@ export const CallerPanel = memo(function CallerPanel({
       oscillator.start(ctx.currentTime);
       oscillator.stop(ctx.currentTime + 0.3);
     } catch (error) {
-      console.error('Error playing beep:', error);
+      console.error("Error playing beep:", error);
     }
   }, [soundEnabled]);
 
@@ -127,7 +129,7 @@ export const CallerPanel = memo(function CallerPanel({
   // Handle call number (manual mode)
   const handleCallNumber = useCallback(() => {
     if (remainingNumbers.length === 0) {
-      console.warn('No remaining numbers to call');
+      console.warn("No remaining numbers to call");
       return;
     }
 
@@ -141,7 +143,9 @@ export const CallerPanel = memo(function CallerPanel({
   // Handle reset game
   const handleResetGame = useCallback(() => {
     // Confirm before reset
-    if (confirm('Bạn có chắc muốn đặt lại trò chơi? Mọi tiến trình sẽ bị mất.')) {
+    if (
+      confirm("Bạn có chắc muốn đặt lại trò chơi? Mọi tiến trình sẽ bị mất.")
+    ) {
       reset();
       // Note: Server-side reset would be better, but not implemented yet
       // For now, just reset client state
@@ -149,9 +153,12 @@ export const CallerPanel = memo(function CallerPanel({
   }, [reset]);
 
   // Handle change caller mode
-  const handleChangeCallerMode = useCallback((mode: 'machine' | 'manual') => {
-    changeCallerMode(mode);
-  }, [changeCallerMode]);
+  const handleChangeCallerMode = useCallback(
+    (mode: "machine" | "manual") => {
+      changeCallerMode(mode);
+    },
+    [changeCallerMode],
+  );
 
   // Container animation variants
   const containerVariants = {
@@ -171,7 +178,7 @@ export const CallerPanel = memo(function CallerPanel({
       opacity: 1,
       y: 0,
       transition: {
-        type: 'spring',
+        type: "spring",
         stiffness: 300,
         damping: 30,
       },
@@ -190,23 +197,22 @@ export const CallerPanel = memo(function CallerPanel({
       `}
     >
       {/* Top section: Current Number + Controls */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        {/* Current Number - Takes 2 columns on desktop */}
-        <motion.div
-          variants={itemVariants}
-          className="lg:col-span-2"
-        >
+      <div className="grid grid-cols-1 lg:flex lg:flex-col gap-4 sm:gap-6 lg:gap-8">
+        {/* Current Number - Takes 3 columns on desktop */}
+        <motion.div variants={itemVariants} className="lg:col-span-3">
           <CurrentNumber
             currentNumber={currentNumber}
-            hideNumber={callerMode === 'manual' && !isCaller}
-            showGenerateButton={isCaller && callerMode === 'manual' && gameState === 'playing'}
+            hideNumber={callerMode === "manual" && !isCaller}
+            showGenerateButton={
+              isCaller && callerMode === "manual" && gameState === "playing"
+            }
             onGenerateNumber={handleCallNumber}
-            className="h-64 sm:h-80 lg:h-96"
+            className="h-64 sm:h-80 lg:h-[28rem]"
           />
         </motion.div>
 
-        {/* Controls - Takes 1 column on desktop */}
-        <motion.div variants={itemVariants}>
+        {/* Controls - Takes 2 columns on desktop */}
+        <motion.div variants={itemVariants} className="lg:col-span-2">
           <CallerControls
             gameState={gameState}
             callerMode={callerMode}
@@ -228,7 +234,7 @@ export const CallerPanel = memo(function CallerPanel({
         <CalledHistory
           calledNumbers={calledHistory}
           currentNumber={currentNumber}
-          hideHistory={callerMode === 'manual' && !isCaller}
+          hideHistory={callerMode === "manual" && !isCaller}
         />
       </motion.div>
 
@@ -245,7 +251,8 @@ export const CallerPanel = memo(function CallerPanel({
           "
         >
           <p className="text-sm text-gray-600">
-            Bạn đang xem bảng gọi số. Chỉ chủ phòng và người gọi số mới có thể điều khiển trò chơi.
+            Bạn đang xem bảng gọi số. Chỉ chủ phòng và người gọi số mới có thể
+            điều khiển trò chơi.
           </p>
         </motion.div>
       )}

@@ -98,8 +98,8 @@ export function PlayableCardImage({
           shadow-lg
         `}
       >
-        {/* Background Image */}
-        <div className="relative aspect-[3/4]">
+        {/* Background Image - Matches actual card ratio (560x960 = 7:12) */}
+        <div className="relative w-full" style={{ aspectRatio: '7 / 12' }}>
           <img
             src={`/sample/${config.imageFile}`}
             alt={config.name}
@@ -112,9 +112,9 @@ export function PlayableCardImage({
           {/* Card Number Badge (top-left) */}
           <div
             className={`
-              absolute top-3 left-3 px-3 py-1.5 rounded-lg
+              absolute top-2 left-2 px-2.5 py-1 rounded-md
               bg-white/95 backdrop-blur-sm
-              font-bold text-base
+              font-bold text-xs sm:text-sm
               ${colorClasses.text}
               border-2 ${colorClasses.border}
               shadow-lg
@@ -128,28 +128,28 @@ export function PlayableCardImage({
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
-              className="absolute top-3 right-3 px-3 py-1.5 rounded-lg bg-loto-gold border-2 border-loto-gold-dark shadow-lg"
+              className="absolute top-2 right-2 px-2.5 py-1 rounded-md bg-loto-gold border-2 border-loto-gold-dark shadow-lg"
             >
               <div className="flex items-center gap-1">
-                <Check className="w-4 h-4 text-white" strokeWidth={3} />
-                <span className="text-sm font-bold text-white">THẮNG</span>
+                <Check className="w-3 h-3 sm:w-4 sm:h-4 text-white" strokeWidth={3} />
+                <span className="text-xs sm:text-sm font-bold text-white">THẮNG</span>
               </div>
             </motion.div>
           )}
 
           {/* Interactive Number Grid Overlay - Matches Traditional Loto Card Styling */}
-          <div className="absolute inset-0 p-4 flex flex-col justify-center">
+          <div className="absolute inset-0 flex flex-col justify-center" style={{ padding: '3%' }}>
             {/* Decorative Border Container (like traditional card) */}
             <div
-              className={`relative rounded-lg overflow-hidden shadow-2xl border-4 ${colorClasses.border}`}
+              className={`relative rounded overflow-hidden shadow-2xl border-3 ${colorClasses.border}`}
               style={{
-                padding: '8px',
+                padding: '2.5%',
               }}
             >
               {/* Inner white container */}
-              <div className="bg-white rounded p-2">
+              <div className="bg-white rounded" style={{ padding: '2%' }}>
                 {/* Number Grid - 9x9 Traditional Layout */}
-                <div className="grid grid-cols-9 gap-[2px]">
+                <div className="grid grid-cols-9" style={{ gap: '1.5%' }}>
                   {cardData.map((row, rowIndex) => {
                     const rowComplete = isRowComplete(rowIndex);
                     const isWinningRowHighlight = isWinning && winningRow === rowIndex;
@@ -163,19 +163,19 @@ export function PlayableCardImage({
                           key={`${rowIndex}-${colIndex}`}
                           onClick={() => cell !== null && toggleManualMark(cell)}
                           disabled={cell === null || !manualMarkingMode}
-                          whileHover={cell !== null && manualMarkingMode ? { scale: 1.1 } : {}}
+                          whileHover={cell !== null && manualMarkingMode ? { scale: 1.08 } : {}}
                           whileTap={cell !== null && manualMarkingMode ? { scale: 0.95 } : {}}
                           className={`
                             relative flex items-center justify-center
                             aspect-square rounded-sm
-                            font-black text-[10px] sm:text-xs md:text-sm
+                            font-black text-[8px] sm:text-[10px] md:text-xs
                             transition-all duration-200
-                            border-2
+                            border
                             ${
                               cell !== null && isMarked
-                                ? 'bg-[#ffd700] text-black shadow-lg scale-105 border-[#ffaa00]'
+                                ? 'bg-[#ffd700] text-black shadow-md scale-105 border-[#ffaa00]'
                                 : cell !== null && isCalled && !manualMarkingMode
-                                  ? 'bg-[#ffd700] text-black shadow-lg animate-pulse border-[#ffaa00]'
+                                  ? 'bg-[#ffd700] text-black shadow-md animate-pulse border-[#ffaa00]'
                                   : cell !== null
                                     ? 'bg-white text-black border-gray-300'
                                     : ''
@@ -187,7 +187,7 @@ export function PlayableCardImage({
                             }
                             ${
                               isWinningRowHighlight && cell !== null
-                                ? 'ring-2 ring-offset-1 ring-yellow-400 animate-pulse'
+                                ? 'ring-1 ring-offset-1 ring-yellow-400 animate-pulse'
                                 : ''
                             }
                           `}
@@ -195,8 +195,9 @@ export function PlayableCardImage({
                             // Set background color for blank cells using the card's actual color
                             backgroundColor: cell === null ? getBlankCellColor(cardId) : undefined,
                             borderColor: cell === null ? getBlankCellBorderColor(cardId) : undefined,
+                            borderWidth: cell === null ? '1.5px' : '1px',
                             boxShadow: cell !== null && (isMarked || (isCalled && !manualMarkingMode))
-                              ? '0 2px 8px rgba(255, 215, 0, 0.5)'
+                              ? '0 1px 4px rgba(255, 215, 0, 0.4)'
                               : undefined,
                           }}
                         >
@@ -215,7 +216,7 @@ export function PlayableCardImage({
                               className="absolute inset-0 flex items-center justify-center"
                             >
                               <Check
-                                className="w-3 h-3 sm:w-4 sm:h-4 text-white drop-shadow-lg"
+                                className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white drop-shadow-lg"
                                 strokeWidth={4}
                               />
                             </motion.div>
@@ -227,7 +228,7 @@ export function PlayableCardImage({
                 </div>
 
                 {/* Mini Stats */}
-                <div className="mt-2 pt-2 border-t border-gray-200 flex items-center justify-between text-[10px] sm:text-xs px-1">
+                <div className="flex items-center justify-between text-[9px] sm:text-[10px]" style={{ marginTop: '3%', paddingTop: '2%', borderTop: '1px solid #e5e7eb' }}>
                   <span className="text-gray-700 font-semibold">
                     {cardData.flat().filter((c): c is number => c !== null && markedNumbers.has(c)).length} / 45
                   </span>
@@ -239,7 +240,7 @@ export function PlayableCardImage({
                       animate={{ scale: 1 }}
                       className="text-green-600 font-bold flex items-center gap-1"
                     >
-                      <Check className="w-3 h-3" />
+                      <Check className="w-2.5 h-2.5" />
                       Có dòng!
                     </motion.span>
                   )}
