@@ -382,15 +382,19 @@ export default function RoomPage() {
           })()}
 
           {/* Selected Cards Display - Show card images */}
-          <div className="bg-white rounded-xl p-6 border-2 border-loto-green shadow-lg">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Vé của bạn</h3>
-            <SelectedCardsDisplay
-              selectedCards={selectedCards}
-              currentPlayerId={currentPlayerId || ''}
-              calledNumbers={calledNumbersSet}
-              cards={playerCards}
-              onChangeMarkingMode={changeMarkingMode}
-            />
+          <div className="bg-white rounded-xl border-2 border-loto-green shadow-lg overflow-hidden flex flex-col max-h-[70vh]">
+            <div className="px-6 pt-6 pb-4 border-b border-gray-200">
+              <h3 className="text-xl font-bold text-gray-800">Vé của bạn</h3>
+            </div>
+            <div className="flex-1 overflow-y-auto p-6">
+              <SelectedCardsDisplay
+                selectedCards={selectedCards}
+                currentPlayerId={currentPlayerId || ''}
+                calledNumbers={calledNumbersSet}
+                cards={playerCards}
+                onChangeMarkingMode={changeMarkingMode}
+              />
+            </div>
           </div>
 
           {/* Player List */}

@@ -8,7 +8,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { getCardConfig, getCardColorClasses } from '@/lib/card-configs';
+import { getCardConfig, getCardColorClasses, getBlankCellColor, getBlankCellBorderColor } from '@/lib/card-configs';
 import { Check } from 'lucide-react';
 import type { Card } from '@/types';
 
@@ -141,11 +141,9 @@ export function PlayableCardImage({
           <div className="absolute inset-0 p-4 flex flex-col justify-center">
             {/* Decorative Border Container (like traditional card) */}
             <div
-              className="relative rounded-lg overflow-hidden shadow-2xl"
+              className={`relative rounded-lg overflow-hidden shadow-2xl border-4 ${colorClasses.border}`}
               style={{
-                background: 'linear-gradient(135deg, #ff4b8b 0%, #ff6ba8 50%, #ff4b8b 100%)',
                 padding: '8px',
-                border: '3px solid #dc2f6c',
               }}
             >
               {/* Inner white container */}
@@ -172,14 +170,15 @@ export function PlayableCardImage({
                             aspect-square rounded-sm
                             font-black text-[10px] sm:text-xs md:text-sm
                             transition-all duration-200
+                            border-2
                             ${
-                              cell === null
-                                ? 'bg-[#ff4b8b]'  // Hot pink for blank cells (matching image)
-                                : isMarked
-                                  ? 'bg-[#ffd700] text-black shadow-lg scale-105 border-2 border-[#ffaa00]'  // Gold for marked
-                                  : isCalled && !manualMarkingMode
-                                    ? 'bg-[#ffd700] text-black shadow-lg animate-pulse border-2 border-[#ffaa00]'  // Gold for auto-marked
-                                    : 'bg-white text-black border border-gray-300'  // White cells with black text (matching image)
+                              cell !== null && isMarked
+                                ? 'bg-[#ffd700] text-black shadow-lg scale-105 border-[#ffaa00]'
+                                : cell !== null && isCalled && !manualMarkingMode
+                                  ? 'bg-[#ffd700] text-black shadow-lg animate-pulse border-[#ffaa00]'
+                                  : cell !== null
+                                    ? 'bg-white text-black border-gray-300'
+                                    : ''
                             }
                             ${
                               cell !== null && manualMarkingMode
@@ -193,6 +192,9 @@ export function PlayableCardImage({
                             }
                           `}
                           style={{
+                            // Set background color for blank cells using the card's actual color
+                            backgroundColor: cell === null ? getBlankCellColor(cardId) : undefined,
+                            borderColor: cell === null ? getBlankCellBorderColor(cardId) : undefined,
                             boxShadow: cell !== null && (isMarked || (isCalled && !manualMarkingMode))
                               ? '0 2px 8px rgba(255, 215, 0, 0.5)'
                               : undefined,
