@@ -9,11 +9,8 @@ import {
   getCardNumbers,
   checkRowWin,
   getRemainingNumbers,
-  randomCallNumber,
   formatNumber,
   generateMultipleCards,
-  hasNumber,
-  findNumberPosition,
   checkPlayerWin,
   type Card,
 } from "../lib/game";

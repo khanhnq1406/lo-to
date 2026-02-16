@@ -61,7 +61,7 @@ colorCounts.forEach((count, color) => {
 
 if (allHaveTwo) {
   console.log("✅ PASS: Each color has exactly 2 cards");
-  colorCounts.forEach((count, color) => {
+  colorCounts.forEach((_count, color) => {
     const cards = getCardsByColor(color);
     console.log(`  ${color}: Cards ${cards.map((c) => c.id).join(", ")}`);
   });

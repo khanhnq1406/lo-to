@@ -1,4 +1,4 @@
-import { Card, CellValue } from "../lib/game";
+import { Card } from "../lib/game";
 
 // Inline the function to debug
 function shuffleArray<T>(array: T[], seed?: number): T[] {
