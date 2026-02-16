@@ -445,7 +445,7 @@ export default function RoomPage() {
       </div>
 
       {/* MOBILE LAYOUT */}
-      <div className="lg:hidden min-h-screen flex flex-col">
+      <div className={cn("lg:hidden min-h-screen flex flex-col", isSheetOpen && "overflow-hidden")}>
         {/* Top: Current Number (Sticky) */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -467,7 +467,7 @@ export default function RoomPage() {
         </motion.div>
 
         {/* Middle: Scrollable Content */}
-        <div className="flex-1 overflow-y-auto pb-32">
+        <div className={cn("flex-1 pb-32", !isSheetOpen && "overflow-y-auto")}>
           <div className="p-4 space-y-4">
             {/* Room Info */}
             <motion.div
@@ -546,7 +546,7 @@ export default function RoomPage() {
             className={cn(
               "relative bg-white rounded-t-3xl shadow-2xl overflow-hidden pointer-events-auto",
               "border-t-4 border-loto-green",
-              "h-[calc(100vh-180px)]",
+              "h-screen flex flex-col",
             )}
           >
             {/* Sheet Handle */}
@@ -574,11 +574,8 @@ export default function RoomPage() {
             </button>
 
             {/* Sheet Content */}
-            <div
-              className="overflow-y-auto"
-              style={{ maxHeight: "calc(100vh - 240px)" }}
-            >
-              <div className="p-4 space-y-6">
+            <div className="flex-1 overflow-y-auto">
+              <div className="p-4 space-y-6 pb-8">
                 {/* Called History */}
                 <div>
                   <h3 className="text-lg font-bold text-gray-800 mb-3">
