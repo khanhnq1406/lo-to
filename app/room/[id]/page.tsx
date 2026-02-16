@@ -44,7 +44,6 @@ import {
   useError,
   useSelectedCards,
 } from "@/store/useGameStore";
-import { CallerPanel } from "@/components/game/CallerPanel";
 import { CurrentNumber } from "@/components/game/CurrentNumber";
 import { CalledHistory } from "@/components/game/CalledHistory";
 import { CardSelector } from "@/components/game/CardSelector";
@@ -363,85 +362,134 @@ export default function RoomPage() {
       </motion.button>
 
       {/* DESKTOP LAYOUT (lg+) */}
-      <div className="hidden lg:grid lg:grid-cols-[30%_70%] lg:gap-8 lg:px-8 lg:py-6 lg:min-h-screen">
-        {/* Left Panel: Caller Panel */}
+      <div className="hidden lg:block lg:min-h-screen">
+        {/* Fixed Top: Current Number - Compact */}
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          className="relative flex flex-col z-0"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="fixed top-0 left-0 right-0 z-30 bg-paper shadow-md"
         >
-          <CallerPanel className="flex-1" />
-        </motion.div>
-
-        {/* Right Panel: Player Info - Fixed sidebar with internal scroll */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="relative flex flex-col gap-6 z-10 "
-        >
-          {/* Room Info - Fixed at top */}
-          <div className="flex-shrink-0">
-            <RoomInfo
-              roomId={room.id}
-              playerCount={players.length}
-              gameState={gameState}
-              createdAt={room.createdAt}
+          <div className="px-8 py-3">
+            <CurrentNumber
+              currentNumber={currentNumber}
+              hideNumber={callerMode === "manual" && !isCaller}
+              showGenerateButton={
+                isCaller && callerMode === "manual" && gameState === "playing"
+              }
+              onGenerateNumber={handleCallNumber}
+              className="h-32 lg:h-52"
+              collapsible={true}
+              defaultCollapsed={true}
             />
           </div>
+        </motion.div>
 
-          {/* Scrollable content area */}
-          <div className="flex-1 overflow-y-auto space-y-6 pr-2 custom-scrollbar">
-            {/* Card Selector (only show during waiting state) */}
-            {(() => {
-              const shouldShow =
-                gameState === "waiting" && currentPlayerId && currentPlayer;
-              console.log("[CardSelector Desktop] Debug:", {
-                gameState,
-                currentPlayerId,
-                hasCurrentPlayer: !!currentPlayer,
-                shouldShow,
-                players: players.length,
-              });
-              return shouldShow ? (
-                <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 border-2 border-loto-blue shadow-lg transition-all duration-300 hover:shadow-xl">
-                  <CardSelector
+        {/* Main Content - Grid with top padding */}
+        <div className="grid lg:grid-cols-[30%_70%] lg:gap-8 lg:px-8 lg:pt-20 lg:pb-6">
+          {/* Left Panel: Caller Controls & History */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="relative flex flex-col gap-6 z-0"
+          >
+            {/* Caller Controls */}
+            <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 border-2 border-loto-green shadow-lg">
+              <CallerControls
+                gameState={gameState}
+                callerMode={callerMode}
+                machineInterval={machineInterval}
+                isHost={isHost}
+                isCaller={isCaller}
+                players={players}
+                onStartGame={handleStartGame}
+                onCallNumber={handleCallNumber}
+                onResetGame={handleResetGame}
+                onChangeCallerMode={handleChangeCallerMode}
+                onChangeCaller={changeCaller}
+              />
+            </div>
+
+            {/* Called History */}
+            <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 border-2 border-loto-green shadow-lg">
+              <CalledHistory
+                calledNumbers={calledHistory}
+                currentNumber={currentNumber}
+                hideHistory={callerMode === "manual" && !isCaller}
+              />
+            </div>
+          </motion.div>
+
+          {/* Right Panel: Player Info - Fixed sidebar with internal scroll */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="relative flex flex-col gap-6 z-10"
+          >
+            {/* Room Info - Fixed at top */}
+            <div className="flex-shrink-0">
+              <RoomInfo
+                roomId={room.id}
+                playerCount={players.length}
+                gameState={gameState}
+                createdAt={room.createdAt}
+              />
+            </div>
+
+            {/* Scrollable content area */}
+            <div className="flex-1 overflow-y-auto space-y-6 pr-2 custom-scrollbar">
+              {/* Card Selector (only show during waiting state) */}
+              {(() => {
+                const shouldShow =
+                  gameState === "waiting" && currentPlayerId && currentPlayer;
+                console.log("[CardSelector Desktop] Debug:", {
+                  gameState,
+                  currentPlayerId,
+                  hasCurrentPlayer: !!currentPlayer,
+                  shouldShow,
+                  players: players.length,
+                });
+                return shouldShow ? (
+                  <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 border-2 border-loto-blue shadow-lg transition-all duration-300 hover:shadow-xl">
+                    <CardSelector
+                      selectedCards={selectedCards}
+                      currentPlayerId={currentPlayerId}
+                      players={players}
+                      gameStarted={gameState !== "waiting"}
+                      onSelectCard={selectCard}
+                      onDeselectCard={deselectCard}
+                    />
+                  </div>
+                ) : null;
+              })()}
+
+              {/* Selected Cards Display - Show card images */}
+              <div className="bg-white/95 backdrop-blur-sm rounded-2xl border-2 border-loto-green shadow-lg overflow-hidden flex flex-col transition-all duration-300 hover:shadow-xl">
+                <div className="px-6 pt-6 pb-4 border-b border-gray-200 bg-gradient-to-r from-loto-green/5 to-transparent">
+                  <h3 className="text-xl font-bold text-gray-800">
+                    Phiếu dò của bạn
+                  </h3>
+                </div>
+                <div className="p-6">
+                  <SelectedCardsDisplay
                     selectedCards={selectedCards}
-                    currentPlayerId={currentPlayerId}
-                    players={players}
-                    gameStarted={gameState !== "waiting"}
-                    onSelectCard={selectCard}
-                    onDeselectCard={deselectCard}
+                    currentPlayerId={currentPlayerId || ""}
+                    calledNumbers={calledNumbersSet}
+                    cards={playerCards}
+                    onChangeMarkingMode={changeMarkingMode}
                   />
                 </div>
-              ) : null;
-            })()}
-
-            {/* Selected Cards Display - Show card images */}
-            <div className="bg-white/95 backdrop-blur-sm rounded-2xl border-2 border-loto-green shadow-lg overflow-hidden flex flex-col transition-all duration-300 hover:shadow-xl">
-              <div className="px-6 pt-6 pb-4 border-b border-gray-200 bg-gradient-to-r from-loto-green/5 to-transparent">
-                <h3 className="text-xl font-bold text-gray-800">
-                  Phiếu dò của bạn
-                </h3>
               </div>
-              <div className="p-6">
-                <SelectedCardsDisplay
-                  selectedCards={selectedCards}
-                  currentPlayerId={currentPlayerId || ""}
-                  calledNumbers={calledNumbersSet}
-                  cards={playerCards}
-                  onChangeMarkingMode={changeMarkingMode}
-                />
+
+              {/* Player List */}
+              <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 border-2 border-loto-green shadow-lg transition-all duration-300 hover:shadow-xl">
+                <PlayerList />
               </div>
             </div>
-
-            {/* Player List */}
-            <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 border-2 border-loto-green shadow-lg transition-all duration-300 hover:shadow-xl">
-              <PlayerList />
-            </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
 
       {/* MOBILE LAYOUT */}

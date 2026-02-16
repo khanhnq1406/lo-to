@@ -138,7 +138,7 @@ export const CurrentNumber = memo(function CurrentNumber({
                   stiffness: 300,
                   damping: 25,
                 }}
-                className="flex flex-col items-center justify-center w-full"
+                className="flex flex-col items-center justify-center w-full p-2"
               >
                 {hideNumber ? (
                   <>
@@ -194,7 +194,7 @@ export const CurrentNumber = memo(function CurrentNumber({
                         ease: "easeInOut",
                       }}
                       className="
-                      text-6xl sm:text-7xl md:text-8xl lg:text-9xl
+                      text-6xl sm:text-7xl md:text-7xl lg:text-7xl
                       font-extrabold
                       text-transparent
                       bg-clip-text
@@ -215,7 +215,7 @@ export const CurrentNumber = memo(function CurrentNumber({
                       transition={{ delay: 0.2 }}
                       className="
                       mt-1 sm:mt-2
-                      text-base sm:text-lg md:text-xl
+                      text-base sm:text-lg md:text-lg
                       font-bold
                       text-loto-green
                       tracking-wider

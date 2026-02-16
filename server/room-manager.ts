@@ -402,8 +402,9 @@ export class RoomManager {
     // Update selectedCards mapping with new player ID
     if (room.selectedCards) {
       Object.keys(room.selectedCards).forEach((cardIdStr) => {
-        if (room.selectedCards[cardIdStr] === oldPlayerId) {
-          room.selectedCards[cardIdStr] = newSocketId;
+        const cardId = cardIdStr as unknown as number;
+        if (room.selectedCards[cardId] === oldPlayerId) {
+          room.selectedCards[cardId] = newSocketId;
         }
       });
     }
