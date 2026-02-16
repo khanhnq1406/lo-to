@@ -470,8 +470,8 @@ export default function HomePage() {
                     1. Cấu trúc vé số
                   </h3>
                   <p className={darkMode ? 'text-gray-300' : 'text-gray-700'}>
-                    • Mỗi vé có 3 hàng × 9 cột = 27 ô<br />
-                    • Mỗi vé chứa 15 số (từ 1 đến 90) và 12 ô trống<br />
+                    • Mỗi vé có 9 hàng × 9 cột = 81 ô<br />
+                    • Mỗi vé chứa 45 số (từ 1 đến 90) và 36 ô trống<br />
                     • Mỗi hàng có đúng 5 số và 4 ô trống<br />
                     • Các số được sắp xếp tăng dần trong mỗi cột
                   </p>

@@ -333,7 +333,7 @@ export default function RoomPage() {
   // ===========================
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-paper via-paper to-paper-dark">
+    <div className="min-h-screen bg-gradient-to-br from-paper via-paper to-paper-dark overflow-y-auto">
       {/* Error toast */}
       <AnimatePresence>
         {error && (
