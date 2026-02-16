@@ -124,6 +124,11 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       const room = deserializeRoom(data.room);
       setRoom(room);
 
+      // Always ensure currentPlayerId is set to socket.id when room updates
+      if (socket.id) {
+        setCurrentPlayerId(socket.id);
+      }
+
       // Update session with current room data if player is in the room
       if (socket.id && room && sessionIdRef.current) {
         const currentPlayer = room.players.find((p) => p.id === socket.id);
