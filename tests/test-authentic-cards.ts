@@ -4,18 +4,18 @@
  * Run with: npx tsx test-authentic-cards.ts
  */
 
-import { AUTHENTIC_CARDS, getAuthenticCard } from './lib/authentic-card-data';
-import { CardSchema } from './types';
+import { AUTHENTIC_CARDS, getAuthenticCard } from "../lib/authentic-card-data";
+import { CardSchema } from "../types";
 
-console.log('🎴 Testing Authentic Card Data from Images\n');
+console.log("🎴 Testing Authentic Card Data from Images\n");
 
 let allPassed = true;
 
 // Test each card
 for (let cardId = 1; cardId <= 16; cardId++) {
-  console.log(`\n${'='.repeat(50)}`);
+  console.log(`\n${"=".repeat(50)}`);
   console.log(`Testing Card #${cardId}`);
-  console.log('='.repeat(50));
+  console.log("=".repeat(50));
 
   const card = getAuthenticCard(cardId);
 
@@ -30,7 +30,7 @@ for (let cardId = 1; cardId <= 16; cardId++) {
 
   if (!validation.success) {
     console.log(`❌ FAIL: Card #${cardId} validation failed`);
-    console.log('Errors:', validation.error.errors);
+    console.log("Errors:", validation.error.errors);
     allPassed = false;
     continue;
   }
@@ -71,7 +71,7 @@ for (let cardId = 1; cardId <= 16; cardId++) {
 
     if (rowNumbers.length !== 5 || rowBlanks.length !== 4) {
       console.log(
-        `❌ Row ${idx}: ${rowNumbers.length} numbers, ${rowBlanks.length} blanks (expected 5,4)`
+        `❌ Row ${idx}: ${rowNumbers.length} numbers, ${rowBlanks.length} blanks (expected 5,4)`,
       );
       rowsValid = false;
       allPassed = false;
@@ -94,7 +94,7 @@ for (let cardId = 1; cardId <= 16; cardId++) {
       if (cell !== null) {
         if (cell < minRange || cell > maxRange) {
           console.log(
-            `❌ Col ${col}: Number ${cell} out of range ${minRange}-${maxRange}`
+            `❌ Col ${col}: Number ${cell} out of range ${minRange}-${maxRange}`,
           );
           columnsValid = false;
           allPassed = false;
@@ -116,23 +116,25 @@ for (let cardId = 1; cardId <= 16; cardId++) {
     console.log(`✅ All columns have correct ranges and sorting`);
   }
 
-  console.log(`\n✨ Card #${cardId}: ${validation.success ? 'VALID' : 'INVALID'}`);
+  console.log(
+    `\n✨ Card #${cardId}: ${validation.success ? "VALID" : "INVALID"}`,
+  );
 }
 
 // Summary
-console.log('\n' + '='.repeat(50));
-console.log('SUMMARY');
-console.log('='.repeat(50));
+console.log("\n" + "=".repeat(50));
+console.log("SUMMARY");
+console.log("=".repeat(50));
 
 const totalCards = Object.keys(AUTHENTIC_CARDS).length;
 console.log(`Total cards extracted: ${totalCards}/16`);
 
 if (totalCards === 16 && allPassed) {
-  console.log('\n✅ ALL TESTS PASSED! 🎉');
-  console.log('All 16 cards are valid and match Vietnamese Lô Tô rules!');
+  console.log("\n✅ ALL TESTS PASSED! 🎉");
+  console.log("All 16 cards are valid and match Vietnamese Lô Tô rules!");
 } else {
-  console.log('\n❌ SOME TESTS FAILED');
-  console.log('Please review the errors above.');
+  console.log("\n❌ SOME TESTS FAILED");
+  console.log("Please review the errors above.");
 }
 
-console.log('\n');
+console.log("\n");

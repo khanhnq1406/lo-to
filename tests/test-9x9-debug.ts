@@ -1,24 +1,28 @@
-import { Card, CellValue } from './lib/game';
+import { Card, CellValue } from "../lib/game";
 
 // Inline the function to debug
 function shuffleArray<T>(array: T[], seed?: number): T[] {
   const arr = [...array];
   let currentIndex = arr.length;
 
-  let random = seed !== undefined
-    ? (() => {
-        let s = seed;
-        return () => {
-          s = (s * 9301 + 49297) % 233280;
-          return s / 233280;
-        };
-      })()
-    : Math.random;
+  let random =
+    seed !== undefined
+      ? (() => {
+          let s = seed;
+          return () => {
+            s = (s * 9301 + 49297) % 233280;
+            return s / 233280;
+          };
+        })()
+      : Math.random;
 
   while (currentIndex !== 0) {
     const randomIndex = Math.floor(random() * currentIndex);
     currentIndex--;
-    [arr[currentIndex], arr[randomIndex]] = [arr[randomIndex], arr[currentIndex]];
+    [arr[currentIndex], arr[randomIndex]] = [
+      arr[randomIndex],
+      arr[currentIndex],
+    ];
   }
 
   return arr;
@@ -26,8 +30,15 @@ function shuffleArray<T>(array: T[], seed?: number): T[] {
 
 function generateCardDebug(seed?: number): Card {
   const columnRanges: [number, number][] = [
-    [1, 9], [10, 19], [20, 29], [30, 39], [40, 49],
-    [50, 59], [60, 69], [70, 79], [80, 90],
+    [1, 9],
+    [10, 19],
+    [20, 29],
+    [30, 39],
+    [40, 49],
+    [50, 59],
+    [60, 69],
+    [70, 79],
+    [80, 90],
   ];
 
   const card: Card = Array.from({ length: 9 }, () => Array(9).fill(null));
@@ -40,13 +51,21 @@ function generateCardDebug(seed?: number): Card {
     return nums;
   });
 
-  console.log('Column sizes:', columnNumbers.map(c => c.length));
+  console.log(
+    "Column sizes:",
+    columnNumbers.map((c) => c.length),
+  );
 
   for (let col = 0; col < 9; col++) {
-    columnNumbers[col] = shuffleArray(columnNumbers[col], seed ? seed + col : undefined);
+    columnNumbers[col] = shuffleArray(
+      columnNumbers[col],
+      seed ? seed + col : undefined,
+    );
   }
 
-  const rowColumnAssignments: boolean[][] = Array.from({ length: 9 }, () => Array(9).fill(false));
+  const rowColumnAssignments: boolean[][] = Array.from({ length: 9 }, () =>
+    Array(9).fill(false),
+  );
 
   const permutations: number[][] = [];
   for (let p = 0; p < 5; p++) {
@@ -54,8 +73,8 @@ function generateCardDebug(seed?: number): Card {
     permutations.push(shuffleArray(perm, seed ? seed + p * 1000 : undefined));
   }
 
-  console.log('\nPermutations:');
-  permutations.forEach((p, i) => console.log(`  P${i}: [${p.join(', ')}]`));
+  console.log("\nPermutations:");
+  permutations.forEach((p, i) => console.log(`  P${i}: [${p.join(", ")}]`));
 
   for (let p = 0; p < 5; p++) {
     for (let row = 0; row < 9; row++) {
@@ -64,21 +83,21 @@ function generateCardDebug(seed?: number): Card {
     }
   }
 
-  console.log('\nRow assignments (columns selected per row):');
+  console.log("\nRow assignments (columns selected per row):");
   for (let row = 0; row < 9; row++) {
     const cols = rowColumnAssignments[row]
-      .map((hasNum, col) => hasNum ? col : -1)
-      .filter(c => c >= 0);
-    console.log(`  Row ${row}: [${cols.join(', ')}] (${cols.length} columns)`);
+      .map((hasNum, col) => (hasNum ? col : -1))
+      .filter((c) => c >= 0);
+    console.log(`  Row ${row}: [${cols.join(", ")}] (${cols.length} columns)`);
   }
 
-  console.log('\nColumn assignments (rows selected per column):');
+  console.log("\nColumn assignments (rows selected per column):");
   for (let col = 0; col < 9; col++) {
     const rows = [];
     for (let row = 0; row < 9; row++) {
       if (rowColumnAssignments[row][col]) rows.push(row);
     }
-    console.log(`  Col ${col}: [${rows.join(', ')}] (${rows.length} rows)`);
+    console.log(`  Col ${col}: [${rows.join(", ")}] (${rows.length} rows)`);
   }
 
   const columnNumberIndex: number[] = Array(9).fill(0);
@@ -94,28 +113,28 @@ function generateCardDebug(seed?: number): Card {
     }
   }
 
-  console.log('\nNumbers used per column:', columnNumberIndex);
+  console.log("\nNumbers used per column:", columnNumberIndex);
 
   return card;
 }
 
 const card = generateCardDebug(12345);
 
-console.log('\n\nFinal card:');
-console.log('┌────┬────┬────┬────┬────┬────┬────┬────┬────┐');
+console.log("\n\nFinal card:");
+console.log("┌────┬────┬────┬────┬────┬────┬────┬────┬────┐");
 for (let row = 0; row < 9; row++) {
-  let line = '│';
+  let line = "│";
   for (let col = 0; col < 9; col++) {
     const cell = card[row][col];
     if (cell === null) {
-      line += '    │';
+      line += "    │";
     } else {
-      line += ' ' + cell.toString().padStart(2, ' ') + ' │';
+      line += " " + cell.toString().padStart(2, " ") + " │";
     }
   }
   console.log(line);
   if (row < 8) {
-    console.log('├────┼────┼────┼────┼────┼────┼────┼────┼────┤');
+    console.log("├────┼────┼────┼────┼────┼────┼────┼────┼────┤");
   }
 }
-console.log('└────┴────┴────┴────┴────┴────┴────┴────┴────┘');
+console.log("└────┴────┴────┴────┴────┴────┴────┴────┴────┘");
