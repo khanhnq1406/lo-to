@@ -445,12 +445,12 @@ export default function RoomPage() {
       </div>
 
       {/* MOBILE LAYOUT */}
-      <div className={cn("lg:hidden min-h-screen flex flex-col", isSheetOpen && "overflow-hidden")}>
-        {/* Top: Current Number (Sticky) */}
+      <div className="lg:hidden min-h-screen flex flex-col">
+        {/* Top: Current Number (Fixed) */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="sticky top-0 z-30 bg-paper shadow-lg"
+          className="fixed top-0 left-0 right-0 z-30 bg-paper shadow-lg"
         >
           <div className="p-4">
             <CurrentNumber
@@ -467,7 +467,12 @@ export default function RoomPage() {
         </motion.div>
 
         {/* Middle: Scrollable Content */}
-        <div className={cn("flex-1 pb-32", !isSheetOpen && "overflow-y-auto")}>
+        <div
+          className={cn(
+            "flex-1 pt-24 pb-32",
+            !isSheetOpen && "overflow-y-auto",
+          )}
+        >
           <div className="p-4 space-y-4">
             {/* Room Info */}
             <motion.div
