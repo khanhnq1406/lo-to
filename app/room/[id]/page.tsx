@@ -54,6 +54,7 @@ import { RoomInfo } from "@/components/game/RoomInfo";
 import { CallerControls } from "@/components/game/CallerControls";
 import { useCardSelection } from "@/hooks/useCardSelection";
 import { cn } from "@/lib/utils";
+import { cachePlayerName, cleanPlayerNameCache } from "@/lib/session-storage";
 
 // ============================================================================
 // COMPONENT
@@ -127,6 +128,20 @@ export default function RoomPage() {
   const [joinError, setJoinError] = useState<string | null>(null);
 
   // ===========================
+  // CACHE PLAYER NAMES
+  // ===========================
+
+  useEffect(() => {
+    // Cache all player names for quick lookup after page refresh
+    players.forEach((player) => {
+      cachePlayerName(player.id, player.name);
+    });
+
+    // Clean expired cache entries periodically
+    cleanPlayerNameCache();
+  }, [players]);
+
+  // ===========================
   // AUTO-JOIN ON MOUNT
   // ===========================
 
@@ -149,7 +164,7 @@ export default function RoomPage() {
     // Get player name from localStorage or generate default
     const storedName = localStorage.getItem("loto-player-name");
     const playerName =
-      storedName || `Player_${Math.random().toString(36).substr(2, 4)}`;
+      storedName || `Player_${Math.random().toString(36).substring(2, 6)}`;
 
     console.log("[RoomPage] Auto-joining room:", { roomId, playerName });
 

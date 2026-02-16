@@ -9,6 +9,7 @@
 import { motion } from "framer-motion";
 import { Check, Lock, User } from "lucide-react";
 import { CARD_CONFIGS, getCardColorClasses } from "@/lib/card-configs";
+import { getCachedPlayerName } from "@/lib/session-storage";
 
 interface CardSelectorProps {
   /** Currently selected cards: Map of cardId to playerId */
@@ -46,8 +47,16 @@ export function CardSelector({
   const MAX_CARDS_PER_PLAYER = 5;
 
   const getPlayerName = (playerId: string): string => {
+    // First try to find player in current players list
     const player = players.find((p) => p.id === playerId);
-    return player?.name || "Unknown";
+    if (player) return player.name;
+
+    // If not found, try to get from cache
+    const cachedName = getCachedPlayerName(playerId);
+    if (cachedName) return cachedName;
+
+    // Fallback to Unknown
+    return "Unknown";
   };
 
   const isCardSelected = (cardId: number): boolean => {

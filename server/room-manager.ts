@@ -399,6 +399,15 @@ export class RoomManager {
     oldPlayer.id = newSocketId;
     oldPlayer.connected = true;
 
+    // Update selectedCards mapping with new player ID
+    if (room.selectedCards) {
+      Object.keys(room.selectedCards).forEach((cardIdStr) => {
+        if (room.selectedCards[cardIdStr] === oldPlayerId) {
+          room.selectedCards[cardIdStr] = newSocketId;
+        }
+      });
+    }
+
     // Update session with new player ID
     this.sessions.set(sessionId, { roomId, playerId: newSocketId, playerName });
 
