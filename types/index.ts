@@ -323,6 +323,16 @@ export interface Room {
    * Set by room host, applies to all players
    */
   manualMarkingMode: boolean;
+
+  /** Show current number to all players (false = only caller sees it)
+   * Set by room host, applies to all players
+   */
+  showCurrentNumber: boolean;
+
+  /** Show called history to all players (false = only caller sees it)
+   * Set by room host, applies to all players
+   */
+  showHistory: boolean;
 }
 
 export const RoomSchema = z.object({
@@ -336,7 +346,9 @@ export const RoomSchema = z.object({
   machineInterval: z.number().int().min(1000).max(60000), // 1s to 60s
   createdAt: z.date(),
   selectedCards: z.record(z.string(), z.string()).optional().default({}),
-  manualMarkingMode: z.boolean().default(true)
+  manualMarkingMode: z.boolean().default(true),
+  showCurrentNumber: z.boolean().default(false),
+  showHistory: z.boolean().default(false)
 }).refine(
   (room) => {
     // Called history should not have duplicates
@@ -568,6 +580,21 @@ export const ClientRenamePlayerEventSchema = z.object({
   newName: z.string().min(1).max(50)
 });
 
+/**
+ * Host changes visibility settings
+ */
+export interface ClientChangeVisibilitySettingsEvent {
+  roomId: string;
+  showCurrentNumber?: boolean;
+  showHistory?: boolean;
+}
+
+export const ClientChangeVisibilitySettingsEventSchema = z.object({
+  roomId: z.string().min(1),
+  showCurrentNumber: z.boolean().optional(),
+  showHistory: z.boolean().optional()
+});
+
 // ============================================================================
 // SOCKET EVENT TYPES - SERVER TO CLIENT
 // ============================================================================
@@ -591,7 +618,9 @@ export const ServerRoomUpdateEventSchema = z.object({
     machineInterval: z.number(),
     createdAt: z.string(),
     selectedCards: z.record(z.string(), z.string()).optional().default({}),
-    manualMarkingMode: z.boolean().default(true)
+    manualMarkingMode: z.boolean().default(true),
+    showCurrentNumber: z.boolean().default(false),
+    showHistory: z.boolean().default(false)
   })
 });
 
@@ -782,6 +811,19 @@ export const ServerPlayerRenamedEventSchema = z.object({
 });
 
 /**
+ * Server confirms visibility settings changed
+ */
+export interface ServerVisibilitySettingsChangedEvent {
+  showCurrentNumber: boolean;
+  showHistory: boolean;
+}
+
+export const ServerVisibilitySettingsChangedEventSchema = z.object({
+  showCurrentNumber: z.boolean(),
+  showHistory: z.boolean()
+});
+
+/**
  * Server event: Session reconnection successful
  */
 export interface ServerSessionReconnectedEvent {
@@ -845,7 +887,8 @@ export type ClientEvent =
   | { type: 'select_card'; data: ClientSelectCardEvent }
   | { type: 'deselect_card'; data: ClientDeselectCardEvent }
   | { type: 'change_marking_mode'; data: ClientChangeMarkingModeEvent }
-  | { type: 'rename_player'; data: ClientRenamePlayerEvent };
+  | { type: 'rename_player'; data: ClientRenamePlayerEvent }
+  | { type: 'change_visibility_settings'; data: ClientChangeVisibilitySettingsEvent };
 
 /**
  * All possible server-to-client events
@@ -864,7 +907,8 @@ export type ServerEvent =
   | { type: 'card_selected'; data: ServerCardSelectedEvent }
   | { type: 'card_deselected'; data: ServerCardDeselectedEvent }
   | { type: 'marking_mode_changed'; data: ServerMarkingModeChangedEvent }
-  | { type: 'player_renamed'; data: ServerPlayerRenamedEvent };
+  | { type: 'player_renamed'; data: ServerPlayerRenamedEvent }
+  | { type: 'visibility_settings_changed'; data: ServerVisibilitySettingsChangedEvent };
 
 // ============================================================================
 // UTILITY TYPE GUARDS

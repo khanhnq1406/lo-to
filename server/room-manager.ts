@@ -9,11 +9,14 @@ import {
   CallerMode,
   RoomSchema,
   PlayerSchema,
-} from '../types/index';
+} from "../types/index";
 
 export class RoomManager {
   private rooms = new Map<string, Room>();
-  private sessions = new Map<string, { roomId: string; playerId: string; playerName: string }>();
+  private sessions = new Map<
+    string,
+    { roomId: string; playerId: string; playerName: string }
+  >();
 
   /**
    * Create a new room with a host player
@@ -23,7 +26,7 @@ export class RoomManager {
     hostName: string,
     callerMode: CallerMode,
     machineInterval: number = 3000,
-    sessionId?: string
+    sessionId?: string,
   ): Room {
     const roomId = this.generateRoomId();
 
@@ -39,7 +42,7 @@ export class RoomManager {
     const room: Room = {
       id: roomId,
       players: [hostPlayer],
-      gameState: 'waiting',
+      gameState: "waiting",
       callerMode,
       currentNumber: null,
       calledHistory: [],
@@ -48,6 +51,8 @@ export class RoomManager {
       createdAt: new Date(),
       selectedCards: {},
       manualMarkingMode: true, // Default to manual-mark
+      showCurrentNumber: false, // Default to show current number
+      showHistory: false, // Default to show history
     };
 
     // Validate room before storing
@@ -69,14 +74,19 @@ export class RoomManager {
   /**
    * Add a player to an existing room
    */
-  joinRoom(roomId: string, socketId: string, playerName: string, sessionId?: string): Room {
+  joinRoom(
+    roomId: string,
+    socketId: string,
+    playerName: string,
+    sessionId?: string,
+  ): Room {
     const room = this.rooms.get(roomId);
     if (!room) {
-      throw new Error('Room not found');
+      throw new Error("Room not found");
     }
 
-    if (room.gameState !== 'waiting') {
-      throw new Error('Cannot join room - game already started');
+    if (room.gameState !== "waiting") {
+      throw new Error("Cannot join room - game already started");
     }
 
     // Check if player already exists (reconnection case)
@@ -88,10 +98,10 @@ export class RoomManager {
 
     // Check for duplicate names
     const nameExists = room.players.some(
-      (p) => p.name.toLowerCase() === playerName.toLowerCase()
+      (p) => p.name.toLowerCase() === playerName.toLowerCase(),
     );
     if (nameExists) {
-      throw new Error('Player name already exists in this room');
+      throw new Error("Player name already exists in this room");
     }
 
     const newPlayer: Player = {
@@ -169,24 +179,28 @@ export class RoomManager {
   /**
    * Kick a player from a room (host action)
    */
-  kickPlayer(roomId: string, hostSocketId: string, targetPlayerId: string): Room {
+  kickPlayer(
+    roomId: string,
+    hostSocketId: string,
+    targetPlayerId: string,
+  ): Room {
     const room = this.rooms.get(roomId);
     if (!room) {
-      throw new Error('Room not found');
+      throw new Error("Room not found");
     }
 
     const host = room.players.find((p) => p.id === hostSocketId);
     if (!host || !host.isHost) {
-      throw new Error('Only host can kick players');
+      throw new Error("Only host can kick players");
     }
 
     if (targetPlayerId === hostSocketId) {
-      throw new Error('Host cannot kick themselves');
+      throw new Error("Host cannot kick themselves");
     }
 
     const playerIndex = room.players.findIndex((p) => p.id === targetPlayerId);
     if (playerIndex === -1) {
-      throw new Error('Player not found in room');
+      throw new Error("Player not found in room");
     }
 
     room.players.splice(playerIndex, 1);
@@ -252,7 +266,7 @@ export class RoomManager {
   updateRoom(roomId: string, updates: Partial<Room>): Room {
     const room = this.rooms.get(roomId);
     if (!room) {
-      throw new Error('Room not found');
+      throw new Error("Room not found");
     }
 
     Object.assign(room, updates);
@@ -262,22 +276,26 @@ export class RoomManager {
   /**
    * Change the caller (host action)
    */
-  changeCaller(roomId: string, hostSocketId: string, targetPlayerId: string): Room {
+  changeCaller(
+    roomId: string,
+    hostSocketId: string,
+    targetPlayerId: string,
+  ): Room {
     const room = this.rooms.get(roomId);
     if (!room) {
-      throw new Error('Room not found');
+      throw new Error("Room not found");
     }
 
     // Verify host permission
     const host = room.players.find((p) => p.id === hostSocketId);
     if (!host || !host.isHost) {
-      throw new Error('Only host can change the caller');
+      throw new Error("Only host can change the caller");
     }
 
     // Verify target player exists
     const targetPlayer = room.players.find((p) => p.id === targetPlayerId);
     if (!targetPlayer) {
-      throw new Error('Target player not found in room');
+      throw new Error("Target player not found in room");
     }
 
     // Find current caller
@@ -297,24 +315,29 @@ export class RoomManager {
   /**
    * Rename a player (player can rename themselves)
    */
-  renamePlayer(roomId: string, playerId: string, newName: string): { room: Room; oldName: string } {
+  renamePlayer(
+    roomId: string,
+    playerId: string,
+    newName: string,
+  ): { room: Room; oldName: string } {
     const room = this.rooms.get(roomId);
     if (!room) {
-      throw new Error('Room not found');
+      throw new Error("Room not found");
     }
 
     // Find the player
     const player = room.players.find((p) => p.id === playerId);
     if (!player) {
-      throw new Error('Player not found in room');
+      throw new Error("Player not found in room");
     }
 
     // Check if new name is already taken by another player
     const nameExists = room.players.some(
-      (p) => p.id !== playerId && p.name.toLowerCase() === newName.toLowerCase()
+      (p) =>
+        p.id !== playerId && p.name.toLowerCase() === newName.toLowerCase(),
     );
     if (nameExists) {
-      throw new Error('Player name already exists in this room');
+      throw new Error("Player name already exists in this room");
     }
 
     // Store old name for event notification
@@ -339,13 +362,15 @@ export class RoomManager {
    */
   private generateRoomId(): string {
     // Generate short, memorable room codes (6 characters)
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     let roomId: string;
 
     do {
-      roomId = '';
+      roomId = "";
       for (let i = 0; i < 6; i++) {
-        roomId += characters.charAt(Math.floor(Math.random() * characters.length));
+        roomId += characters.charAt(
+          Math.floor(Math.random() * characters.length),
+        );
       }
     } while (this.rooms.has(roomId));
 
@@ -362,15 +387,25 @@ export class RoomManager {
   /**
    * Save session for reconnection
    */
-  saveSession(sessionId: string, roomId: string, playerId: string, playerName: string): void {
+  saveSession(
+    sessionId: string,
+    roomId: string,
+    playerId: string,
+    playerName: string,
+  ): void {
     this.sessions.set(sessionId, { roomId, playerId, playerName });
-    console.log(`[RoomManager] Session saved: ${sessionId} -> ${playerName} in room ${roomId}`);
+    console.log(
+      `[RoomManager] Session saved: ${sessionId} -> ${playerName} in room ${roomId}`,
+    );
   }
 
   /**
    * Reconnect player using session
    */
-  reconnectSession(sessionId: string, newSocketId: string): { room: Room; oldPlayerId: string } | null {
+  reconnectSession(
+    sessionId: string,
+    newSocketId: string,
+  ): { room: Room; oldPlayerId: string } | null {
     const session = this.sessions.get(sessionId);
     if (!session) {
       console.log(`[RoomManager] Session not found: ${sessionId}`);
@@ -412,7 +447,9 @@ export class RoomManager {
     // Update session with new player ID
     this.sessions.set(sessionId, { roomId, playerId: newSocketId, playerName });
 
-    console.log(`[RoomManager] Session reconnected: ${playerName} (${oldPlayerId} -> ${newSocketId}) in room ${roomId}`);
+    console.log(
+      `[RoomManager] Session reconnected: ${playerName} (${oldPlayerId} -> ${newSocketId}) in room ${roomId}`,
+    );
 
     return { room, oldPlayerId };
   }

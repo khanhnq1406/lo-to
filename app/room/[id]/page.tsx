@@ -75,6 +75,7 @@ export default function RoomPage() {
     changeCallerMode,
     changeCaller,
     changeMarkingMode,
+    changeVisibilitySettings,
     resetGame,
   } = useSocket();
 
@@ -258,6 +259,13 @@ export default function RoomPage() {
     [changeCallerMode],
   );
 
+  const handleChangeVisibilitySettings = useCallback(
+    (showCurrentNumber?: boolean, showHistory?: boolean) => {
+      changeVisibilitySettings(showCurrentNumber, showHistory);
+    },
+    [changeVisibilitySettings],
+  );
+
   // ===========================
   // LOADING STATE
   // ===========================
@@ -373,7 +381,7 @@ export default function RoomPage() {
           <div className="px-8 py-3">
             <CurrentNumber
               currentNumber={currentNumber}
-              hideNumber={callerMode === "manual" && !isCaller}
+              hideNumber={!room.showCurrentNumber && !isCaller}
               showGenerateButton={
                 isCaller && callerMode === "manual" && gameState === "playing"
               }
@@ -403,11 +411,14 @@ export default function RoomPage() {
                 isHost={isHost}
                 isCaller={isCaller}
                 players={players}
+                showCurrentNumber={room.showCurrentNumber}
+                showHistory={room.showHistory}
                 onStartGame={handleStartGame}
                 onCallNumber={handleCallNumber}
                 onResetGame={handleResetGame}
                 onChangeCallerMode={handleChangeCallerMode}
                 onChangeCaller={changeCaller}
+                onChangeVisibilitySettings={handleChangeVisibilitySettings}
               />
             </div>
 
@@ -416,7 +427,7 @@ export default function RoomPage() {
               <CalledHistory
                 calledNumbers={calledHistory}
                 currentNumber={currentNumber}
-                hideHistory={callerMode === "manual" && !isCaller}
+                hideHistory={!room.showHistory && !isCaller}
               />
             </div>
           </motion.div>
@@ -503,7 +514,7 @@ export default function RoomPage() {
           <div className="p-4">
             <CurrentNumber
               currentNumber={currentNumber}
-              hideNumber={callerMode === "manual" && !isCaller}
+              hideNumber={!room.showCurrentNumber && !isCaller}
               showGenerateButton={
                 isCaller && callerMode === "manual" && gameState === "playing"
               }
@@ -518,7 +529,7 @@ export default function RoomPage() {
         <div
           className={cn(
             "flex-1 pt-24 pb-32",
-            !isSheetOpen && "overflow-y-auto",
+            isSheetOpen ? "overflow-hidden" : "overflow-y-auto",
           )}
         >
           <div className="p-4 space-y-4">
@@ -627,7 +638,7 @@ export default function RoomPage() {
             </button>
 
             {/* Sheet Content */}
-            <div className="flex-1 overflow-y-auto safe-area-bottom">
+            <div className="flex-1 overflow-y-auto safe-area-bottom touch-pan-y overscroll-contain">
               <div className="p-4 space-y-6 pb-8">
                 {/* Called History */}
                 <div>
@@ -637,7 +648,7 @@ export default function RoomPage() {
                   <CalledHistory
                     calledNumbers={calledHistory}
                     currentNumber={currentNumber}
-                    hideHistory={callerMode === "manual" && !isCaller}
+                    hideHistory={!room.showHistory && !isCaller}
                   />
                 </div>
 
@@ -654,11 +665,14 @@ export default function RoomPage() {
                       isHost={isHost}
                       isCaller={isCaller}
                       players={players}
+                      showCurrentNumber={room.showCurrentNumber}
+                      showHistory={room.showHistory}
                       onStartGame={handleStartGame}
                       onCallNumber={handleCallNumber}
                       onResetGame={handleResetGame}
                       onChangeCallerMode={handleChangeCallerMode}
                       onChangeCaller={changeCaller}
+                      onChangeVisibilitySettings={handleChangeVisibilitySettings}
                     />
                   </div>
                 )}

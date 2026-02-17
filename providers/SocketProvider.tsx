@@ -35,6 +35,7 @@ interface SocketContextValue {
   changeCallerMode: (mode: CallerMode, interval?: number) => void;
   changeCaller: (targetPlayerId: string) => void;
   changeMarkingMode: (manualMarkingMode: boolean) => void;
+  changeVisibilitySettings: (showCurrentNumber?: boolean, showHistory?: boolean) => void;
   resetGame: () => void;
   renamePlayer: (newName: string) => void;
 }
@@ -462,6 +463,21 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     socket.emit('rename_player', { roomId, newName });
   };
 
+  const changeVisibilitySettings = (showCurrentNumber?: boolean, showHistory?: boolean) => {
+    const socket = socketRef.current;
+    if (!socket || !socket.connected) {
+      setError('Not connected to server');
+      return;
+    }
+    if (!roomId) {
+      setError('Not in a room');
+      return;
+    }
+
+    console.log('[Socket Provider] Changing visibility settings:', { showCurrentNumber, showHistory });
+    socket.emit('change_visibility_settings', { roomId, showCurrentNumber, showHistory });
+  };
+
   const value: SocketContextValue = {
     socket: socketRef.current,
     connected,
@@ -477,6 +493,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     changeCallerMode,
     changeCaller,
     changeMarkingMode,
+    changeVisibilitySettings,
     resetGame,
     renamePlayer,
   };

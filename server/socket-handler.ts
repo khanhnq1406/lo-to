@@ -19,6 +19,7 @@ import {
   ClientDeselectCardEventSchema,
   ClientResetGameEventSchema,
   ClientChangeMarkingModeEventSchema,
+  ClientChangeVisibilitySettingsEventSchema,
   ClientRenamePlayerEventSchema,
   ServerRoomUpdateEvent,
   ServerPlayerJoinedEvent,
@@ -34,6 +35,7 @@ import {
   ServerCardSelectedEvent,
   ServerCardDeselectedEvent,
   ServerMarkingModeChangedEvent,
+  ServerVisibilitySettingsChangedEvent,
   ServerPlayerRenamedEvent,
   serializeRoom,
 } from "../types/index";
@@ -548,6 +550,62 @@ export function setupSocketHandlers(io: SocketServer): void {
         };
         socket.emit("error", errorMsg);
         console.error("[Error] change_marking_mode:", error);
+      }
+    });
+
+    // Change visibility settings
+    socket.on("change_visibility_settings", (data) => {
+      try {
+        const validated = ClientChangeVisibilitySettingsEventSchema.parse(data);
+
+        const room = roomManager.getRoom(validated.roomId);
+        if (!room) {
+          throw new Error("Room not found");
+        }
+
+        // Verify host permission
+        const host = room.players.find((p) => p.id === socket.id);
+        if (!host || !host.isHost) {
+          throw new Error("Only host can change visibility settings");
+        }
+
+        // Update visibility settings
+        if (validated.showCurrentNumber !== undefined) {
+          room.showCurrentNumber = validated.showCurrentNumber;
+        }
+        if (validated.showHistory !== undefined) {
+          room.showHistory = validated.showHistory;
+        }
+
+        // Send visibility settings changed event
+        const visibilitySettingsChanged: ServerVisibilitySettingsChangedEvent = {
+          showCurrentNumber: room.showCurrentNumber,
+          showHistory: room.showHistory,
+        };
+        io.to(validated.roomId).emit(
+          "visibility_settings_changed",
+          visibilitySettingsChanged,
+        );
+
+        // Send room update
+        const roomUpdate: ServerRoomUpdateEvent = {
+          room: serializeRoom(room),
+        };
+        io.to(validated.roomId).emit("room_update", roomUpdate);
+
+        console.log(
+          `[Room] Visibility settings changed in room ${validated.roomId}: showCurrentNumber=${room.showCurrentNumber}, showHistory=${room.showHistory}`,
+        );
+      } catch (error) {
+        const errorMsg: ServerErrorEvent = {
+          message:
+            error instanceof Error
+              ? error.message
+              : "Failed to change visibility settings",
+          code: "CHANGE_VISIBILITY_SETTINGS_ERROR",
+        };
+        socket.emit("error", errorMsg);
+        console.error("[Error] change_visibility_settings:", error);
       }
     });
 

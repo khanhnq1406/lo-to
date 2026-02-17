@@ -97,6 +97,15 @@ const config: Config = {
             display: 'none',
           },
         },
+        '.touch-pan-y': {
+          'touch-action': 'pan-y',
+        },
+        '.touch-pan-x': {
+          'touch-action': 'pan-x',
+        },
+        '.overscroll-contain': {
+          'overscroll-behavior': 'contain',
+        },
       });
     },
   ],
