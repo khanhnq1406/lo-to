@@ -108,7 +108,7 @@ const CARD_05: Card = [
  */
 const CARD_06: Card = [
   // Section 1 (rows 0-2)
-  [null, 14, 28, null, 50, null, 75, 90, null],
+  [null, 14, 28, null, null, 50, null, 75, 90],
   [null, 19, null, 31, 49, null, 68, null, 81],
   [5, null, 20, null, 47, null, null, 77, 84],
   // Section 2 (rows 3-5)
@@ -232,7 +232,7 @@ const CARD_12: Card = [
   // Section 3 (rows 6-8)
   [null, 15, 25, null, null, 51, null, 77, 85],
   [null, 12, null, 36, 43, null, 64, null, 82],
-  [3, null, 26, 39, null, null, 58, 66, null],
+  [3, null, 26, 39, null, 58, 66, null, null],
 ];
 
 /**
