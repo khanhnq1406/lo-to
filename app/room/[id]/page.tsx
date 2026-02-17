@@ -577,7 +577,7 @@ export default function RoomPage() {
         </div>
 
         {/* Bottom: Expandable Sheet */}
-        <div className="fixed bottom-0 left-0 right-0 z-40 pointer-events-none">
+        <div className="fixed left-0 right-0 z-40 pointer-events-none sheet-container-bottom">
           <AnimatePresence>
             {isSheetOpen && (
               <motion.div
@@ -627,7 +627,7 @@ export default function RoomPage() {
             </button>
 
             {/* Sheet Content */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto safe-area-bottom">
               <div className="p-4 space-y-6 pb-8">
                 {/* Called History */}
                 <div>
