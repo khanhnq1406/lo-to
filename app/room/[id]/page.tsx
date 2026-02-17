@@ -53,7 +53,11 @@ import { RoomInfo } from "@/components/game/RoomInfo";
 import { CallerControls } from "@/components/game/CallerControls";
 import { useCardSelection } from "@/hooks/useCardSelection";
 import { cn } from "@/lib/utils";
-import { cachePlayerName, cleanPlayerNameCache, getSession } from "@/lib/session-storage";
+import {
+  cachePlayerName,
+  cleanPlayerNameCache,
+  getSession,
+} from "@/lib/session-storage";
 
 // ============================================================================
 // COMPONENT
@@ -171,7 +175,9 @@ export default function RoomPage() {
     // Check if there's an existing session - if so, let SocketProvider handle reconnection
     const existingSession = getSession();
     if (existingSession && existingSession.roomId === roomId) {
-      console.log("[RoomPage] Found existing session, waiting for automatic reconnection");
+      console.log(
+        "[RoomPage] Found existing session, waiting for automatic reconnection",
+      );
       setHasJoined(true);
       return;
     }
@@ -194,7 +200,15 @@ export default function RoomPage() {
       console.error("[RoomPage] Failed to join room:", err);
       setJoinError("Không thể tham gia phòng. Vui lòng thử lại.");
     }
-  }, [connected, connecting, isReconnecting, room?.id, roomId, hasJoined, joinRoom]);
+  }, [
+    connected,
+    connecting,
+    isReconnecting,
+    room?.id,
+    roomId,
+    hasJoined,
+    joinRoom,
+  ]);
 
   // ===========================
   // REDIRECT IF NOT CONNECTED
@@ -625,7 +639,7 @@ export default function RoomPage() {
             className={cn(
               "relative bg-white rounded-t-3xl shadow-2xl overflow-hidden pointer-events-auto",
               "border-t-4 border-loto-green",
-              "h-screen flex flex-col",
+              "h-[calc(100vh-3rem)] flex flex-col",
             )}
           >
             {/* Sheet Handle */}
@@ -687,7 +701,9 @@ export default function RoomPage() {
                       onResetGame={handleResetGame}
                       onChangeCallerMode={handleChangeCallerMode}
                       onChangeCaller={changeCaller}
-                      onChangeVisibilitySettings={handleChangeVisibilitySettings}
+                      onChangeVisibilitySettings={
+                        handleChangeVisibilitySettings
+                      }
                     />
                   </div>
                 )}
