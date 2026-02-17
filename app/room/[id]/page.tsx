@@ -53,7 +53,7 @@ import { RoomInfo } from "@/components/game/RoomInfo";
 import { CallerControls } from "@/components/game/CallerControls";
 import { useCardSelection } from "@/hooks/useCardSelection";
 import { cn } from "@/lib/utils";
-import { cachePlayerName, cleanPlayerNameCache } from "@/lib/session-storage";
+import { cachePlayerName, cleanPlayerNameCache, getSession } from "@/lib/session-storage";
 
 // ============================================================================
 // COMPONENT
@@ -68,6 +68,7 @@ export default function RoomPage() {
   const {
     connected,
     connecting,
+    isReconnecting,
     joinRoom,
     leaveRoom,
     startGame,
@@ -152,6 +153,12 @@ export default function RoomPage() {
     // Wait for connection
     if (!connected || connecting) return;
 
+    // Wait for reconnection to complete
+    if (isReconnecting) {
+      console.log("[RoomPage] Waiting for session reconnection to complete");
+      return;
+    }
+
     // Check if already in room
     if (room?.id === roomId) {
       setHasJoined(true);
@@ -160,6 +167,14 @@ export default function RoomPage() {
 
     // Check if already tried to join
     if (hasJoined) return;
+
+    // Check if there's an existing session - if so, let SocketProvider handle reconnection
+    const existingSession = getSession();
+    if (existingSession && existingSession.roomId === roomId) {
+      console.log("[RoomPage] Found existing session, waiting for automatic reconnection");
+      setHasJoined(true);
+      return;
+    }
 
     // Get player name from localStorage or generate default
     const storedName = localStorage.getItem("loto-player-name");
@@ -179,7 +194,7 @@ export default function RoomPage() {
       console.error("[RoomPage] Failed to join room:", err);
       setJoinError("Không thể tham gia phòng. Vui lòng thử lại.");
     }
-  }, [connected, connecting, room?.id, roomId, hasJoined, joinRoom]);
+  }, [connected, connecting, isReconnecting, room?.id, roomId, hasJoined, joinRoom]);
 
   // ===========================
   // REDIRECT IF NOT CONNECTED

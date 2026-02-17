@@ -24,6 +24,7 @@ interface SocketContextValue {
   socket: Socket | null;
   connected: boolean;
   connecting: boolean;
+  isReconnecting: boolean;
   createRoom: (playerName: string, cardCount: number) => void;
   joinRoom: (roomId: string, playerName: string, cardCount: number) => void;
   startGame: () => void;
@@ -46,6 +47,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   const socketRef = useRef<Socket | null>(null);
   const [connected, setConnected] = useState(false);
   const [connecting, setConnectingState] = useState(false);
+  const [isReconnecting, setIsReconnecting] = useState(false);
   const hasInitialized = useRef(false);
   const sessionIdRef = useRef<string | null>(null);
   const isReconnectingRef = useRef(false);
@@ -95,6 +97,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       if (existingSession && !isReconnectingRef.current) {
         console.log('[Socket Provider] Found existing session, attempting to reconnect to room:', existingSession.roomId);
         isReconnectingRef.current = true;
+        setIsReconnecting(true);
 
         // Emit reconnect event to server
         socket.emit('reconnect_session', {
@@ -214,6 +217,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     socket.on('session_reconnected', () => {
       console.log('[Socket Provider] Session reconnected successfully');
       isReconnectingRef.current = false;
+      setIsReconnecting(false);
 
       // Update session with new socket ID
       if (socket.id) {
@@ -227,6 +231,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     socket.on('session_reconnect_failed', (data) => {
       console.log('[Socket Provider] Session reconnection failed:', data.message);
       isReconnectingRef.current = false;
+      setIsReconnecting(false);
 
       // Clear invalid session
       clearSession();
@@ -482,6 +487,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     socket: socketRef.current,
     connected,
     connecting,
+    isReconnecting,
     createRoom,
     joinRoom,
     startGame,
