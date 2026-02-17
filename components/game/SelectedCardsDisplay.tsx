@@ -11,6 +11,7 @@ import { Sparkles, MousePointerClick, Zap } from "lucide-react";
 import { PlayableCardImage } from "./PlayableCardImage";
 import { useGameStore } from "@/store/useGameStore";
 import type { Card } from "@/types";
+import { useState, useRef, useEffect } from "react";
 
 interface SelectedCardsDisplayProps {
   /** Map of selected cards: cardId -> playerId */
@@ -48,6 +49,10 @@ export function SelectedCardsDisplay({
   const manualMarkingMode =
     manualMarkingModeProp ?? room?.manualMarkingMode ?? true;
 
+  // Carousel state for mobile
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
   // Toggle function - only for host
   const handleToggleMarkingMode = () => {
     console.log("[SelectedCardsDisplay] Toggle clicked", {
@@ -73,6 +78,34 @@ export function SelectedCardsDisplay({
     .filter(([_, playerId]) => playerId === currentPlayerId)
     .map(([cardId]) => parseInt(cardId, 10))
     .sort((a, b) => a - b);
+
+  // Handle scroll to update current card index
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const scrollLeft = container.scrollLeft;
+      const cardWidth = container.offsetWidth;
+      const newIndex = Math.round(scrollLeft / cardWidth);
+      setCurrentCardIndex(newIndex);
+    };
+
+    container.addEventListener("scroll", handleScroll);
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, [mySelectedCardIds.length]);
+
+  // Function to scroll to specific card
+  const scrollToCard = (index: number) => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const cardWidth = container.offsetWidth;
+    container.scrollTo({
+      left: cardWidth * index,
+      behavior: "smooth",
+    });
+  };
 
   // Empty state
   if (mySelectedCardIds.length === 0) {
@@ -224,31 +257,114 @@ export function SelectedCardsDisplay({
       </div>
 
       {/* Cards Grid with Playable Numbers */}
-      <motion.div
-        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6"
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
-      >
-        <AnimatePresence mode="popLayout">
-          {mySelectedCardIds.map((cardId, index) => {
-            const cardData = cards[index];
-            if (!cardData) return null;
+      {mySelectedCardIds.length === 1 ? (
+        // Single card: centered display
+        <motion.div
+          className="flex justify-center"
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+        >
+          <AnimatePresence mode="popLayout">
+            {mySelectedCardIds.map((cardId, index) => {
+              const cardData = cards[index];
+              if (!cardData) return null;
 
-            return (
-              <motion.div key={cardId} variants={cardVariants} layout>
-                <PlayableCardImage
-                  cardId={cardId}
-                  cardData={cardData}
-                  calledNumbers={calledNumbers}
-                  cardIndex={index}
-                  manualMarkingMode={manualMarkingMode}
+              return (
+                <motion.div key={cardId} variants={cardVariants} layout>
+                  <PlayableCardImage
+                    cardId={cardId}
+                    cardData={cardData}
+                    calledNumbers={calledNumbers}
+                    cardIndex={index}
+                    manualMarkingMode={manualMarkingMode}
+                  />
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        </motion.div>
+      ) : (
+        // Multiple cards: horizontal scroll on mobile, grid on desktop
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+        >
+          {/* Mobile: Horizontal carousel with snap scroll */}
+          <div className="md:hidden">
+            <div
+              ref={scrollContainerRef}
+              className="overflow-x-auto scrollbar-hide snap-x snap-mandatory"
+              style={{ scrollSnapType: "x mandatory" }}
+            >
+              <div className="flex">
+                <AnimatePresence mode="popLayout">
+                  {mySelectedCardIds.map((cardId, index) => {
+                    const cardData = cards[index];
+                    if (!cardData) return null;
+
+                    return (
+                      <motion.div
+                        key={cardId}
+                        variants={cardVariants}
+                        layout
+                        className="flex-shrink-0 w-full snap-center px-4"
+                      >
+                        <PlayableCardImage
+                          cardId={cardId}
+                          cardData={cardData}
+                          calledNumbers={calledNumbers}
+                          cardIndex={index}
+                          manualMarkingMode={manualMarkingMode}
+                        />
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
+              </div>
+            </div>
+
+            {/* Pagination dots */}
+            <div className="flex justify-center gap-2 mt-4">
+              {mySelectedCardIds.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => scrollToCard(index)}
+                  className={`transition-all duration-300 rounded-full ${
+                    currentCardIndex === index
+                      ? "w-8 h-2 bg-loto-green"
+                      : "w-2 h-2 bg-gray-300 hover:bg-gray-400"
+                  }`}
+                  aria-label={`Go to card ${index + 1}`}
                 />
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
-      </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* Desktop: Grid layout */}
+          <div className="hidden md:grid md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+            <AnimatePresence mode="popLayout">
+              {mySelectedCardIds.map((cardId, index) => {
+                const cardData = cards[index];
+                if (!cardData) return null;
+
+                return (
+                  <motion.div key={cardId} variants={cardVariants} layout>
+                    <PlayableCardImage
+                      cardId={cardId}
+                      cardData={cardData}
+                      calledNumbers={calledNumbers}
+                      cardIndex={index}
+                      manualMarkingMode={manualMarkingMode}
+                    />
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </div>
+        </motion.div>
+      )}
 
       {/* Helpful tip */}
       <motion.div
