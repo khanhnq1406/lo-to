@@ -133,7 +133,7 @@ export function PlayableCardImage({
           </div> */}
 
           {/* Winning Badge */}
-          {true && (
+          {isWinning && (
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}

@@ -4,8 +4,8 @@
  * Each card is 9 rows × 9 columns with exact number positions
  */
 
-export type { Card } from '@/types';
-import type { Card } from '@/types';
+export type { Card } from "@/types";
+import type { Card } from "@/types";
 
 /**
  * Card #1 (Pink/Red) - Card ID 20
@@ -19,7 +19,7 @@ const CARD_01: Card = [
   // Section 2 (rows 3-5)
   [3, null, 25, null, null, 57, 60, null, 86],
   [null, 16, null, 31, 49, null, null, 77, 89],
-  [8, 17, null, null, 48, null, 59, null, 79],
+  [8, 17, null, null, 48, 59, null, 79, null],
   // Section 3 (rows 6-8)
   [null, 15, 20, null, 44, 52, null, 70, null],
   [4, null, null, 33, 41, null, 61, null, 83],

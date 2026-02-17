@@ -653,8 +653,8 @@ export default function RoomPage() {
             </button>
 
             {/* Sheet Content */}
-            <div className="flex-1 overflow-y-auto safe-area-bottom touch-pan-y overscroll-contain">
-              <div className="p-4 space-y-6 pb-8">
+            <div className="flex-1 overflow-y-auto touch-pan-y overscroll-contain">
+              <div className="p-4 space-y-6 pb-8 safe-area-bottom">
                 {/* Called History */}
                 <div>
                   <h3 className="text-lg font-bold text-gray-800 mb-3">

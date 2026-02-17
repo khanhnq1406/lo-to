@@ -258,9 +258,9 @@ export function SelectedCardsDisplay({
 
       {/* Cards Grid with Playable Numbers */}
       {mySelectedCardIds.length === 1 ? (
-        // Single card: centered display
+        // Single card: centered display with consistent size
         <motion.div
-          className="flex justify-center"
+          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6"
           variants={containerVariants}
           initial="hidden"
           animate="show"
