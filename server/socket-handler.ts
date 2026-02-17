@@ -3,7 +3,7 @@
  * Handles all client-server socket communication
  */
 
-import { Server as SocketServer, Socket } from 'socket.io';
+import { Server as SocketServer, Socket } from "socket.io";
 import {
   ClientJoinRoomEventSchema,
   ClientCreateRoomEventSchema,
@@ -36,20 +36,20 @@ import {
   ServerMarkingModeChangedEvent,
   ServerPlayerRenamedEvent,
   serializeRoom,
-} from '../types/index';
-import { roomManager } from './room-manager';
-import { gameManager } from './game-manager';
-import { generatePredefinedCard } from '../lib/card-generator';
+} from "../types/index";
+import { roomManager } from "./room-manager";
+import { gameManager } from "./game-manager";
+import { generatePredefinedCard } from "../lib/card-generator";
 
 /**
  * Setup all socket event handlers
  */
 export function setupSocketHandlers(io: SocketServer): void {
-  io.on('connection', (socket: Socket) => {
+  io.on("connection", (socket: Socket) => {
     console.log(`[Socket] Client connected: ${socket.id}`);
 
     // Create room
-    socket.on('create_room', (data) => {
+    socket.on("create_room", (data) => {
       try {
         const validated = ClientCreateRoomEventSchema.parse(data);
 
@@ -58,7 +58,7 @@ export function setupSocketHandlers(io: SocketServer): void {
           validated.playerName,
           validated.callerMode,
           validated.machineInterval,
-          (data as any).sessionId
+          (data as any).sessionId,
         );
 
         // Join socket to room
@@ -68,7 +68,7 @@ export function setupSocketHandlers(io: SocketServer): void {
         const roomUpdate = {
           room: serializeRoom(room),
         };
-        io.to(room.id).emit('room_update', roomUpdate);
+        io.to(room.id).emit("room_update", roomUpdate);
 
         // Send player joined event
         const playerJoined: ServerPlayerJoinedEvent = {
@@ -76,21 +76,22 @@ export function setupSocketHandlers(io: SocketServer): void {
           playerName: validated.playerName,
           isHost: true,
         };
-        socket.emit('player_joined', playerJoined);
+        socket.emit("player_joined", playerJoined);
 
         console.log(`[Room] Created: ${room.id} by ${validated.playerName}`);
       } catch (error) {
         const errorMsg: ServerErrorEvent = {
-          message: error instanceof Error ? error.message : 'Failed to create room',
-          code: 'CREATE_ROOM_ERROR',
+          message:
+            error instanceof Error ? error.message : "Failed to create room",
+          code: "CREATE_ROOM_ERROR",
         };
-        socket.emit('error', errorMsg);
-        console.error('[Error] create_room:', error);
+        socket.emit("error", errorMsg);
+        console.error("[Error] create_room:", error);
       }
     });
 
     // Join room
-    socket.on('join_room', (data) => {
+    socket.on("join_room", (data) => {
       try {
         const validated = ClientJoinRoomEventSchema.parse(data);
 
@@ -98,7 +99,7 @@ export function setupSocketHandlers(io: SocketServer): void {
           validated.roomId,
           socket.id,
           validated.playerName,
-          (data as any).sessionId
+          (data as any).sessionId,
         );
 
         // Join socket to room
@@ -108,7 +109,7 @@ export function setupSocketHandlers(io: SocketServer): void {
         const roomUpdate: ServerRoomUpdateEvent = {
           room: serializeRoom(room),
         };
-        io.to(validated.roomId).emit('room_update', roomUpdate);
+        io.to(validated.roomId).emit("room_update", roomUpdate);
 
         // Notify about new player
         const playerJoined: ServerPlayerJoinedEvent = {
@@ -116,33 +117,36 @@ export function setupSocketHandlers(io: SocketServer): void {
           playerName: validated.playerName,
           isHost: false,
         };
-        io.to(validated.roomId).emit('player_joined', playerJoined);
+        io.to(validated.roomId).emit("player_joined", playerJoined);
 
-        console.log(`[Room] ${validated.playerName} joined room ${validated.roomId}`);
+        console.log(
+          `[Room] ${validated.playerName} joined room ${validated.roomId}`,
+        );
       } catch (error) {
         const errorMsg: ServerErrorEvent = {
-          message: error instanceof Error ? error.message : 'Failed to join room',
-          code: 'JOIN_ROOM_ERROR',
+          message:
+            error instanceof Error ? error.message : "Failed to join room",
+          code: "JOIN_ROOM_ERROR",
         };
-        socket.emit('error', errorMsg);
-        console.error('[Error] join_room:', error);
+        socket.emit("error", errorMsg);
+        console.error("[Error] join_room:", error);
       }
     });
 
     // Start game
-    socket.on('start_game', (data) => {
+    socket.on("start_game", (data) => {
       try {
         const validated = ClientStartGameEventSchema.parse(data);
 
         const room = roomManager.getRoom(validated.roomId);
         if (!room) {
-          throw new Error('Room not found');
+          throw new Error("Room not found");
         }
 
         // Verify host permission
         const player = room.players.find((p) => p.id === socket.id);
         if (!player || !player.isHost) {
-          throw new Error('Only host can start the game');
+          throw new Error("Only host can start the game");
         }
 
         gameManager.startGame(room);
@@ -151,38 +155,39 @@ export function setupSocketHandlers(io: SocketServer): void {
         const gameStarted: ServerGameStartedEvent = {
           roomId: validated.roomId,
         };
-        io.to(validated.roomId).emit('game_started', gameStarted);
+        io.to(validated.roomId).emit("game_started", gameStarted);
 
         // Send room update
         const roomUpdate: ServerRoomUpdateEvent = {
           room: serializeRoom(room),
         };
-        io.to(validated.roomId).emit('room_update', roomUpdate);
+        io.to(validated.roomId).emit("room_update", roomUpdate);
 
         console.log(`[Game] Started in room ${validated.roomId}`);
 
         // If machine mode, set up number calling listener
-        if (room.callerMode === 'machine') {
+        if (room.callerMode === "machine") {
           setupMachineCallingListener(io, room.id);
         }
       } catch (error) {
         const errorMsg: ServerErrorEvent = {
-          message: error instanceof Error ? error.message : 'Failed to start game',
-          code: 'START_GAME_ERROR',
+          message:
+            error instanceof Error ? error.message : "Failed to start game",
+          code: "START_GAME_ERROR",
         };
-        socket.emit('error', errorMsg);
-        console.error('[Error] start_game:', error);
+        socket.emit("error", errorMsg);
+        console.error("[Error] start_game:", error);
       }
     });
 
     // Call number (manual mode)
-    socket.on('call_number', (data) => {
+    socket.on("call_number", (data) => {
       try {
         const validated = ClientCallNumberEventSchema.parse(data);
 
         const room = roomManager.getRoom(validated.roomId);
         if (!room) {
-          throw new Error('Room not found');
+          throw new Error("Room not found");
         }
 
         gameManager.callNumber(room, validated.number, socket.id);
@@ -193,44 +198,47 @@ export function setupSocketHandlers(io: SocketServer): void {
           calledHistory: room.calledHistory,
           remainingCount: 90 - room.calledHistory.length,
         };
-        io.to(validated.roomId).emit('number_called', numberCalled);
+        io.to(validated.roomId).emit("number_called", numberCalled);
 
         // Send room update
         const roomUpdate: ServerRoomUpdateEvent = {
           room: serializeRoom(room),
         };
-        io.to(validated.roomId).emit('room_update', roomUpdate);
+        io.to(validated.roomId).emit("room_update", roomUpdate);
 
-        console.log(`[Game] Number ${validated.number} called in room ${validated.roomId}`);
+        console.log(
+          `[Game] Number ${validated.number} called in room ${validated.roomId}`,
+        );
       } catch (error) {
         const errorMsg: ServerErrorEvent = {
-          message: error instanceof Error ? error.message : 'Failed to call number',
-          code: 'CALL_NUMBER_ERROR',
+          message:
+            error instanceof Error ? error.message : "Failed to call number",
+          code: "CALL_NUMBER_ERROR",
         };
-        socket.emit('error', errorMsg);
-        console.error('[Error] call_number:', error);
+        socket.emit("error", errorMsg);
+        console.error("[Error] call_number:", error);
       }
     });
 
     // Claim win
-    socket.on('claim_win', (data) => {
+    socket.on("claim_win", (data) => {
       try {
         const validated = ClientClaimWinEventSchema.parse(data);
 
         const room = roomManager.getRoom(validated.roomId);
         if (!room) {
-          throw new Error('Room not found');
+          throw new Error("Room not found");
         }
 
         const winResult = gameManager.validateWinClaim(
           room,
           socket.id,
           validated.ticketIndex,
-          validated.boardIndex
+          validated.boardIndex,
         );
 
         if (!winResult) {
-          throw new Error('Invalid win claim - win condition not met');
+          throw new Error("Invalid win claim - win condition not met");
         }
 
         gameManager.declareWinner(room, winResult);
@@ -239,39 +247,44 @@ export function setupSocketHandlers(io: SocketServer): void {
         const gameFinished: ServerGameFinishedEvent = {
           winner: winResult,
         };
-        io.to(validated.roomId).emit('game_finished', gameFinished);
+        io.to(validated.roomId).emit("game_finished", gameFinished);
 
         // Send room update
         const roomUpdate: ServerRoomUpdateEvent = {
           room: serializeRoom(room),
         };
-        io.to(validated.roomId).emit('room_update', roomUpdate);
+        io.to(validated.roomId).emit("room_update", roomUpdate);
 
-        console.log(`[Game] Win claimed by ${winResult.playerName} in room ${validated.roomId}`);
+        console.log(
+          `[Game] Win claimed by ${winResult.playerName} in room ${validated.roomId}`,
+        );
       } catch (error) {
         const errorMsg: ServerErrorEvent = {
-          message: error instanceof Error ? error.message : 'Failed to process win claim',
-          code: 'CLAIM_WIN_ERROR',
+          message:
+            error instanceof Error
+              ? error.message
+              : "Failed to process win claim",
+          code: "CLAIM_WIN_ERROR",
         };
-        socket.emit('error', errorMsg);
-        console.error('[Error] claim_win:', error);
+        socket.emit("error", errorMsg);
+        console.error("[Error] claim_win:", error);
       }
     });
 
     // Generate tickets
-    socket.on('generate_tickets', (data) => {
+    socket.on("generate_tickets", (data) => {
       try {
         const validated = ClientGenerateTicketsEventSchema.parse(data);
 
         const room = roomManager.getRoom(validated.roomId);
         if (!room) {
-          throw new Error('Room not found');
+          throw new Error("Room not found");
         }
 
         const cards = gameManager.generateTickets(
           room,
           socket.id,
-          validated.cardCount
+          validated.cardCount,
         );
 
         // Send tickets generated event to requesting player
@@ -279,34 +292,39 @@ export function setupSocketHandlers(io: SocketServer): void {
           playerId: socket.id,
           tickets: cards,
         };
-        socket.emit('tickets_generated', ticketsGenerated);
+        socket.emit("tickets_generated", ticketsGenerated);
 
         // Send room update to all players
         const roomUpdate: ServerRoomUpdateEvent = {
           room: serializeRoom(room),
         };
-        io.to(validated.roomId).emit('room_update', roomUpdate);
+        io.to(validated.roomId).emit("room_update", roomUpdate);
 
-        console.log(`[Game] Generated ${validated.cardCount} cards for player in room ${validated.roomId}`);
+        console.log(
+          `[Game] Generated ${validated.cardCount} cards for player in room ${validated.roomId}`,
+        );
       } catch (error) {
         const errorMsg: ServerErrorEvent = {
-          message: error instanceof Error ? error.message : 'Failed to generate tickets',
-          code: 'GENERATE_TICKETS_ERROR',
+          message:
+            error instanceof Error
+              ? error.message
+              : "Failed to generate tickets",
+          code: "GENERATE_TICKETS_ERROR",
         };
-        socket.emit('error', errorMsg);
-        console.error('[Error] generate_tickets:', error);
+        socket.emit("error", errorMsg);
+        console.error("[Error] generate_tickets:", error);
       }
     });
 
     // Kick player
-    socket.on('kick_player', (data) => {
+    socket.on("kick_player", (data) => {
       try {
         const validated = ClientKickPlayerEventSchema.parse(data);
 
         const room = roomManager.kickPlayer(
           validated.roomId,
           socket.id,
-          validated.playerId
+          validated.playerId,
         );
 
         // Notify kicked player
@@ -314,31 +332,34 @@ export function setupSocketHandlers(io: SocketServer): void {
         if (kickedSocket) {
           kickedSocket.leave(validated.roomId);
           const errorMsg: ServerErrorEvent = {
-            message: 'You have been kicked from the room',
-            code: 'KICKED',
+            message: "You have been kicked from the room",
+            code: "KICKED",
           };
-          kickedSocket.emit('error', errorMsg);
+          kickedSocket.emit("error", errorMsg);
         }
 
         // Send room update
         const roomUpdate: ServerRoomUpdateEvent = {
           room: serializeRoom(room),
         };
-        io.to(validated.roomId).emit('room_update', roomUpdate);
+        io.to(validated.roomId).emit("room_update", roomUpdate);
 
-        console.log(`[Room] Player ${validated.playerId} kicked from room ${validated.roomId}`);
+        console.log(
+          `[Room] Player ${validated.playerId} kicked from room ${validated.roomId}`,
+        );
       } catch (error) {
         const errorMsg: ServerErrorEvent = {
-          message: error instanceof Error ? error.message : 'Failed to kick player',
-          code: 'KICK_PLAYER_ERROR',
+          message:
+            error instanceof Error ? error.message : "Failed to kick player",
+          code: "KICK_PLAYER_ERROR",
         };
-        socket.emit('error', errorMsg);
-        console.error('[Error] kick_player:', error);
+        socket.emit("error", errorMsg);
+        console.error("[Error] kick_player:", error);
       }
     });
 
     // Leave room
-    socket.on('leave_room', (data) => {
+    socket.on("leave_room", (data) => {
       try {
         const validated = ClientLeaveRoomEventSchema.parse(data);
 
@@ -350,43 +371,44 @@ export function setupSocketHandlers(io: SocketServer): void {
           // Send player left event
           const playerLeft: ServerPlayerLeftEvent = {
             playerId: socket.id,
-            playerName: '', // Could be improved by storing player name before removal
+            playerName: "", // Could be improved by storing player name before removal
           };
-          io.to(validated.roomId).emit('player_left', playerLeft);
+          io.to(validated.roomId).emit("player_left", playerLeft);
 
           // Send room update
           const roomUpdate: ServerRoomUpdateEvent = {
             room: serializeRoom(room),
           };
-          io.to(validated.roomId).emit('room_update', roomUpdate);
+          io.to(validated.roomId).emit("room_update", roomUpdate);
         }
 
         console.log(`[Room] Player ${socket.id} left room ${validated.roomId}`);
       } catch (error) {
         const errorMsg: ServerErrorEvent = {
-          message: error instanceof Error ? error.message : 'Failed to leave room',
-          code: 'LEAVE_ROOM_ERROR',
+          message:
+            error instanceof Error ? error.message : "Failed to leave room",
+          code: "LEAVE_ROOM_ERROR",
         };
-        socket.emit('error', errorMsg);
-        console.error('[Error] leave_room:', error);
+        socket.emit("error", errorMsg);
+        console.error("[Error] leave_room:", error);
       }
     });
 
     // Change caller mode
-    socket.on('change_caller_mode', (data) => {
+    socket.on("change_caller_mode", (data) => {
       try {
         const validated = ClientChangeCallerModeEventSchema.parse(data);
 
         const room = roomManager.getRoom(validated.roomId);
         if (!room) {
-          throw new Error('Room not found');
+          throw new Error("Room not found");
         }
 
         gameManager.changeCallerMode(
           room,
           socket.id,
           validated.callerMode,
-          validated.machineInterval
+          validated.machineInterval,
         );
 
         // Send caller mode changed event
@@ -394,41 +416,48 @@ export function setupSocketHandlers(io: SocketServer): void {
           callerMode: validated.callerMode,
           machineInterval: validated.machineInterval,
         };
-        io.to(validated.roomId).emit('caller_mode_changed', callerModeChanged);
+        io.to(validated.roomId).emit("caller_mode_changed", callerModeChanged);
 
         // Send room update
         const roomUpdate: ServerRoomUpdateEvent = {
           room: serializeRoom(room),
         };
-        io.to(validated.roomId).emit('room_update', roomUpdate);
+        io.to(validated.roomId).emit("room_update", roomUpdate);
 
-        console.log(`[Room] Caller mode changed to ${validated.callerMode} in room ${validated.roomId}`);
+        console.log(
+          `[Room] Caller mode changed to ${validated.callerMode} in room ${validated.roomId}`,
+        );
       } catch (error) {
         const errorMsg: ServerErrorEvent = {
-          message: error instanceof Error ? error.message : 'Failed to change caller mode',
-          code: 'CHANGE_CALLER_MODE_ERROR',
+          message:
+            error instanceof Error
+              ? error.message
+              : "Failed to change caller mode",
+          code: "CHANGE_CALLER_MODE_ERROR",
         };
-        socket.emit('error', errorMsg);
-        console.error('[Error] change_caller_mode:', error);
+        socket.emit("error", errorMsg);
+        console.error("[Error] change_caller_mode:", error);
       }
     });
 
     // Change caller
-    socket.on('change_caller', (data) => {
+    socket.on("change_caller", (data) => {
       try {
         const validated = ClientChangeCallerEventSchema.parse(data);
 
         const room = roomManager.getRoom(validated.roomId);
         if (!room) {
-          throw new Error('Room not found');
+          throw new Error("Room not found");
         }
 
         // Get old and new caller names for event
         const oldCaller = room.players.find((p) => p.isCaller);
-        const newCaller = room.players.find((p) => p.id === validated.targetPlayerId);
+        const newCaller = room.players.find(
+          (p) => p.id === validated.targetPlayerId,
+        );
 
         if (!oldCaller || !newCaller) {
-          throw new Error('Caller not found');
+          throw new Error("Caller not found");
         }
 
         const oldCallerId = oldCaller.id;
@@ -437,7 +466,11 @@ export function setupSocketHandlers(io: SocketServer): void {
         const newCallerName = newCaller.name;
 
         // Change the caller
-        roomManager.changeCaller(validated.roomId, socket.id, validated.targetPlayerId);
+        roomManager.changeCaller(
+          validated.roomId,
+          socket.id,
+          validated.targetPlayerId,
+        );
 
         // Send caller changed event
         const callerChanged: ServerCallerChangedEvent = {
@@ -446,39 +479,42 @@ export function setupSocketHandlers(io: SocketServer): void {
           newCallerId,
           newCallerName,
         };
-        io.to(validated.roomId).emit('caller_changed', callerChanged);
+        io.to(validated.roomId).emit("caller_changed", callerChanged);
 
         // Send room update
         const roomUpdate: ServerRoomUpdateEvent = {
           room: serializeRoom(room),
         };
-        io.to(validated.roomId).emit('room_update', roomUpdate);
+        io.to(validated.roomId).emit("room_update", roomUpdate);
 
-        console.log(`[Room] Caller changed from ${oldCallerName} to ${newCallerName} in room ${validated.roomId}`);
+        console.log(
+          `[Room] Caller changed from ${oldCallerName} to ${newCallerName} in room ${validated.roomId}`,
+        );
       } catch (error) {
         const errorMsg: ServerErrorEvent = {
-          message: error instanceof Error ? error.message : 'Failed to change caller',
-          code: 'CHANGE_CALLER_ERROR',
+          message:
+            error instanceof Error ? error.message : "Failed to change caller",
+          code: "CHANGE_CALLER_ERROR",
         };
-        socket.emit('error', errorMsg);
-        console.error('[Error] change_caller:', error);
+        socket.emit("error", errorMsg);
+        console.error("[Error] change_caller:", error);
       }
     });
 
     // Change marking mode
-    socket.on('change_marking_mode', (data) => {
+    socket.on("change_marking_mode", (data) => {
       try {
         const validated = ClientChangeMarkingModeEventSchema.parse(data);
 
         const room = roomManager.getRoom(validated.roomId);
         if (!room) {
-          throw new Error('Room not found');
+          throw new Error("Room not found");
         }
 
         // Verify host permission
         const host = room.players.find((p) => p.id === socket.id);
         if (!host || !host.isHost) {
-          throw new Error('Only host can change marking mode');
+          throw new Error("Only host can change marking mode");
         }
 
         // Update marking mode
@@ -488,44 +524,52 @@ export function setupSocketHandlers(io: SocketServer): void {
         const markingModeChanged: ServerMarkingModeChangedEvent = {
           manualMarkingMode: validated.manualMarkingMode,
         };
-        io.to(validated.roomId).emit('marking_mode_changed', markingModeChanged);
+        io.to(validated.roomId).emit(
+          "marking_mode_changed",
+          markingModeChanged,
+        );
 
         // Send room update
         const roomUpdate: ServerRoomUpdateEvent = {
           room: serializeRoom(room),
         };
-        io.to(validated.roomId).emit('room_update', roomUpdate);
+        io.to(validated.roomId).emit("room_update", roomUpdate);
 
-        console.log(`[Room] Marking mode changed to ${validated.manualMarkingMode ? 'manual' : 'auto'} in room ${validated.roomId}`);
+        console.log(
+          `[Room] Marking mode changed to ${validated.manualMarkingMode ? "manual" : "auto"} in room ${validated.roomId}`,
+        );
       } catch (error) {
         const errorMsg: ServerErrorEvent = {
-          message: error instanceof Error ? error.message : 'Failed to change marking mode',
-          code: 'CHANGE_MARKING_MODE_ERROR',
+          message:
+            error instanceof Error
+              ? error.message
+              : "Failed to change marking mode",
+          code: "CHANGE_MARKING_MODE_ERROR",
         };
-        socket.emit('error', errorMsg);
-        console.error('[Error] change_marking_mode:', error);
+        socket.emit("error", errorMsg);
+        console.error("[Error] change_marking_mode:", error);
       }
     });
 
     // Select card
-    socket.on('select_card', (data) => {
+    socket.on("select_card", (data) => {
       try {
         const validated = ClientSelectCardEventSchema.parse(data);
 
         const room = roomManager.getRoom(validated.roomId);
         if (!room) {
-          throw new Error('Room not found');
+          throw new Error("Room not found");
         }
 
         // Cannot select card if game has started
-        if (room.gameState !== 'waiting') {
-          throw new Error('Cannot select card after game has started');
+        if (room.gameState !== "waiting") {
+          throw new Error("Cannot select card after game has started");
         }
 
         // Get player
         const player = room.players.find((p) => p.id === socket.id);
         if (!player) {
-          throw new Error('Player not found in room');
+          throw new Error("Player not found in room");
         }
 
         // Initialize selectedCards if not exists
@@ -536,22 +580,24 @@ export function setupSocketHandlers(io: SocketServer): void {
         // Check if card is already selected by someone else
         const currentOwner = room.selectedCards[validated.cardId];
         if (currentOwner && currentOwner !== socket.id) {
-          throw new Error('Card already selected by another player');
+          throw new Error("Card already selected by another player");
         }
 
         // Check if player already selected this card (shouldn't happen, but just in case)
         if (currentOwner === socket.id) {
-          throw new Error('You have already selected this card');
+          throw new Error("You have already selected this card");
         }
 
         // Check if player has reached max card limit (5 cards)
-        const MAX_CARDS_PER_PLAYER = 5;
+        const MAX_CARDS_PER_PLAYER = 2;
         const playerCardCount = Object.values(room.selectedCards).filter(
-          (playerId) => playerId === socket.id
+          (playerId) => playerId === socket.id,
         ).length;
 
         if (playerCardCount >= MAX_CARDS_PER_PLAYER) {
-          throw new Error(`You can only select up to ${MAX_CARDS_PER_PLAYER} cards`);
+          throw new Error(
+            `You can only select up to ${MAX_CARDS_PER_PLAYER} cards`,
+          );
         }
 
         // Assign card to player (don't remove previous selections)
@@ -569,45 +615,48 @@ export function setupSocketHandlers(io: SocketServer): void {
           playerId: socket.id,
           playerName: player.name,
         };
-        io.to(validated.roomId).emit('card_selected', cardSelected);
+        io.to(validated.roomId).emit("card_selected", cardSelected);
 
         // Send tickets generated event (so client updates player's cards)
         const ticketsGenerated: ServerTicketsGeneratedEvent = {
           playerId: socket.id,
           tickets: player.tickets,
         };
-        socket.emit('tickets_generated', ticketsGenerated);
+        socket.emit("tickets_generated", ticketsGenerated);
 
         // Send room update
         const roomUpdate: ServerRoomUpdateEvent = {
           room: serializeRoom(room),
         };
-        io.to(validated.roomId).emit('room_update', roomUpdate);
+        io.to(validated.roomId).emit("room_update", roomUpdate);
 
-        console.log(`[Room] Card ${validated.cardId} selected by ${player.name} in room ${validated.roomId} (${player.tickets.length} total cards)`);
+        console.log(
+          `[Room] Card ${validated.cardId} selected by ${player.name} in room ${validated.roomId} (${player.tickets.length} total cards)`,
+        );
       } catch (error) {
         const errorMsg: ServerErrorEvent = {
-          message: error instanceof Error ? error.message : 'Failed to select card',
-          code: 'SELECT_CARD_ERROR',
+          message:
+            error instanceof Error ? error.message : "Failed to select card",
+          code: "SELECT_CARD_ERROR",
         };
-        socket.emit('error', errorMsg);
-        console.error('[Error] select_card:', error);
+        socket.emit("error", errorMsg);
+        console.error("[Error] select_card:", error);
       }
     });
 
     // Deselect card
-    socket.on('deselect_card', (data) => {
+    socket.on("deselect_card", (data) => {
       try {
         const validated = ClientDeselectCardEventSchema.parse(data);
 
         const room = roomManager.getRoom(validated.roomId);
         if (!room) {
-          throw new Error('Room not found');
+          throw new Error("Room not found");
         }
 
         // Cannot deselect card if game has started
-        if (room.gameState !== 'waiting') {
-          throw new Error('Cannot deselect card after game has started');
+        if (room.gameState !== "waiting") {
+          throw new Error("Cannot deselect card after game has started");
         }
 
         // Initialize selectedCards if not exists
@@ -618,13 +667,13 @@ export function setupSocketHandlers(io: SocketServer): void {
         // Check if card is owned by this player
         const cardOwner = room.selectedCards[validated.cardId];
         if (!cardOwner || cardOwner !== socket.id) {
-          throw new Error('You have not selected this card');
+          throw new Error("You have not selected this card");
         }
 
         // Get player
         const player = room.players.find((p) => p.id === socket.id);
         if (!player) {
-          throw new Error('Player not found in room');
+          throw new Error("Player not found in room");
         }
 
         // Find the index of this card in player's tickets
@@ -651,46 +700,49 @@ export function setupSocketHandlers(io: SocketServer): void {
           cardId: deselectedCardId,
           playerId: socket.id,
         };
-        io.to(validated.roomId).emit('card_deselected', cardDeselected);
+        io.to(validated.roomId).emit("card_deselected", cardDeselected);
 
         // Send updated tickets to player
         const ticketsGenerated: ServerTicketsGeneratedEvent = {
           playerId: socket.id,
           tickets: player.tickets,
         };
-        socket.emit('tickets_generated', ticketsGenerated);
+        socket.emit("tickets_generated", ticketsGenerated);
 
         // Send room update
         const roomUpdate: ServerRoomUpdateEvent = {
           room: serializeRoom(room),
         };
-        io.to(validated.roomId).emit('room_update', roomUpdate);
+        io.to(validated.roomId).emit("room_update", roomUpdate);
 
-        console.log(`[Room] Card ${deselectedCardId} deselected by player ${socket.id} in room ${validated.roomId} (${player.tickets.length} remaining)`);
+        console.log(
+          `[Room] Card ${deselectedCardId} deselected by player ${socket.id} in room ${validated.roomId} (${player.tickets.length} remaining)`,
+        );
       } catch (error) {
         const errorMsg: ServerErrorEvent = {
-          message: error instanceof Error ? error.message : 'Failed to deselect card',
-          code: 'DESELECT_CARD_ERROR',
+          message:
+            error instanceof Error ? error.message : "Failed to deselect card",
+          code: "DESELECT_CARD_ERROR",
         };
-        socket.emit('error', errorMsg);
-        console.error('[Error] deselect_card:', error);
+        socket.emit("error", errorMsg);
+        console.error("[Error] deselect_card:", error);
       }
     });
 
     // Reset game
-    socket.on('reset_game', (data) => {
+    socket.on("reset_game", (data) => {
       try {
         const validated = ClientResetGameEventSchema.parse(data);
 
         const room = roomManager.getRoom(validated.roomId);
         if (!room) {
-          throw new Error('Room not found');
+          throw new Error("Room not found");
         }
 
         // Verify host permission
         const player = room.players.find((p) => p.id === socket.id);
         if (!player || !player.isHost) {
-          throw new Error('Only host can reset the game');
+          throw new Error("Only host can reset the game");
         }
 
         // Reset the game
@@ -700,41 +752,44 @@ export function setupSocketHandlers(io: SocketServer): void {
         const gameReset: ServerGameResetEvent = {
           roomId: validated.roomId,
         };
-        io.to(validated.roomId).emit('game_reset', gameReset);
+        io.to(validated.roomId).emit("game_reset", gameReset);
 
         // Send room update
         const roomUpdate: ServerRoomUpdateEvent = {
           room: serializeRoom(room),
         };
-        io.to(validated.roomId).emit('room_update', roomUpdate);
+        io.to(validated.roomId).emit("room_update", roomUpdate);
 
         console.log(`[Game] Reset in room ${validated.roomId}`);
       } catch (error) {
         const errorMsg: ServerErrorEvent = {
-          message: error instanceof Error ? error.message : 'Failed to reset game',
-          code: 'RESET_GAME_ERROR',
+          message:
+            error instanceof Error ? error.message : "Failed to reset game",
+          code: "RESET_GAME_ERROR",
         };
-        socket.emit('error', errorMsg);
-        console.error('[Error] reset_game:', error);
+        socket.emit("error", errorMsg);
+        console.error("[Error] reset_game:", error);
       }
     });
 
     // Reconnect session
-    socket.on('reconnect_session', (data) => {
+    socket.on("reconnect_session", (data) => {
       try {
         const { sessionId, playerName } = data;
 
-        console.log(`[Socket] Reconnect session request: ${sessionId} for ${playerName}`);
+        console.log(
+          `[Socket] Reconnect session request: ${sessionId} for ${playerName}`,
+        );
 
         const result = roomManager.reconnectSession(sessionId, socket.id);
 
         if (!result) {
           // Session not found or expired
           const errorMsg: ServerErrorEvent = {
-            message: 'Session not found or expired',
-            code: 'SESSION_NOT_FOUND',
+            message: "Session not found or expired",
+            code: "SESSION_NOT_FOUND",
           };
-          socket.emit('session_reconnect_failed', errorMsg);
+          socket.emit("session_reconnect_failed", errorMsg);
           console.log(`[Socket] Session reconnection failed: ${sessionId}`);
           return;
         }
@@ -745,7 +800,7 @@ export function setupSocketHandlers(io: SocketServer): void {
         socket.join(room.id);
 
         // Notify success
-        socket.emit('session_reconnected', {
+        socket.emit("session_reconnected", {
           roomId: room.id,
           playerId: socket.id,
         });
@@ -754,28 +809,33 @@ export function setupSocketHandlers(io: SocketServer): void {
         const roomUpdate: ServerRoomUpdateEvent = {
           room: serializeRoom(room),
         };
-        io.to(room.id).emit('room_update', roomUpdate);
+        io.to(room.id).emit("room_update", roomUpdate);
 
-        console.log(`[Socket] Session reconnected: ${playerName} (${oldId} -> ${socket.id}) in room ${room.id}`);
+        console.log(
+          `[Socket] Session reconnected: ${playerName} (${oldId} -> ${socket.id}) in room ${room.id}`,
+        );
       } catch (error) {
         const errorMsg: ServerErrorEvent = {
-          message: error instanceof Error ? error.message : 'Failed to reconnect session',
-          code: 'RECONNECT_SESSION_ERROR',
+          message:
+            error instanceof Error
+              ? error.message
+              : "Failed to reconnect session",
+          code: "RECONNECT_SESSION_ERROR",
         };
-        socket.emit('session_reconnect_failed', errorMsg);
-        console.error('[Error] reconnect_session:', error);
+        socket.emit("session_reconnect_failed", errorMsg);
+        console.error("[Error] reconnect_session:", error);
       }
     });
 
     // Rename player
-    socket.on('rename_player', (data) => {
+    socket.on("rename_player", (data) => {
       try {
         const validated = ClientRenamePlayerEventSchema.parse(data);
 
         const result = roomManager.renamePlayer(
           validated.roomId,
           socket.id,
-          validated.newName
+          validated.newName,
         );
 
         // Send player renamed event
@@ -784,27 +844,30 @@ export function setupSocketHandlers(io: SocketServer): void {
           oldName: result.oldName,
           newName: validated.newName,
         };
-        io.to(validated.roomId).emit('player_renamed', playerRenamed);
+        io.to(validated.roomId).emit("player_renamed", playerRenamed);
 
         // Send room update
         const roomUpdate: ServerRoomUpdateEvent = {
           room: serializeRoom(result.room),
         };
-        io.to(validated.roomId).emit('room_update', roomUpdate);
+        io.to(validated.roomId).emit("room_update", roomUpdate);
 
-        console.log(`[Room] Player renamed: ${result.oldName} -> ${validated.newName} in room ${validated.roomId}`);
+        console.log(
+          `[Room] Player renamed: ${result.oldName} -> ${validated.newName} in room ${validated.roomId}`,
+        );
       } catch (error) {
         const errorMsg: ServerErrorEvent = {
-          message: error instanceof Error ? error.message : 'Failed to rename player',
-          code: 'RENAME_PLAYER_ERROR',
+          message:
+            error instanceof Error ? error.message : "Failed to rename player",
+          code: "RENAME_PLAYER_ERROR",
         };
-        socket.emit('error', errorMsg);
-        console.error('[Error] rename_player:', error);
+        socket.emit("error", errorMsg);
+        console.error("[Error] rename_player:", error);
       }
     });
 
     // Disconnect
-    socket.on('disconnect', () => {
+    socket.on("disconnect", () => {
       const result = roomManager.disconnectPlayer(socket.id);
 
       if (result) {
@@ -814,22 +877,29 @@ export function setupSocketHandlers(io: SocketServer): void {
         const roomUpdate: ServerRoomUpdateEvent = {
           room: serializeRoom(room),
         };
-        io.to(roomId).emit('room_update', roomUpdate);
+        io.to(roomId).emit("room_update", roomUpdate);
 
-        console.log(`[Socket] Client disconnected: ${socket.id} from room ${roomId}`);
+        console.log(
+          `[Socket] Client disconnected: ${socket.id} from room ${roomId}`,
+        );
       } else {
-        console.log(`[Socket] Client disconnected: ${socket.id} (not in any room)`);
+        console.log(
+          `[Socket] Client disconnected: ${socket.id} (not in any room)`,
+        );
       }
     });
   });
 
   // Periodic cleanup
-  setInterval(() => {
-    const cleaned = roomManager.cleanup();
-    if (cleaned > 0) {
-      console.log(`[Cleanup] Removed ${cleaned} empty rooms`);
-    }
-  }, 5 * 60 * 1000); // Every 5 minutes
+  setInterval(
+    () => {
+      const cleaned = roomManager.cleanup();
+      if (cleaned > 0) {
+        console.log(`[Cleanup] Removed ${cleaned} empty rooms`);
+      }
+    },
+    5 * 60 * 1000,
+  ); // Every 5 minutes
 }
 
 /**
@@ -842,7 +912,11 @@ function setupMachineCallingListener(io: SocketServer, roomId: string): void {
   const checkInterval = setInterval(() => {
     const room = roomManager.getRoom(roomId);
 
-    if (!room || room.gameState !== 'playing' || room.callerMode !== 'machine') {
+    if (
+      !room ||
+      room.gameState !== "playing" ||
+      room.callerMode !== "machine"
+    ) {
       clearInterval(checkInterval);
       return;
     }
@@ -856,16 +930,18 @@ function setupMachineCallingListener(io: SocketServer, roomId: string): void {
         calledHistory: room.calledHistory,
         remainingCount: 90 - room.calledHistory.length,
       };
-      io.to(roomId).emit('number_called', numberCalled);
+      io.to(roomId).emit("number_called", numberCalled);
 
       // Send room update
       const roomUpdate: ServerRoomUpdateEvent = {
         room: serializeRoom(room),
       };
-      io.to(roomId).emit('room_update', roomUpdate);
+      io.to(roomId).emit("room_update", roomUpdate);
 
       lastCalledLength = room.calledHistory.length;
-      console.log(`[Game] Machine called number ${newNumber} in room ${roomId}`);
+      console.log(
+        `[Game] Machine called number ${newNumber} in room ${roomId}`,
+      );
     }
   }, 100); // Check every 100ms
 }

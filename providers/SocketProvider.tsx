@@ -32,7 +32,7 @@ interface SocketContextValue {
   generateTickets: (cardCount: number, boardsPerCard: number) => void;
   leaveRoom: () => void;
   kickPlayer: (playerId: string) => void;
-  changeCallerMode: (mode: CallerMode) => void;
+  changeCallerMode: (mode: CallerMode, interval?: number) => void;
   changeCaller: (targetPlayerId: string) => void;
   changeMarkingMode: (manualMarkingMode: boolean) => void;
   resetGame: () => void;

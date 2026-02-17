@@ -64,7 +64,7 @@ export interface UseSocketReturn {
   generateTickets: (cardCount: number, boardsPerCard: number) => void;
   leaveRoom: () => void;
   kickPlayer: (playerId: string) => void;
-  changeCallerMode: (mode: CallerMode) => void;
+  changeCallerMode: (mode: CallerMode, interval?: number) => void;
   changeCaller: (targetPlayerId: string) => void;
   changeMarkingMode: (manualMarkingMode: boolean) => void;
   resetGame: () => void;
@@ -560,7 +560,7 @@ export function useSocket(): UseSocketReturn {
   /**
    * 9. Change caller mode (host only)
    */
-  const changeCallerMode = (mode: CallerMode) => {
+  const changeCallerMode = (mode: CallerMode, interval?: number) => {
     const socket = socketRef.current;
     if (!socket || !socket.connected) {
       setError('Not connected to server');
@@ -572,11 +572,11 @@ export function useSocket(): UseSocketReturn {
       return;
     }
 
-    console.log('[Socket] Changing caller mode:', { roomId, mode });
+    console.log('[Socket] Changing caller mode:', { roomId, mode, interval });
     socket.emit('change_caller_mode', {
       roomId,
       callerMode: mode,
-      machineInterval: mode === 'machine' ? 3000 : undefined,
+      machineInterval: interval,
     });
   };
 

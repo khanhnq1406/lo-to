@@ -57,7 +57,7 @@ const mySelectedCardIds = Object.entries(selectedCards)
   .map(([cardId]) => parseInt(cardId, 10));
 
 // Max 5 cards per player
-const MAX_CARDS_PER_PLAYER = 5;
+const MAX_CARDS_PER_PLAYER = 2;
 
 // Check limit before allowing selection
 if (mySelectedCardIds.length >= MAX_CARDS_PER_PLAYER) {

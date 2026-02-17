@@ -130,7 +130,7 @@ Open **two browser windows**:
 ```
 ┌────────────────────────────────────────┐
 │ Chọn Phiếu Dò                          │
-│ Chọn từ 1-5 phiếu dò trong 16 phiếu dò          │
+│ Chọn từ 1-2 phiếu dò trong 16 phiếu dò          │
 │                                        │
 │ [🎴 1] [🎴 2] [🎴 3] [🎴 4] ...      │
 │ [🎴 9] [🎴10] [🎴11] [🎴12] ...      │

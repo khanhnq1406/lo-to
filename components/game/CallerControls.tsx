@@ -15,7 +15,7 @@
 
 'use client';
 
-import { memo, useState } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import type { CallerMode, GameState, Player } from '@/types';
 
@@ -81,6 +81,12 @@ export const CallerControls = memo(function CallerControls({
 }: CallerControlsProps) {
   const [selectedMode, setSelectedMode] = useState<CallerMode>(callerMode);
   const [selectedInterval, setSelectedInterval] = useState<number>(machineInterval / 1000); // Convert to seconds
+
+  // Sync local state with props when they change
+  useEffect(() => {
+    setSelectedMode(callerMode);
+    setSelectedInterval(machineInterval / 1000);
+  }, [callerMode, machineInterval]);
 
   // Get current caller
   const currentCaller = players.find((p) => p.isCaller);

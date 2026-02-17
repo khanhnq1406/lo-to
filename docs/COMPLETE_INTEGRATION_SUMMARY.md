@@ -97,7 +97,7 @@ server/
 ```
 ┌──────────────────────────────────────────┐
 │ Chọn Phiếu Dò                            │
-│ Chọn từ 1-5 phiếu dò trong 16 phiếu dò            │
+│ Chọn từ 1-2 phiếu dò trong 16 phiếu dò            │
 │                                          │
 │ [IMG1] [IMG2] [IMG3] [IMG4] [IMG5] ...  │
 │ [IMG9] [IMG10][IMG11][IMG12][IMG13]...  │

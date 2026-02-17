@@ -252,8 +252,8 @@ export default function RoomPage() {
   }, [resetGame]);
 
   const handleChangeCallerMode = useCallback(
-    (mode: "machine" | "manual", _interval?: number) => {
-      changeCallerMode(mode);
+    (mode: "machine" | "manual", interval?: number) => {
+      changeCallerMode(mode, interval);
     },
     [changeCallerMode],
   );

@@ -44,7 +44,7 @@ export function CardSelector({
     .filter(([_, playerId]) => playerId === currentPlayerId)
     .map(([cardId]) => parseInt(cardId, 10));
 
-  const MAX_CARDS_PER_PLAYER = 5;
+  const MAX_CARDS_PER_PLAYER = 2;
 
   const getPlayerName = (playerId: string): string => {
     // First try to find player in current players list
@@ -106,7 +106,7 @@ export function CardSelector({
       <div className="mb-4">
         <h2 className="text-2xl font-bold text-gray-800 mb-2">Chọn Phiếu Dò</h2>
         <p className="text-gray-600">
-          Chọn từ 1-5 phiếu dò trong 16 phiếu dò để chơi. Mỗi phiếu dò chỉ có
+          Chọn từ 1-2 phiếu dò trong 16 phiếu dò để chơi. Mỗi phiếu dò chỉ có
           thể được chọn bởi 1 người chơi.
         </p>
         {mySelectedCardIds.length > 0 && (
