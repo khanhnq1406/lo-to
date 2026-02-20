@@ -54,7 +54,7 @@ export const CallerPanel = memo(function CallerPanel({
   className = "",
 }: CallerPanelProps) {
   // Socket actions
-  const { startGame, callNumber, changeCallerMode, changeCaller } = useSocket();
+  const { startGame, callNumber, changeCallerMode, changeCaller, pauseMachine, resumeMachine } = useSocket();
 
   // Store state
   const gameState = useGameState();
@@ -68,6 +68,7 @@ export const CallerPanel = memo(function CallerPanel({
   const soundMode = useSoundMode();
   const reset = useGameStore((state) => state.reset);
   const room = useGameStore((state) => state.room);
+  const machinePaused = useGameStore((state) => state.room?.machinePaused ?? false);
 
   // Compute remaining numbers with useMemo to avoid infinite loops
   const remainingNumbers = useMemo(() => {
@@ -271,6 +272,7 @@ export const CallerPanel = memo(function CallerPanel({
             gameState={gameState}
             callerMode={callerMode}
             machineInterval={machineInterval}
+            machinePaused={machinePaused}
             isHost={isHost}
             isCaller={isCaller}
             players={room?.players || []}
@@ -279,6 +281,8 @@ export const CallerPanel = memo(function CallerPanel({
             onResetGame={handleResetGame}
             onChangeCallerMode={handleChangeCallerMode}
             onChangeCaller={changeCaller}
+            onPauseMachine={pauseMachine}
+            onResumeMachine={resumeMachine}
           />
         </motion.div>
       </div>

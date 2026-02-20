@@ -39,6 +39,8 @@ interface SocketContextValue {
   changeVisibilitySettings: (showCurrentNumber?: boolean, showHistory?: boolean) => void;
   resetGame: () => void;
   renamePlayer: (newName: string) => void;
+  pauseMachine: () => void;
+  resumeMachine: () => void;
 }
 
 const SocketContext = createContext<SocketContextValue | null>(null);
@@ -211,6 +213,16 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
     socket.on('player_renamed', (data) => {
       console.log('[Socket Provider] Player renamed from', data.oldName, 'to', data.newName);
+    });
+
+    socket.on('machine_paused', (data) => {
+      console.log('[Socket Provider] Machine paused in room:', data.roomId);
+      // Room update will handle state change
+    });
+
+    socket.on('machine_resumed', (data) => {
+      console.log('[Socket Provider] Machine resumed in room:', data.roomId);
+      // Room update will handle state change
     });
 
     // Session reconnection success
@@ -483,6 +495,36 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     socket.emit('change_visibility_settings', { roomId, showCurrentNumber, showHistory });
   };
 
+  const pauseMachine = () => {
+    const socket = socketRef.current;
+    if (!socket || !socket.connected) {
+      setError('Not connected to server');
+      return;
+    }
+    if (!roomId) {
+      setError('Not in a room');
+      return;
+    }
+
+    console.log('[Socket Provider] Pausing machine mode');
+    socket.emit('pause_machine', { roomId });
+  };
+
+  const resumeMachine = () => {
+    const socket = socketRef.current;
+    if (!socket || !socket.connected) {
+      setError('Not connected to server');
+      return;
+    }
+    if (!roomId) {
+      setError('Not in a room');
+      return;
+    }
+
+    console.log('[Socket Provider] Resuming machine mode');
+    socket.emit('resume_machine', { roomId });
+  };
+
   const value: SocketContextValue = {
     socket: socketRef.current,
     connected,
@@ -502,6 +544,8 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     changeVisibilitySettings,
     resetGame,
     renamePlayer,
+    pauseMachine,
+    resumeMachine,
   };
 
   return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>;

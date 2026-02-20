@@ -61,6 +61,11 @@ export class GameManager {
           return;
         }
 
+        // Check if machine is paused
+        if (room.machinePaused) {
+          return; // Don't call numbers when paused, but keep interval running
+        }
+
         // Get remaining numbers
         const calledSet = new Set(room.calledHistory);
         const remaining = getRemainingNumbers(calledSet);
@@ -274,8 +279,55 @@ export class GameManager {
     room.currentNumber = null;
     room.calledHistory = [];
     room.winner = null;
+    room.machinePaused = false;
 
     // Keep players and their cards
+  }
+
+  /**
+   * Pause machine mode auto-calling
+   */
+  pauseMachineCalling(room: Room, hostId: string): void {
+    // Verify host permission
+    const host = room.players.find((p) => p.id === hostId);
+    if (!host || !host.isHost) {
+      throw new Error('Only host can pause machine calling');
+    }
+
+    // Can only pause in machine mode
+    if (room.callerMode !== 'machine') {
+      throw new Error('Can only pause in machine mode');
+    }
+
+    // Can only pause when playing
+    if (room.gameState !== 'playing') {
+      throw new Error('Can only pause during active game');
+    }
+
+    room.machinePaused = true;
+  }
+
+  /**
+   * Resume machine mode auto-calling
+   */
+  resumeMachineCalling(room: Room, hostId: string): void {
+    // Verify host permission
+    const host = room.players.find((p) => p.id === hostId);
+    if (!host || !host.isHost) {
+      throw new Error('Only host can resume machine calling');
+    }
+
+    // Can only resume in machine mode
+    if (room.callerMode !== 'machine') {
+      throw new Error('Can only resume in machine mode');
+    }
+
+    // Can only resume when playing
+    if (room.gameState !== 'playing') {
+      throw new Error('Can only resume during active game');
+    }
+
+    room.machinePaused = false;
   }
 
   /**

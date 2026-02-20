@@ -53,6 +53,7 @@ export class RoomManager {
       manualMarkingMode: true, // Default to manual-mark
       showCurrentNumber: false, // Default to show current number
       showHistory: false, // Default to show history
+      machinePaused: false, // Default to not paused
     };
 
     // Validate room before storing

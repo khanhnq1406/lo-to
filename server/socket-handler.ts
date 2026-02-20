@@ -21,6 +21,8 @@ import {
   ClientChangeMarkingModeEventSchema,
   ClientChangeVisibilitySettingsEventSchema,
   ClientRenamePlayerEventSchema,
+  ClientPauseMachineEventSchema,
+  ClientResumeMachineEventSchema,
   ServerRoomUpdateEvent,
   ServerPlayerJoinedEvent,
   ServerPlayerLeftEvent,
@@ -37,6 +39,8 @@ import {
   ServerMarkingModeChangedEvent,
   ServerVisibilitySettingsChangedEvent,
   ServerPlayerRenamedEvent,
+  ServerMachinePausedEvent,
+  ServerMachineResumedEvent,
   serializeRoom,
 } from "../types/index";
 import { roomManager } from "./room-manager";
@@ -921,6 +925,78 @@ export function setupSocketHandlers(io: SocketServer): void {
         };
         socket.emit("error", errorMsg);
         console.error("[Error] rename_player:", error);
+      }
+    });
+
+    // Pause machine
+    socket.on("pause_machine", (data) => {
+      try {
+        const validated = ClientPauseMachineEventSchema.parse(data);
+
+        const room = roomManager.getRoom(validated.roomId);
+        if (!room) {
+          throw new Error("Room not found");
+        }
+
+        gameManager.pauseMachineCalling(room, socket.id);
+
+        // Send machine paused event
+        const machinePaused: ServerMachinePausedEvent = {
+          roomId: validated.roomId,
+        };
+        io.to(validated.roomId).emit("machine_paused", machinePaused);
+
+        // Send room update
+        const roomUpdate: ServerRoomUpdateEvent = {
+          room: serializeRoom(room),
+        };
+        io.to(validated.roomId).emit("room_update", roomUpdate);
+
+        console.log(`[Game] Machine paused in room ${validated.roomId}`);
+      } catch (error) {
+        const errorMsg: ServerErrorEvent = {
+          message:
+            error instanceof Error ? error.message : "Failed to pause machine",
+          code: "PAUSE_MACHINE_ERROR",
+        };
+        socket.emit("error", errorMsg);
+        console.error("[Error] pause_machine:", error);
+      }
+    });
+
+    // Resume machine
+    socket.on("resume_machine", (data) => {
+      try {
+        const validated = ClientResumeMachineEventSchema.parse(data);
+
+        const room = roomManager.getRoom(validated.roomId);
+        if (!room) {
+          throw new Error("Room not found");
+        }
+
+        gameManager.resumeMachineCalling(room, socket.id);
+
+        // Send machine resumed event
+        const machineResumed: ServerMachineResumedEvent = {
+          roomId: validated.roomId,
+        };
+        io.to(validated.roomId).emit("machine_resumed", machineResumed);
+
+        // Send room update
+        const roomUpdate: ServerRoomUpdateEvent = {
+          room: serializeRoom(room),
+        };
+        io.to(validated.roomId).emit("room_update", roomUpdate);
+
+        console.log(`[Game] Machine resumed in room ${validated.roomId}`);
+      } catch (error) {
+        const errorMsg: ServerErrorEvent = {
+          message:
+            error instanceof Error ? error.message : "Failed to resume machine",
+          code: "RESUME_MACHINE_ERROR",
+        };
+        socket.emit("error", errorMsg);
+        console.error("[Error] resume_machine:", error);
       }
     });
 

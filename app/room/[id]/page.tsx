@@ -88,6 +88,8 @@ export default function RoomPage() {
     changeMarkingMode,
     changeVisibilitySettings,
     resetGame,
+    pauseMachine,
+    resumeMachine,
   } = useSocket();
 
   // Store state
@@ -530,6 +532,7 @@ export default function RoomPage() {
                 gameState={gameState}
                 callerMode={callerMode}
                 machineInterval={machineInterval}
+                machinePaused={room.machinePaused}
                 isHost={isHost}
                 isCaller={isCaller}
                 players={players}
@@ -541,6 +544,8 @@ export default function RoomPage() {
                 onChangeCallerMode={handleChangeCallerMode}
                 onChangeCaller={changeCaller}
                 onChangeVisibilitySettings={handleChangeVisibilitySettings}
+                onPauseMachine={pauseMachine}
+                onResumeMachine={resumeMachine}
               />
             </div>
 
@@ -784,6 +789,7 @@ export default function RoomPage() {
                       gameState={gameState}
                       callerMode={callerMode}
                       machineInterval={machineInterval}
+                      machinePaused={room.machinePaused}
                       isHost={isHost}
                       isCaller={isCaller}
                       players={players}
@@ -797,6 +803,8 @@ export default function RoomPage() {
                       onChangeVisibilitySettings={
                         handleChangeVisibilitySettings
                       }
+                      onPauseMachine={pauseMachine}
+                      onResumeMachine={resumeMachine}
                     />
                   </div>
                 )}

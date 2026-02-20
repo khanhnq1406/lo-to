@@ -333,6 +333,11 @@ export interface Room {
    * Set by room host, applies to all players
    */
   showHistory: boolean;
+
+  /** Machine mode paused state (only relevant when callerMode is 'machine')
+   * When true, auto-calling is temporarily stopped
+   */
+  machinePaused: boolean;
 }
 
 export const RoomSchema = z.object({
@@ -348,7 +353,8 @@ export const RoomSchema = z.object({
   selectedCards: z.record(z.string(), z.string()).optional().default({}),
   manualMarkingMode: z.boolean().default(true),
   showCurrentNumber: z.boolean().default(false),
-  showHistory: z.boolean().default(false)
+  showHistory: z.boolean().default(false),
+  machinePaused: z.boolean().default(false)
 }).refine(
   (room) => {
     // Called history should not have duplicates
@@ -595,6 +601,28 @@ export const ClientChangeVisibilitySettingsEventSchema = z.object({
   showHistory: z.boolean().optional()
 });
 
+/**
+ * Host pauses machine mode
+ */
+export interface ClientPauseMachineEvent {
+  roomId: string;
+}
+
+export const ClientPauseMachineEventSchema = z.object({
+  roomId: z.string().min(1)
+});
+
+/**
+ * Host resumes machine mode
+ */
+export interface ClientResumeMachineEvent {
+  roomId: string;
+}
+
+export const ClientResumeMachineEventSchema = z.object({
+  roomId: z.string().min(1)
+});
+
 // ============================================================================
 // SOCKET EVENT TYPES - SERVER TO CLIENT
 // ============================================================================
@@ -620,7 +648,8 @@ export const ServerRoomUpdateEventSchema = z.object({
     selectedCards: z.record(z.string(), z.string()).optional().default({}),
     manualMarkingMode: z.boolean().default(true),
     showCurrentNumber: z.boolean().default(false),
-    showHistory: z.boolean().default(false)
+    showHistory: z.boolean().default(false),
+    machinePaused: z.boolean().default(false)
   })
 });
 
@@ -821,6 +850,28 @@ export interface ServerVisibilitySettingsChangedEvent {
 export const ServerVisibilitySettingsChangedEventSchema = z.object({
   showCurrentNumber: z.boolean(),
   showHistory: z.boolean()
+});
+
+/**
+ * Server confirms machine paused
+ */
+export interface ServerMachinePausedEvent {
+  roomId: string;
+}
+
+export const ServerMachinePausedEventSchema = z.object({
+  roomId: z.string().min(1)
+});
+
+/**
+ * Server confirms machine resumed
+ */
+export interface ServerMachineResumedEvent {
+  roomId: string;
+}
+
+export const ServerMachineResumedEventSchema = z.object({
+  roomId: z.string().min(1)
 });
 
 /**
