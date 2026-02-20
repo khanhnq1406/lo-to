@@ -18,6 +18,7 @@
 import { memo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import type { CallerMode, GameState, Player } from "@/types";
+import { useGameStore, useSoundMode } from "@/store/useGameStore";
 
 // ============================================================================
 // PROPS
@@ -98,6 +99,10 @@ export const CallerControls = memo(function CallerControls({
   const [selectedInterval, setSelectedInterval] = useState<number>(
     machineInterval / 1000,
   ); // Convert to seconds
+
+  // Get sound mode from store
+  const soundMode = useSoundMode();
+  const setSoundMode = useGameStore((state) => state.setSoundMode);
 
   // Sync local state with props when they change
   useEffect(() => {
@@ -289,6 +294,68 @@ export const CallerControls = memo(function CallerControls({
           )}
         </div>
       )}
+
+      {/* Sound Mode Settings */}
+      <div className="space-y-3 pt-2 border-t border-loto-green/20">
+        <label className="block text-sm font-bold text-loto-green">
+          Âm thanh gọi số:
+        </label>
+
+        <div className="grid grid-cols-3 gap-2">
+          <button
+            onClick={() => setSoundMode("voice")}
+            className={`
+              px-3 py-2 rounded-lg font-semibold text-xs
+              transition-all flex flex-col items-center gap-1
+              ${
+                soundMode === "voice"
+                  ? "bg-loto-green text-paper shadow-md"
+                  : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+              }
+            `}
+          >
+            <span className="text-lg">🔊</span>
+            <span>Giọng nói</span>
+          </button>
+
+          <button
+            onClick={() => setSoundMode("beep")}
+            className={`
+              px-3 py-2 rounded-lg font-semibold text-xs
+              transition-all flex flex-col items-center gap-1
+              ${
+                soundMode === "beep"
+                  ? "bg-loto-green text-paper shadow-md"
+                  : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+              }
+            `}
+          >
+            <span className="text-lg">🔔</span>
+            <span>Tiếng bíp</span>
+          </button>
+
+          <button
+            onClick={() => setSoundMode("silent")}
+            className={`
+              px-3 py-2 rounded-lg font-semibold text-xs
+              transition-all flex flex-col items-center gap-1
+              ${
+                soundMode === "silent"
+                  ? "bg-loto-green text-paper shadow-md"
+                  : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+              }
+            `}
+          >
+            <span className="text-lg">🔇</span>
+            <span>Im lặng</span>
+          </button>
+        </div>
+
+        <p className="text-xs text-gray-500 italic">
+          Giọng nói: Đọc số bằng tiếng Việt • Tiếng bíp: Âm thanh đơn giản • Im
+          lặng: Không có âm thanh
+        </p>
+      </div>
 
       {/* Visibility Settings (Host only) */}
       {isHost && onChangeVisibilitySettings && (

@@ -53,6 +53,7 @@ import { RoomInfo } from "@/components/game/RoomInfo";
 import { CallerControls } from "@/components/game/CallerControls";
 import { JoinRoomNameModal } from "@/components/game/JoinRoomNameModal";
 import { useCardSelection } from "@/hooks/useCardSelection";
+import { useNumberSound } from "@/hooks/useNumberSound";
 import { cn } from "@/lib/utils";
 import {
   cachePlayerName,
@@ -69,6 +70,9 @@ export default function RoomPage() {
   const router = useRouter();
   const params = useParams();
   const roomId = params.id as string;
+
+  // Enable number sound when numbers are called
+  useNumberSound();
 
   // Socket connection and actions
   const {

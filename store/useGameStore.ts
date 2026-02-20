@@ -58,6 +58,9 @@ interface GameStore {
   /** Sound effects enabled */
   soundEnabled: boolean;
 
+  /** Sound mode: voice (TTS), beep (tone), or silent */
+  soundMode: 'voice' | 'beep' | 'silent';
+
   /** Manual marking mode (false = auto-mark, true = manual-mark)
    * @deprecated Now controlled by room host via room.manualMarkingMode
    * Kept for backward compatibility only
@@ -152,6 +155,11 @@ interface GameStore {
    * Set sound enabled explicitly
    */
   setSoundEnabled: (enabled: boolean) => void;
+
+  /**
+   * Set sound mode (voice/beep/silent)
+   */
+  setSoundMode: (mode: 'voice' | 'beep' | 'silent') => void;
 
   /**
    * Toggle manual marking mode
@@ -259,6 +267,7 @@ export const useGameStore = create<GameStore>()(
       ...initialState,
       darkMode: false,
       soundEnabled: true,
+      soundMode: 'voice', // Default to voice mode (TTS)
       manualMarkingMode: true, // Default but not used (room.manualMarkingMode is the source of truth)
 
       // ===========================
@@ -449,6 +458,10 @@ export const useGameStore = create<GameStore>()(
         set({ soundEnabled: enabled });
       },
 
+      setSoundMode: (mode) => {
+        set({ soundMode: mode });
+      },
+
       toggleManualMarkingMode: () => {
         set((state) => ({ manualMarkingMode: !state.manualMarkingMode }));
       },
@@ -474,11 +487,12 @@ export const useGameStore = create<GameStore>()(
       // ===========================
 
       reset: () => {
-        // Reset everything except persisted preferences (darkMode, soundEnabled)
+        // Reset everything except persisted preferences (darkMode, soundEnabled, soundMode)
         set((state) => ({
           ...initialState,
           darkMode: state.darkMode,
           soundEnabled: state.soundEnabled,
+          soundMode: state.soundMode,
         }));
       },
 
@@ -560,6 +574,7 @@ export const useGameStore = create<GameStore>()(
       partialize: (state) => ({
         darkMode: state.darkMode,
         soundEnabled: state.soundEnabled,
+        soundMode: state.soundMode,
       }),
     }
   )
@@ -685,6 +700,11 @@ export const useDarkMode = () => useGameStore((state) => state.darkMode);
  * Get sound enabled
  */
 export const useSoundEnabled = () => useGameStore((state) => state.soundEnabled);
+
+/**
+ * Get sound mode
+ */
+export const useSoundMode = () => useGameStore((state) => state.soundMode);
 
 /**
  * Get connecting state

@@ -30,6 +30,7 @@ import {
   useCallerMode,
   useMachineInterval,
   useSoundEnabled,
+  useSoundMode,
 } from "@/store/useGameStore";
 import { CurrentNumber } from "./CurrentNumber";
 import { CallerControls } from "./CallerControls";
@@ -64,6 +65,7 @@ export const CallerPanel = memo(function CallerPanel({
   const callerMode = useCallerMode();
   const machineInterval = useMachineInterval();
   const soundEnabled = useSoundEnabled();
+  const soundMode = useSoundMode();
   const reset = useGameStore((state) => state.reset);
   const room = useGameStore((state) => state.room);
 
@@ -76,9 +78,9 @@ export const CallerPanel = memo(function CallerPanel({
   // Audio context for sound effects
   const audioContextRef = useRef<AudioContext | null>(null);
 
-  // Initialize audio context
+  // Initialize audio context for beep mode
   useEffect(() => {
-    if (typeof window !== "undefined" && soundEnabled) {
+    if (typeof window !== "undefined" && soundEnabled && soundMode === "beep") {
       audioContextRef.current = new (
         window.AudioContext || (window as any).webkitAudioContext
       )();
@@ -86,9 +88,9 @@ export const CallerPanel = memo(function CallerPanel({
     return () => {
       audioContextRef.current?.close();
     };
-  }, [soundEnabled]);
+  }, [soundEnabled, soundMode]);
 
-  // Play beep sound when number is called
+  // Play beep sound
   const playBeep = useCallback(() => {
     if (!soundEnabled || !audioContextRef.current) return;
 
@@ -114,12 +116,63 @@ export const CallerPanel = memo(function CallerPanel({
     }
   }, [soundEnabled]);
 
-  // Play sound when current number changes
-  useEffect(() => {
-    if (currentNumber !== null) {
+  // Play voice announcement using Web Speech API
+  const playVoice = useCallback((number: number) => {
+    if (typeof window === "undefined") return;
+
+    try {
+      // Check if speech synthesis is supported
+      if (!("speechSynthesis" in window)) {
+        console.warn("Speech synthesis not supported, falling back to beep");
+        playBeep();
+        return;
+      }
+
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+
+      // Wait a tiny bit for cancel to complete (Chrome quirk)
+      setTimeout(() => {
+        // Create utterance
+        const utterance = new SpeechSynthesisUtterance(number.toString());
+
+        // Configure Vietnamese voice
+        utterance.lang = "vi-VN";
+        utterance.rate = 0.9; // Slightly slower for clarity
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
+
+        // Add error handler
+        utterance.onerror = (event) => {
+          console.error("Speech synthesis error:", event);
+          playBeep();
+        };
+
+        // Speak the number
+        window.speechSynthesis.speak(utterance);
+      }, 50);
+    } catch (error) {
+      console.error("Error playing voice:", error);
+      // Fallback to beep on error
       playBeep();
     }
-  }, [currentNumber, playBeep]);
+  }, [playBeep]);
+
+  // Play sound based on mode when current number changes
+  useEffect(() => {
+    if (currentNumber === null) return;
+
+    // Check sound mode (independent of soundEnabled for backward compatibility)
+    if (soundMode === "voice") {
+      playVoice(currentNumber);
+    } else if (soundMode === "beep") {
+      // Only check soundEnabled for beep mode
+      if (soundEnabled) {
+        playBeep();
+      }
+    }
+    // Silent mode: do nothing
+  }, [currentNumber, soundEnabled, soundMode, playVoice, playBeep]);
 
   // Handle start game
   const handleStartGame = useCallback(() => {
