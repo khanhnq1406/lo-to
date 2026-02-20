@@ -36,6 +36,7 @@ import { CurrentNumber } from "./CurrentNumber";
 import { CallerControls } from "./CallerControls";
 import { CalledHistory } from "./CalledHistory";
 import { motion } from "framer-motion";
+import { useSpeechSynthesis } from "@/hooks/useSpeechSynthesis";
 
 // ============================================================================
 // PROPS
@@ -79,6 +80,9 @@ export const CallerPanel = memo(function CallerPanel({
   // Audio context for sound effects
   const audioContextRef = useRef<AudioContext | null>(null);
 
+  // Speech synthesis hook
+  const { speak, initialize, hasUserGesture, isSupported: isSpeechSupported } = useSpeechSynthesis();
+
   // Initialize audio context for beep mode
   useEffect(() => {
     if (typeof window !== "undefined" && soundEnabled && soundMode === "beep") {
@@ -119,66 +123,52 @@ export const CallerPanel = memo(function CallerPanel({
 
   // Play voice announcement using Web Speech API
   const playVoice = useCallback((number: number) => {
-    if (typeof window === "undefined") return;
+    console.log("[CallerPanel] playVoice called with number:", number, "isSpeechSupported:", isSpeechSupported);
 
-    try {
-      // Check if speech synthesis is supported
-      if (!("speechSynthesis" in window)) {
-        console.warn("Speech synthesis not supported, falling back to beep");
-        playBeep();
-        return;
-      }
+    if (!isSpeechSupported) {
+      console.warn("[CallerPanel] Speech synthesis not supported, falling back to beep");
+      playBeep();
+      return;
+    }
 
-      // Cancel any ongoing speech
-      window.speechSynthesis.cancel();
-
-      // Wait a tiny bit for cancel to complete (Chrome quirk)
-      setTimeout(() => {
-        // Create utterance
-        const utterance = new SpeechSynthesisUtterance(number.toString());
-
-        // Configure Vietnamese voice
-        utterance.lang = "vi-VN";
-        utterance.rate = 0.9; // Slightly slower for clarity
-        utterance.pitch = 1.0;
-        utterance.volume = 1.0;
-
-        // Add error handler
-        utterance.onerror = (event) => {
-          console.error("Speech synthesis error:", event);
-          playBeep();
-        };
-
-        // Speak the number
-        window.speechSynthesis.speak(utterance);
-      }, 50);
-    } catch (error) {
-      console.error("Error playing voice:", error);
+    const success = speak(number.toString(), 'vi-VN');
+    if (!success) {
       // Fallback to beep on error
+      console.warn("[CallerPanel] speak() returned false, falling back to beep");
       playBeep();
     }
-  }, [playBeep]);
+  }, [speak, isSpeechSupported, playBeep]);
 
   // Play sound based on mode when current number changes
   useEffect(() => {
+    console.log("[CallerPanel] useEffect triggered - currentNumber:", currentNumber, "soundMode:", soundMode, "soundEnabled:", soundEnabled, "hasUserGesture:", hasUserGesture);
+
     if (currentNumber === null) return;
 
-    // Check sound mode (independent of soundEnabled for backward compatibility)
-    if (soundMode === "voice") {
+    // Only play voice if we have user gesture (prevents "not-allowed" error)
+    if (soundMode === "voice" && hasUserGesture) {
+      console.log("[CallerPanel] Calling playVoice for number:", currentNumber);
       playVoice(currentNumber);
+    } else if (soundMode === "voice" && !hasUserGesture) {
+      console.warn("[CallerPanel] Cannot play voice without user gesture. User needs to click 'Start Game' or 'Call Number' first.");
     } else if (soundMode === "beep") {
       // Only check soundEnabled for beep mode
       if (soundEnabled) {
+        console.log("[CallerPanel] Playing beep");
         playBeep();
       }
+    } else {
+      console.log("[CallerPanel] Sound mode is silent or unrecognized:", soundMode);
     }
     // Silent mode: do nothing
-  }, [currentNumber, soundEnabled, soundMode, playVoice, playBeep]);
+  }, [currentNumber, soundEnabled, soundMode, playVoice, playBeep, hasUserGesture]);
 
   // Handle start game
   const handleStartGame = useCallback(() => {
+    // Initialize speech synthesis on user gesture (Safari requirement)
+    initialize();
     startGame();
-  }, [startGame]);
+  }, [initialize, startGame]);
 
   // Handle call number (manual mode)
   const handleCallNumber = useCallback(() => {
@@ -187,12 +177,25 @@ export const CallerPanel = memo(function CallerPanel({
       return;
     }
 
+    // Initialize speech if not already done (ensures we have user gesture)
+    if (!hasUserGesture) {
+      initialize();
+    }
+
     // Pick random number from remaining
     const randomIndex = Math.floor(Math.random() * remainingNumbers.length);
     const number = remainingNumbers[randomIndex];
 
+    // Call number via socket
     callNumber(number);
-  }, [callNumber, remainingNumbers]);
+
+    // Trigger speech immediately (still in user gesture context for Safari)
+    if (soundMode === 'voice' && isSpeechSupported) {
+      speak(number.toString(), 'vi-VN', false); // false = don't require user gesture check since we're in handler
+    } else if (soundMode === 'beep') {
+      playBeep();
+    }
+  }, [callNumber, remainingNumbers, soundMode, speak, isSpeechSupported, playBeep, hasUserGesture, initialize]);
 
   // Handle reset game
   const handleResetGame = useCallback(() => {

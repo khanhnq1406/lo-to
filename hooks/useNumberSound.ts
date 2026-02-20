@@ -9,12 +9,16 @@ import {
   useSoundMode,
   useSoundEnabled,
 } from "@/store/useGameStore";
+import { useSpeechSynthesis } from "./useSpeechSynthesis";
 
 export function useNumberSound() {
   const currentNumber = useCurrentNumber();
   const soundMode = useSoundMode();
   const soundEnabled = useSoundEnabled();
   const audioContextRef = useRef<AudioContext | null>(null);
+
+  // Speech synthesis hook
+  const { speak, hasUserGesture, isSupported: isSpeechSupported } = useSpeechSynthesis();
 
   // Initialize audio context for beep mode
   useEffect(() => {
@@ -57,46 +61,19 @@ export function useNumberSound() {
   // Play voice announcement using Web Speech API
   const playVoice = useCallback(
     (number: number) => {
-      if (typeof window === "undefined") return;
+      if (!isSpeechSupported) {
+        console.warn("Speech synthesis not supported, falling back to beep");
+        playBeep();
+        return;
+      }
 
-      try {
-        // Check if speech synthesis is supported
-        if (!("speechSynthesis" in window)) {
-          console.warn("Speech synthesis not supported, falling back to beep");
-          playBeep();
-          return;
-        }
-
-        // Cancel any ongoing speech
-        window.speechSynthesis.cancel();
-
-        // Wait a tiny bit for cancel to complete (Chrome quirk)
-        setTimeout(() => {
-          // Create utterance
-          const utterance = new SpeechSynthesisUtterance(number.toString());
-
-          // Configure Vietnamese voice
-          utterance.lang = "vi-VN";
-          utterance.rate = 1.0;
-          utterance.pitch = 1.0;
-          utterance.volume = 1.0;
-
-          // Add error handler
-          utterance.onerror = (event) => {
-            console.error("Speech synthesis error:", event);
-            playBeep();
-          };
-
-          // Speak the number
-          window.speechSynthesis.speak(utterance);
-        }, 50);
-      } catch (error) {
-        console.error("Error playing voice:", error);
+      const success = speak(number.toString(), 'vi-VN');
+      if (!success) {
         // Fallback to beep on error
         playBeep();
       }
     },
-    [playBeep],
+    [speak, isSpeechSupported, playBeep],
   );
 
   // Play sound based on mode when current number changes
@@ -105,7 +82,12 @@ export function useNumberSound() {
 
     // Check sound mode (independent of soundEnabled for backward compatibility)
     if (soundMode === "voice") {
-      playVoice(currentNumber);
+      // Only play voice if we have user gesture (prevents "not-allowed" error)
+      if (hasUserGesture) {
+        playVoice(currentNumber);
+      } else {
+        console.warn("[useNumberSound] Cannot play voice without user gesture. User needs to interact with the page first.");
+      }
     } else if (soundMode === "beep") {
       // Only check soundEnabled for beep mode
       if (soundEnabled) {
@@ -113,5 +95,5 @@ export function useNumberSound() {
       }
     }
     // Silent mode: do nothing
-  }, [currentNumber, soundEnabled, soundMode, playVoice, playBeep]);
+  }, [currentNumber, soundEnabled, soundMode, playVoice, playBeep, hasUserGesture]);
 }

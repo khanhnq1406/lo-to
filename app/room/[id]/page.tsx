@@ -54,6 +54,7 @@ import { CallerControls } from "@/components/game/CallerControls";
 import { JoinRoomNameModal } from "@/components/game/JoinRoomNameModal";
 import { useCardSelection } from "@/hooks/useCardSelection";
 import { useNumberSound } from "@/hooks/useNumberSound";
+import { useSpeechSynthesis } from "@/hooks/useSpeechSynthesis";
 import { cn } from "@/lib/utils";
 import {
   cachePlayerName,
@@ -73,6 +74,9 @@ export default function RoomPage() {
 
   // Enable number sound when numbers are called
   useNumberSound();
+
+  // Speech synthesis for user gesture initialization
+  const { initialize: initializeSpeech } = useSpeechSynthesis();
 
   // Socket connection and actions
   const {
@@ -288,8 +292,10 @@ export default function RoomPage() {
   }, [leaveRoom, reset, router]);
 
   const handleStartGame = useCallback(() => {
+    // Initialize speech synthesis on user gesture (required for Safari and Chrome)
+    initializeSpeech();
     startGame();
-  }, [startGame]);
+  }, [initializeSpeech, startGame]);
 
   const handleCallNumber = useCallback(() => {
     if (remainingNumbers.length === 0) {
@@ -297,12 +303,15 @@ export default function RoomPage() {
       return;
     }
 
+    // Initialize speech synthesis if not already done (ensures we have user gesture)
+    initializeSpeech();
+
     // Pick random number from remaining
     const randomIndex = Math.floor(Math.random() * remainingNumbers.length);
     const number = remainingNumbers[randomIndex];
 
     callNumber(number);
-  }, [callNumber, remainingNumbers]);
+  }, [callNumber, remainingNumbers, initializeSpeech]);
 
   const handleResetGame = useCallback(() => {
     if (
