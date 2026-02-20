@@ -87,6 +87,14 @@ export default function HomePage() {
     }
   }, [room?.id, router]);
 
+  // Reset loading states when error occurs
+  useEffect(() => {
+    if (error) {
+      setIsCreating(false);
+      setIsJoining(false);
+    }
+  }, [error]);
+
   // ===========================
   // FORM HANDLERS
   // ===========================
