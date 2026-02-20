@@ -17,10 +17,12 @@
 
 'use client';
 
-import { memo, useState, useMemo, useCallback } from 'react';
+import { memo, useState, useMemo, useCallback, useEffect } from 'react';
 import type { Card, CellValue } from '@/types';
 import { NumberCell } from './NumberCell';
 import { CardHeader } from './CardHeader';
+import { getMarkedCells, saveMarkedCells } from '@/lib/marked-numbers-storage';
+import { useGameStore } from '@/store/useGameStore';
 
 // ============================================================================
 // PROPS
@@ -58,8 +60,28 @@ export const CardGrid = memo(function CardGrid({
   isWinning = false,
   winningRow,
 }: CardGridProps) {
-  // Track manually marked cells (row, col)
+  // Get room ID for storage
+  const roomId = useGameStore((state) => state.room?.id || 'local');
+
+  // Track manually marked cells (row, col) - with persistence
   const [markedCells, setMarkedCells] = useState<Set<string>>(new Set());
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Load from localStorage on mount
+  useEffect(() => {
+    if (!isInitialized) {
+      const loaded = getMarkedCells(roomId, cardIndex);
+      setMarkedCells(loaded);
+      setIsInitialized(true);
+    }
+  }, [isInitialized, roomId, cardIndex]);
+
+  // Save to localStorage whenever markedCells changes (skip initial load)
+  useEffect(() => {
+    if (isInitialized) {
+      saveMarkedCells(roomId, cardIndex, markedCells);
+    }
+  }, [markedCells, roomId, cardIndex, isInitialized]);
 
   // Create cell key
   const getCellKey = useCallback((row: number, col: number) => `${row}-${col}`, []);

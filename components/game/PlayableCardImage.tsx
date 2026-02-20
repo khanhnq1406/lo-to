@@ -6,7 +6,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   getCardConfig,
@@ -16,6 +16,8 @@ import {
 } from "@/lib/card-configs";
 import { Check } from "lucide-react";
 import type { Card } from "@/types";
+import { getMarkedNumbers, saveMarkedNumbers } from "@/lib/marked-numbers-storage";
+import { useGameStore } from "@/store/useGameStore";
 
 interface PlayableCardImageProps {
   /** Card ID (1-16) */
@@ -52,15 +54,35 @@ export function PlayableCardImage({
   const config = getCardConfig(cardId);
   const colorClasses = getCardColorClasses(cardId);
 
-  // Track manually marked numbers (only used in manual mode)
+  // Get room ID for storage
+  const roomId = useGameStore((state) => state.room?.id || 'local');
+
+  // Track manually marked numbers (only used in manual mode) - with persistence
   const [manuallyMarked, setManuallyMarked] = useState<Set<number>>(new Set());
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Load from localStorage on mount
+  useEffect(() => {
+    if (!isInitialized) {
+      const loaded = getMarkedNumbers(roomId, cardId);
+      setManuallyMarked(loaded);
+      setIsInitialized(true);
+    }
+  }, [isInitialized, roomId, cardId]);
+
+  // Save to localStorage whenever manuallyMarked changes (skip initial load)
+  useEffect(() => {
+    if (isInitialized) {
+      saveMarkedNumbers(roomId, cardId, manuallyMarked);
+    }
+  }, [manuallyMarked, roomId, cardId, isInitialized]);
 
   if (!config) {
     return null;
   }
 
   // Get effective marked numbers based on mode
-  const getMarkedNumbers = (): Set<number> => {
+  const getEffectiveMarkedNumbers = (): Set<number> => {
     if (manualMarkingMode) {
       return manuallyMarked; // Only manually marked
     } else {
@@ -68,7 +90,7 @@ export function PlayableCardImage({
     }
   };
 
-  const markedNumbers = getMarkedNumbers();
+  const markedNumbers = getEffectiveMarkedNumbers();
 
   // Toggle manual mark for a number
   const toggleManualMark = (number: number) => {

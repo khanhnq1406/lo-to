@@ -58,6 +58,7 @@ import {
   cleanPlayerNameCache,
   getSession,
 } from "@/lib/session-storage";
+import { cleanExpiredMarkedNumbers, clearMarkedNumbersForRoom } from "@/lib/marked-numbers-storage";
 
 // ============================================================================
 // COMPONENT
@@ -144,6 +145,7 @@ export default function RoomPage() {
 
     // Clean expired cache entries periodically
     cleanPlayerNameCache();
+    cleanExpiredMarkedNumbers();
   }, [players]);
 
   // ===========================
@@ -278,8 +280,12 @@ export default function RoomPage() {
       confirm("Bạn có chắc muốn đặt lại trò chơi? Mọi tiến trình sẽ bị mất.")
     ) {
       resetGame();
+      // Clear marked numbers for this room when resetting
+      if (roomId) {
+        clearMarkedNumbersForRoom(roomId);
+      }
     }
-  }, [resetGame]);
+  }, [resetGame, roomId]);
 
   const handleChangeCallerMode = useCallback(
     (mode: "machine" | "manual", interval?: number) => {
