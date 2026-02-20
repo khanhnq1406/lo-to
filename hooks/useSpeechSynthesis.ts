@@ -48,6 +48,7 @@ export function useSpeechSynthesis() {
       text: string,
       lang: string = "vi-VN",
       requireUserGesture: boolean = true,
+      rate: number = 1.0,
     ) => {
       if (!("speechSynthesis" in window)) {
         console.warn("[useSpeechSynthesis] speechSynthesis not supported");
@@ -67,6 +68,8 @@ export function useSpeechSynthesis() {
         text,
         "Lang:",
         lang,
+        "Rate:",
+        rate,
         "Voices available:",
         voices.length,
         "Has user gesture:",
@@ -88,9 +91,14 @@ export function useSpeechSynthesis() {
         // Create utterance
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = lang;
-        utterance.rate = 1.2;
+        utterance.rate = rate;
         utterance.pitch = 1.0;
         utterance.volume = 1.0;
+
+        console.log(
+          "[useSpeechSynthesis] Utterance created with rate:",
+          utterance.rate,
+        );
 
         // Try to select Vietnamese voice
         const viVoice = voices.find((v) => v.lang.startsWith("vi"));

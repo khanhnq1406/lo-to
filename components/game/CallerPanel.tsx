@@ -31,6 +31,7 @@ import {
   useMachineInterval,
   useSoundEnabled,
   useSoundMode,
+  useSpeechRate,
 } from "@/store/useGameStore";
 import { CurrentNumber } from "./CurrentNumber";
 import { CallerControls } from "./CallerControls";
@@ -67,9 +68,13 @@ export const CallerPanel = memo(function CallerPanel({
   const machineInterval = useMachineInterval();
   const soundEnabled = useSoundEnabled();
   const soundMode = useSoundMode();
+  const speechRate = useSpeechRate();
   const reset = useGameStore((state) => state.reset);
   const room = useGameStore((state) => state.room);
   const machinePaused = useGameStore((state) => state.room?.machinePaused ?? false);
+
+  // Debug log for speechRate
+  console.log("[CallerPanel] Current speechRate from store:", speechRate);
 
   // Compute remaining numbers with useMemo to avoid infinite loops
   const remainingNumbers = useMemo(() => {
@@ -131,24 +136,35 @@ export const CallerPanel = memo(function CallerPanel({
       return;
     }
 
-    const success = speak(number.toString(), 'vi-VN');
+    const success = speak(number.toString(), 'vi-VN', true, speechRate);
     if (!success) {
       // Fallback to beep on error
       console.warn("[CallerPanel] speak() returned false, falling back to beep");
       playBeep();
     }
-  }, [speak, isSpeechSupported, playBeep]);
+  }, [speak, isSpeechSupported, playBeep, speechRate]);
 
   // Play sound based on mode when current number changes
   useEffect(() => {
-    console.log("[CallerPanel] useEffect triggered - currentNumber:", currentNumber, "soundMode:", soundMode, "soundEnabled:", soundEnabled, "hasUserGesture:", hasUserGesture);
+    console.log("[CallerPanel] useEffect triggered - currentNumber:", currentNumber, "soundMode:", soundMode, "soundEnabled:", soundEnabled, "hasUserGesture:", hasUserGesture, "speechRate:", speechRate);
 
     if (currentNumber === null) return;
 
     // Only play voice if we have user gesture (prevents "not-allowed" error)
     if (soundMode === "voice" && hasUserGesture) {
-      console.log("[CallerPanel] Calling playVoice for number:", currentNumber);
-      playVoice(currentNumber);
+      console.log("[CallerPanel] Playing voice for number:", currentNumber, "with rate:", speechRate);
+
+      if (!isSpeechSupported) {
+        console.warn("[CallerPanel] Speech synthesis not supported, falling back to beep");
+        playBeep();
+        return;
+      }
+
+      const success = speak(currentNumber.toString(), 'vi-VN', true, speechRate);
+      if (!success) {
+        console.warn("[CallerPanel] speak() returned false, falling back to beep");
+        playBeep();
+      }
     } else if (soundMode === "voice" && !hasUserGesture) {
       console.warn("[CallerPanel] Cannot play voice without user gesture. User needs to click 'Start Game' or 'Call Number' first.");
     } else if (soundMode === "beep") {
@@ -161,7 +177,7 @@ export const CallerPanel = memo(function CallerPanel({
       console.log("[CallerPanel] Sound mode is silent or unrecognized:", soundMode);
     }
     // Silent mode: do nothing
-  }, [currentNumber, soundEnabled, soundMode, playVoice, playBeep, hasUserGesture]);
+  }, [currentNumber, soundEnabled, soundMode, speak, isSpeechSupported, playBeep, hasUserGesture, speechRate]);
 
   // Handle start game
   const handleStartGame = useCallback(() => {
@@ -191,11 +207,11 @@ export const CallerPanel = memo(function CallerPanel({
 
     // Trigger speech immediately (still in user gesture context for Safari)
     if (soundMode === 'voice' && isSpeechSupported) {
-      speak(number.toString(), 'vi-VN', false); // false = don't require user gesture check since we're in handler
+      speak(number.toString(), 'vi-VN', false, speechRate); // false = don't require user gesture check since we're in handler
     } else if (soundMode === 'beep') {
       playBeep();
     }
-  }, [callNumber, remainingNumbers, soundMode, speak, isSpeechSupported, playBeep, hasUserGesture, initialize]);
+  }, [callNumber, remainingNumbers, soundMode, speak, isSpeechSupported, playBeep, hasUserGesture, initialize, speechRate]);
 
   // Handle reset game
   const handleResetGame = useCallback(() => {

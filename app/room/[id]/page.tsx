@@ -279,6 +279,26 @@ export default function RoomPage() {
   }, [error, router]);
 
   // ===========================
+  // INITIALIZE SPEECH ON FIRST USER INTERACTION
+  // ===========================
+
+  useEffect(() => {
+    // Initialize speech synthesis on any click for non-host/non-caller players
+    const handleFirstClick = () => {
+      console.log("[RoomPage] First click detected, initializing speech");
+      initializeSpeech();
+      // Remove listener after first click
+      document.removeEventListener('click', handleFirstClick);
+    };
+
+    document.addEventListener('click', handleFirstClick);
+
+    return () => {
+      document.removeEventListener('click', handleFirstClick);
+    };
+  }, [initializeSpeech]);
+
+  // ===========================
   // HANDLERS
   // ===========================
 

@@ -8,6 +8,7 @@ import {
   useCurrentNumber,
   useSoundMode,
   useSoundEnabled,
+  useSpeechRate,
 } from "@/store/useGameStore";
 import { useSpeechSynthesis } from "./useSpeechSynthesis";
 
@@ -15,7 +16,10 @@ export function useNumberSound() {
   const currentNumber = useCurrentNumber();
   const soundMode = useSoundMode();
   const soundEnabled = useSoundEnabled();
+  const speechRate = useSpeechRate();
   const audioContextRef = useRef<AudioContext | null>(null);
+
+  console.log("[useNumberSound] Current speechRate:", speechRate);
 
   // Speech synthesis hook
   const { speak, hasUserGesture, isSupported: isSpeechSupported } = useSpeechSynthesis();
@@ -61,23 +65,27 @@ export function useNumberSound() {
   // Play voice announcement using Web Speech API
   const playVoice = useCallback(
     (number: number) => {
+      console.log("[useNumberSound] playVoice called with speechRate:", speechRate);
+
       if (!isSpeechSupported) {
         console.warn("Speech synthesis not supported, falling back to beep");
         playBeep();
         return;
       }
 
-      const success = speak(number.toString(), 'vi-VN');
+      const success = speak(number.toString(), 'vi-VN', true, speechRate);
       if (!success) {
         // Fallback to beep on error
         playBeep();
       }
     },
-    [speak, isSpeechSupported, playBeep],
+    [speak, isSpeechSupported, playBeep, speechRate],
   );
 
   // Play sound based on mode when current number changes
   useEffect(() => {
+    console.log("[useNumberSound] useEffect - currentNumber:", currentNumber, "soundMode:", soundMode, "speechRate:", speechRate);
+
     if (currentNumber === null) return;
 
     // Check sound mode (independent of soundEnabled for backward compatibility)
@@ -95,5 +103,5 @@ export function useNumberSound() {
       }
     }
     // Silent mode: do nothing
-  }, [currentNumber, soundEnabled, soundMode, playVoice, playBeep, hasUserGesture]);
+  }, [currentNumber, soundEnabled, soundMode, playVoice, playBeep, hasUserGesture, speechRate]);
 }

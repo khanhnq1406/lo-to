@@ -18,7 +18,7 @@
 import { memo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import type { CallerMode, GameState, Player } from "@/types";
-import { useGameStore, useSoundMode } from "@/store/useGameStore";
+import { useGameStore, useSoundMode, useSpeechRate } from "@/store/useGameStore";
 
 // ============================================================================
 // PROPS
@@ -112,9 +112,11 @@ export const CallerControls = memo(function CallerControls({
     machineInterval / 1000,
   ); // Convert to seconds
 
-  // Get sound mode from store
+  // Get sound mode and speech rate from store
   const soundMode = useSoundMode();
   const setSoundMode = useGameStore((state) => state.setSoundMode);
+  const speechRate = useSpeechRate();
+  const setSpeechRate = useGameStore((state) => state.setSpeechRate);
 
   // Sync local state with props when they change
   useEffect(() => {
@@ -367,6 +369,40 @@ export const CallerControls = memo(function CallerControls({
           Giọng nói: Đọc số bằng tiếng Việt • Tiếng bíp: Âm thanh đơn giản • Im
           lặng: Không có âm thanh
         </p>
+
+        {/* Speech Rate Slider (only show when voice mode is selected) */}
+        {soundMode === "voice" && (
+          <div className="space-y-2 pt-2">
+            <label className="block text-sm font-bold text-loto-green">
+              Tốc độ giọng nói: {speechRate.toFixed(1)}x
+            </label>
+            <input
+              type="range"
+              min="0.5"
+              max="2.0"
+              step="0.1"
+              value={speechRate}
+              onChange={(e) => {
+                const newRate = Number(e.target.value);
+                console.log("[CallerControls] Setting speech rate to:", newRate);
+                setSpeechRate(newRate);
+              }}
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer
+                [&::-webkit-slider-thumb]:appearance-none
+                [&::-webkit-slider-thumb]:w-4
+                [&::-webkit-slider-thumb]:h-4
+                [&::-webkit-slider-thumb]:rounded-full
+                [&::-webkit-slider-thumb]:bg-loto-green
+                [&::-webkit-slider-thumb]:cursor-pointer
+              "
+            />
+            <div className="flex justify-between text-xs text-gray-500">
+              <span>0.5x (chậm)</span>
+              <span>1.0x (bình thường)</span>
+              <span>2.0x (nhanh)</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Visibility Settings (Host only) */}

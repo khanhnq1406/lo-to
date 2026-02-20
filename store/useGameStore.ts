@@ -61,6 +61,9 @@ interface GameStore {
   /** Sound mode: voice (TTS), beep (tone), or silent */
   soundMode: 'voice' | 'beep' | 'silent';
 
+  /** Speech rate for voice mode (0.1 to 2.0, default 1.0) */
+  speechRate: number;
+
   /** Manual marking mode (false = auto-mark, true = manual-mark)
    * @deprecated Now controlled by room host via room.manualMarkingMode
    * Kept for backward compatibility only
@@ -160,6 +163,11 @@ interface GameStore {
    * Set sound mode (voice/beep/silent)
    */
   setSoundMode: (mode: 'voice' | 'beep' | 'silent') => void;
+
+  /**
+   * Set speech rate (0.1 to 2.0)
+   */
+  setSpeechRate: (rate: number) => void;
 
   /**
    * Toggle manual marking mode
@@ -268,6 +276,7 @@ export const useGameStore = create<GameStore>()(
       darkMode: false,
       soundEnabled: true,
       soundMode: 'voice', // Default to voice mode (TTS)
+      speechRate: 1.0, // Default speech rate (0.1 to 2.0)
       manualMarkingMode: true, // Default but not used (room.manualMarkingMode is the source of truth)
 
       // ===========================
@@ -462,6 +471,12 @@ export const useGameStore = create<GameStore>()(
         set({ soundMode: mode });
       },
 
+      setSpeechRate: (rate) => {
+        // Clamp between 0.1 and 2.0
+        const clampedRate = Math.max(0.1, Math.min(2.0, rate));
+        set({ speechRate: clampedRate });
+      },
+
       toggleManualMarkingMode: () => {
         set((state) => ({ manualMarkingMode: !state.manualMarkingMode }));
       },
@@ -493,6 +508,7 @@ export const useGameStore = create<GameStore>()(
           darkMode: state.darkMode,
           soundEnabled: state.soundEnabled,
           soundMode: state.soundMode,
+          speechRate: state.speechRate,
         }));
       },
 
@@ -575,6 +591,7 @@ export const useGameStore = create<GameStore>()(
         darkMode: state.darkMode,
         soundEnabled: state.soundEnabled,
         soundMode: state.soundMode,
+        speechRate: state.speechRate,
       }),
     }
   )
@@ -705,6 +722,11 @@ export const useSoundEnabled = () => useGameStore((state) => state.soundEnabled)
  * Get sound mode
  */
 export const useSoundMode = () => useGameStore((state) => state.soundMode);
+
+/**
+ * Get speech rate
+ */
+export const useSpeechRate = () => useGameStore((state) => state.speechRate);
 
 /**
  * Get connecting state
