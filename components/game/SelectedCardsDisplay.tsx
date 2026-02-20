@@ -59,18 +59,7 @@ export function SelectedCardsDisplay({
 
   // Toggle function - only for host
   const handleToggleMarkingMode = () => {
-    console.log("[SelectedCardsDisplay] Toggle clicked", {
-      isHost,
-      hasCallback: !!onChangeMarkingMode,
-      currentMode: manualMarkingMode,
-      newMode: !manualMarkingMode,
-    });
-
     if (!isHost || !onChangeMarkingMode) {
-      console.log("[SelectedCardsDisplay] Toggle blocked", {
-        isHost,
-        hasCallback: !!onChangeMarkingMode,
-      });
       return;
     }
 

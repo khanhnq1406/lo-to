@@ -122,7 +122,6 @@ export function useSocket(): UseSocketReturn {
     const socket = io(socketUrl, socketOptions);
     socketRef.current = socket;
 
-    console.log('[Socket] Connecting to:', socketUrl);
     setConnecting(true);
 
     // ===========================
@@ -130,7 +129,6 @@ export function useSocket(): UseSocketReturn {
     // ===========================
 
     socket.on('connect', () => {
-      console.log('[Socket] Connected:', socket.id);
       setConnected(true);
       setConnecting(false);
       setCurrentPlayerId(socket.id || null);
@@ -145,7 +143,6 @@ export function useSocket(): UseSocketReturn {
     });
 
     socket.on('disconnect', (reason) => {
-      console.log('[Socket] Disconnected:', reason);
       setConnected(false);
       setConnecting(false);
 
@@ -155,15 +152,13 @@ export function useSocket(): UseSocketReturn {
       }
     });
 
-    socket.on('reconnect', (attemptNumber) => {
-      console.log('[Socket] Reconnected after', attemptNumber, 'attempts');
+    socket.on('reconnect', () => {
       setConnected(true);
       setConnecting(false);
       clearError();
     });
 
-    socket.on('reconnect_attempt', (attemptNumber) => {
-      console.log('[Socket] Reconnect attempt', attemptNumber);
+    socket.on('reconnect_attempt', () => {
       setConnecting(true);
     });
 
@@ -185,7 +180,6 @@ export function useSocket(): UseSocketReturn {
     // 1. room_update - Update entire room state
     socket.on('room_update', (data: ServerRoomUpdateEvent) => {
       try {
-        console.log('[Socket] Room update received:', data);
         const room = deserializeRoom(data.room);
         setRoom(room);
 
@@ -195,7 +189,6 @@ export function useSocket(): UseSocketReturn {
 
           // Only generate if player has no tickets and room is in waiting state
           if (currentPlayer && currentPlayer.tickets.length === 0 && room.gameState === 'waiting') {
-            console.log('[Socket] Auto-generating tickets after room update');
             needsTicketsRef.current = false; // Reset flag
 
             // Emit generate_tickets with the stored card count
@@ -215,9 +208,8 @@ export function useSocket(): UseSocketReturn {
     });
 
     // 2. player_joined - Player joined the room
-    socket.on('player_joined', (data: ServerPlayerJoinedEvent) => {
+    socket.on('player_joined', (_data: ServerPlayerJoinedEvent) => {
       try {
-        console.log('[Socket] Player joined:', data);
         // Room update will handle the actual player list update
         // This event is mainly for notifications
       } catch (error) {
@@ -228,7 +220,6 @@ export function useSocket(): UseSocketReturn {
     // 3. player_left - Player left the room
     socket.on('player_left', (data: ServerPlayerLeftEvent) => {
       try {
-        console.log('[Socket] Player left:', data);
         removePlayer(data.playerId);
       } catch (error) {
         console.error('[Socket] Error processing player_left:', error);
@@ -236,9 +227,8 @@ export function useSocket(): UseSocketReturn {
     });
 
     // 4. game_started - Game has started
-    socket.on('game_started', (data: ServerGameStartedEvent) => {
+    socket.on('game_started', (_data: ServerGameStartedEvent) => {
       try {
-        console.log('[Socket] Game started:', data);
         setGameState('playing');
       } catch (error) {
         console.error('[Socket] Error processing game_started:', error);
@@ -248,7 +238,6 @@ export function useSocket(): UseSocketReturn {
     // 5. number_called - New number was called
     socket.on('number_called', (data: ServerNumberCalledEvent) => {
       try {
-        console.log('[Socket] Number called:', data);
         addCalledNumber(data.number);
         setCurrentNumber(data.number);
       } catch (error) {
@@ -259,7 +248,6 @@ export function useSocket(): UseSocketReturn {
     // 6. game_finished - Game finished with winner
     socket.on('game_finished', (data: ServerGameFinishedEvent) => {
       try {
-        console.log('[Socket] Game finished:', data);
         setWinner(data.winner);
         setGameState('finished');
       } catch (error) {
@@ -285,7 +273,6 @@ export function useSocket(): UseSocketReturn {
     // 8. tickets_generated - Cards generated for player
     socket.on('tickets_generated', (data: ServerTicketsGeneratedEvent) => {
       try {
-        console.log('[Socket] Tickets generated:', data);
         // Only update if it's for the current player
         if (data.playerId === socket.id) {
           setPlayerCards(data.tickets);
@@ -296,9 +283,8 @@ export function useSocket(): UseSocketReturn {
     });
 
     // 9. caller_mode_changed - Caller mode changed
-    socket.on('caller_mode_changed', (data: ServerCallerModeChangedEvent) => {
+    socket.on('caller_mode_changed', (_data: ServerCallerModeChangedEvent) => {
       try {
-        console.log('[Socket] Caller mode changed:', data);
         // Room update will handle the actual state update
         // This event is mainly for notifications
       } catch (error) {
@@ -307,9 +293,8 @@ export function useSocket(): UseSocketReturn {
     });
 
     // 10. caller_changed - Caller changed
-    socket.on('caller_changed', (data: ServerCallerChangedEvent) => {
+    socket.on('caller_changed', (_data: ServerCallerChangedEvent) => {
       try {
-        console.log('[Socket] Caller changed:', data);
         // Room update will handle the actual state update
         // This event is mainly for notifications
       } catch (error) {
@@ -318,9 +303,8 @@ export function useSocket(): UseSocketReturn {
     });
 
     // 11. marking_mode_changed - Marking mode changed
-    socket.on('marking_mode_changed', (data: ServerMarkingModeChangedEvent) => {
+    socket.on('marking_mode_changed', (_data: ServerMarkingModeChangedEvent) => {
       try {
-        console.log('[Socket] Marking mode changed:', data);
         // Room update will handle the actual state update
         // This event is mainly for notifications
       } catch (error) {
@@ -329,9 +313,8 @@ export function useSocket(): UseSocketReturn {
     });
 
     // 12. game_reset - Game reset
-    socket.on('game_reset', (data: ServerGameResetEvent) => {
+    socket.on('game_reset', (_data: ServerGameResetEvent) => {
       try {
-        console.log('[Socket] Game reset:', data);
         // Room update will handle the actual state update
         // This event is mainly for notifications
       } catch (error) {
@@ -344,7 +327,6 @@ export function useSocket(): UseSocketReturn {
     // ===========================
 
     return () => {
-      console.log('[Socket] Cleaning up and disconnecting');
       socket.off('connect');
       socket.off('connect_error');
       socket.off('disconnect');
@@ -383,8 +365,6 @@ export function useSocket(): UseSocketReturn {
       return;
     }
 
-    console.log('[Socket] Creating room:', { playerName, cardCount });
-
     // Set flag and card count for auto-generation on room_update
     needsTicketsRef.current = true;
     pendingCardCountRef.current = cardCount;
@@ -405,8 +385,6 @@ export function useSocket(): UseSocketReturn {
       setError('Not connected to server');
       return;
     }
-
-    console.log('[Socket] Joining room:', { roomId, playerName, cardCount });
 
     // Set flag and card count for auto-generation on room_update
     needsTicketsRef.current = true;
@@ -433,7 +411,6 @@ export function useSocket(): UseSocketReturn {
       return;
     }
 
-    console.log('[Socket] Starting game:', { roomId });
     socket.emit('start_game', {
       roomId,
     });
@@ -454,7 +431,6 @@ export function useSocket(): UseSocketReturn {
       return;
     }
 
-    console.log('[Socket] Calling number:', { roomId, number });
     socket.emit('call_number', {
       roomId,
       number,
@@ -476,7 +452,6 @@ export function useSocket(): UseSocketReturn {
       return;
     }
 
-    console.log('[Socket] Claiming win:', { roomId });
     // Note: The client should determine which ticket/board won
     // For now, we'll send a simple claim and let the server validate
     socket.emit('claim_win', {
@@ -502,7 +477,6 @@ export function useSocket(): UseSocketReturn {
       return;
     }
 
-    console.log('[Socket] Generating tickets:', { roomId, cardCount, boardsPerCard });
     socket.emit('generate_tickets', {
       roomId,
       cardCount,
@@ -525,7 +499,6 @@ export function useSocket(): UseSocketReturn {
       return;
     }
 
-    console.log('[Socket] Leaving room:', { roomId });
     socket.emit('leave_room', {
       roomId,
     });
@@ -550,7 +523,6 @@ export function useSocket(): UseSocketReturn {
       return;
     }
 
-    console.log('[Socket] Kicking player:', { roomId, playerId });
     socket.emit('kick_player', {
       roomId,
       playerId,
@@ -572,7 +544,6 @@ export function useSocket(): UseSocketReturn {
       return;
     }
 
-    console.log('[Socket] Changing caller mode:', { roomId, mode, interval });
     socket.emit('change_caller_mode', {
       roomId,
       callerMode: mode,
@@ -595,7 +566,6 @@ export function useSocket(): UseSocketReturn {
       return;
     }
 
-    console.log('[Socket] Changing caller:', { roomId, targetPlayerId });
     socket.emit('change_caller', {
       roomId,
       targetPlayerId,
@@ -617,7 +587,6 @@ export function useSocket(): UseSocketReturn {
       return;
     }
 
-    console.log('[Socket] Changing marking mode:', { roomId, manualMarkingMode });
     socket.emit('change_marking_mode', {
       roomId,
       manualMarkingMode,
@@ -639,7 +608,6 @@ export function useSocket(): UseSocketReturn {
       return;
     }
 
-    console.log('[Socket] Resetting game:', { roomId });
     socket.emit('reset_game', {
       roomId,
     });

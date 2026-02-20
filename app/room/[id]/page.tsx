@@ -115,17 +115,6 @@ export default function RoomPage() {
   // Get current player from players array to avoid infinite loop
   const currentPlayer = players.find((p) => p.id === currentPlayerId) || null;
 
-  // Debug logging for card selector visibility
-  if (typeof window !== "undefined") {
-    console.log("[CardSelector Debug]", {
-      gameState,
-      currentPlayerId,
-      playerIdsInRoom: players.map((p) => p.id),
-      hasCurrentPlayer: !!currentPlayer,
-      playersCount: players.length,
-    });
-  }
-
   // Card selection hook
   const { selectCard, deselectCard } = useCardSelection();
 
@@ -174,7 +163,6 @@ export default function RoomPage() {
 
     // Wait for reconnection to complete
     if (isReconnecting) {
-      console.log("[RoomPage] Waiting for session reconnection to complete");
       return;
     }
 
@@ -190,15 +178,11 @@ export default function RoomPage() {
     // Check if there's an existing session - if so, let SocketProvider handle reconnection
     const existingSession = getSession();
     if (existingSession && existingSession.roomId === roomId) {
-      console.log(
-        "[RoomPage] Found existing session, waiting for automatic reconnection",
-      );
       setHasJoined(true);
       return;
     }
 
     // Show name modal for new users joining via link
-    console.log("[RoomPage] Showing name modal for room:", roomId);
     setShowNameModal(true);
   }, [
     connected,
@@ -214,8 +198,6 @@ export default function RoomPage() {
   // ===========================
 
   const handleJoinWithName = useCallback((playerName: string) => {
-    console.log("[RoomPage] Joining room with name:", { roomId, playerName });
-
     // Clear previous errors
     setModalError(null);
 
@@ -253,7 +235,6 @@ export default function RoomPage() {
     // Wait a bit before redirecting to allow connection
     if (!connected && !connecting && hasJoined) {
       const timeout = setTimeout(() => {
-        console.log("[RoomPage] Not connected, redirecting to home");
         router.push("/");
       }, 5000);
 
@@ -285,7 +266,6 @@ export default function RoomPage() {
   useEffect(() => {
     // Initialize speech synthesis on any click for non-host/non-caller players
     const handleFirstClick = () => {
-      console.log("[RoomPage] First click detected, initializing speech");
       initializeSpeech();
       // Remove listener after first click
       document.removeEventListener('click', handleFirstClick);
@@ -611,13 +591,6 @@ export default function RoomPage() {
               {(() => {
                 const shouldShow =
                   gameState === "waiting" && currentPlayerId && currentPlayer;
-                console.log("[CardSelector Desktop] Debug:", {
-                  gameState,
-                  currentPlayerId,
-                  hasCurrentPlayer: !!currentPlayer,
-                  shouldShow,
-                  players: players.length,
-                });
                 return shouldShow ? (
                   <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 border-2 border-loto-blue shadow-lg transition-all duration-300 hover:shadow-xl">
                     <CardSelector

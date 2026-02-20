@@ -97,8 +97,6 @@ export function useWinDetection(
     const win = detectWin(currentPlayer.tickets, calledNumbers);
 
     if (win) {
-      console.log('[WinDetection] Win detected:', win);
-
       // Update local state
       setHasWon(true);
       setWinResult(win);
@@ -132,7 +130,6 @@ export function useWinDetection(
   const claimWin = (win: CardWinResult) => {
     // Prevent duplicate claims
     if (claimedRef.current) {
-      console.log('[WinDetection] Already claimed, skipping');
       return;
     }
 
@@ -158,8 +155,6 @@ export function useWinDetection(
     claimedRef.current = true;
     setClaiming(true);
 
-    console.log('[WinDetection] Claiming win:', win);
-
     // Emit win claim to server
     socket.emit('claim_win', {
       roomId: room.id,
@@ -167,8 +162,6 @@ export function useWinDetection(
       boardIndex: 0,
       type: win.type,
     });
-
-    console.log('[WinDetection] Win claimed successfully');
   };
 
   return {

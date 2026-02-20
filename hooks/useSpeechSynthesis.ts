@@ -30,8 +30,6 @@ export function useSpeechSynthesis() {
   const initialize = useCallback(() => {
     if (!("speechSynthesis" in window)) return;
 
-    console.log("[useSpeechSynthesis] Initializing speech synthesis");
-
     // Dummy utterance to "unlock" speech on Safari
     const utterance = new SpeechSynthesisUtterance("");
     utterance.volume = 0;
@@ -63,22 +61,8 @@ export function useSpeechSynthesis() {
         return false;
       }
 
-      console.log(
-        "[useSpeechSynthesis] Speaking:",
-        text,
-        "Lang:",
-        lang,
-        "Rate:",
-        rate,
-        "Voices available:",
-        voices.length,
-        "Has user gesture:",
-        globalHasUserGesture,
-      );
-
       // Check if paused (Safari bug)
       if (window.speechSynthesis.paused) {
-        console.log("[useSpeechSynthesis] Speech was paused, resuming");
         window.speechSynthesis.resume();
       }
 
@@ -95,41 +79,18 @@ export function useSpeechSynthesis() {
         utterance.pitch = 1.0;
         utterance.volume = 1.0;
 
-        console.log(
-          "[useSpeechSynthesis] Utterance created with rate:",
-          utterance.rate,
-        );
-
         // Try to select Vietnamese voice
         const viVoice = voices.find((v) => v.lang.startsWith("vi"));
         if (viVoice) {
-          console.log(
-            "[useSpeechSynthesis] Using Vietnamese voice:",
-            viVoice.name,
-          );
           utterance.voice = viVoice;
-        } else {
-          console.log(
-            "[useSpeechSynthesis] No Vietnamese voice found, using default",
-          );
         }
 
         // Add event handlers for debugging
-        utterance.onstart = () =>
-          console.log("[useSpeechSynthesis] Speech started");
-        utterance.onend = () =>
-          console.log("[useSpeechSynthesis] Speech ended");
         utterance.onerror = (event) =>
           console.error("[useSpeechSynthesis] Speech error:", event);
 
         // Speak
         window.speechSynthesis.speak(utterance);
-        console.log(
-          "[useSpeechSynthesis] speak() called, speaking:",
-          window.speechSynthesis.speaking,
-          "pending:",
-          window.speechSynthesis.pending,
-        );
       }, 100);
 
       return true;

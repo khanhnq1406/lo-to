@@ -384,7 +384,6 @@ export const CallerControls = memo(function CallerControls({
               value={speechRate}
               onChange={(e) => {
                 const newRate = Number(e.target.value);
-                console.log("[CallerControls] Setting speech rate to:", newRate);
                 setSpeechRate(newRate);
               }}
               className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer

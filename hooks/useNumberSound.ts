@@ -19,8 +19,6 @@ export function useNumberSound() {
   const speechRate = useSpeechRate();
   const audioContextRef = useRef<AudioContext | null>(null);
 
-  console.log("[useNumberSound] Current speechRate:", speechRate);
-
   // Speech synthesis hook
   const { speak, hasUserGesture, isSupported: isSpeechSupported } = useSpeechSynthesis();
 
@@ -65,8 +63,6 @@ export function useNumberSound() {
   // Play voice announcement using Web Speech API
   const playVoice = useCallback(
     (number: number) => {
-      console.log("[useNumberSound] playVoice called with speechRate:", speechRate);
-
       if (!isSpeechSupported) {
         console.warn("Speech synthesis not supported, falling back to beep");
         playBeep();
@@ -84,8 +80,6 @@ export function useNumberSound() {
 
   // Play sound based on mode when current number changes
   useEffect(() => {
-    console.log("[useNumberSound] useEffect - currentNumber:", currentNumber, "soundMode:", soundMode, "speechRate:", speechRate);
-
     if (currentNumber === null) return;
 
     // Check sound mode (independent of soundEnabled for backward compatibility)

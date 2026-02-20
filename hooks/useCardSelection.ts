@@ -23,7 +23,6 @@ export function useCardSelection() {
         return;
       }
 
-      console.log('[CardSelection] Selecting card:', cardId);
       socket.emit('select_card', {
         roomId,
         cardId,
@@ -41,7 +40,6 @@ export function useCardSelection() {
       return;
     }
 
-    console.log('[CardSelection] Deselecting card:', cardId);
     socket.emit('deselect_card', {
       roomId,
       cardId,

@@ -73,9 +73,6 @@ export const CallerPanel = memo(function CallerPanel({
   const room = useGameStore((state) => state.room);
   const machinePaused = useGameStore((state) => state.room?.machinePaused ?? false);
 
-  // Debug log for speechRate
-  console.log("[CallerPanel] Current speechRate from store:", speechRate);
-
   // Compute remaining numbers with useMemo to avoid infinite loops
   const remainingNumbers = useMemo(() => {
     const allNumbers = Array.from({ length: 90 }, (_, i) => i + 1);
@@ -126,34 +123,12 @@ export const CallerPanel = memo(function CallerPanel({
     }
   }, [soundEnabled]);
 
-  // Play voice announcement using Web Speech API
-  const playVoice = useCallback((number: number) => {
-    console.log("[CallerPanel] playVoice called with number:", number, "isSpeechSupported:", isSpeechSupported);
-
-    if (!isSpeechSupported) {
-      console.warn("[CallerPanel] Speech synthesis not supported, falling back to beep");
-      playBeep();
-      return;
-    }
-
-    const success = speak(number.toString(), 'vi-VN', true, speechRate);
-    if (!success) {
-      // Fallback to beep on error
-      console.warn("[CallerPanel] speak() returned false, falling back to beep");
-      playBeep();
-    }
-  }, [speak, isSpeechSupported, playBeep, speechRate]);
-
   // Play sound based on mode when current number changes
   useEffect(() => {
-    console.log("[CallerPanel] useEffect triggered - currentNumber:", currentNumber, "soundMode:", soundMode, "soundEnabled:", soundEnabled, "hasUserGesture:", hasUserGesture, "speechRate:", speechRate);
-
     if (currentNumber === null) return;
 
     // Only play voice if we have user gesture (prevents "not-allowed" error)
     if (soundMode === "voice" && hasUserGesture) {
-      console.log("[CallerPanel] Playing voice for number:", currentNumber, "with rate:", speechRate);
-
       if (!isSpeechSupported) {
         console.warn("[CallerPanel] Speech synthesis not supported, falling back to beep");
         playBeep();
@@ -170,11 +145,8 @@ export const CallerPanel = memo(function CallerPanel({
     } else if (soundMode === "beep") {
       // Only check soundEnabled for beep mode
       if (soundEnabled) {
-        console.log("[CallerPanel] Playing beep");
         playBeep();
       }
-    } else {
-      console.log("[CallerPanel] Sound mode is silent or unrecognized:", soundMode);
     }
     // Silent mode: do nothing
   }, [currentNumber, soundEnabled, soundMode, speak, isSpeechSupported, playBeep, hasUserGesture, speechRate]);

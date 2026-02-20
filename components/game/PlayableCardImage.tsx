@@ -75,7 +75,6 @@ export function PlayableCardImage({
   // Clear marked numbers when game resets (state changes to 'waiting' from another state)
   useEffect(() => {
     if (isInitialized && gameState === 'waiting' && lastGameState !== 'waiting') {
-      console.log('[PlayableCardImage] Game reset detected, clearing marked numbers');
       setManuallyMarked(new Set());
     }
     setLastGameState(gameState);

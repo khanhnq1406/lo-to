@@ -81,13 +81,11 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     const socket = io(socketUrl, socketOptions);
     socketRef.current = socket;
 
-    console.log('[Socket Provider] Connecting to:', socketUrl);
     setConnectingState(true);
     setConnecting(true);
 
     // Connection event listeners
     socket.on('connect', () => {
-      console.log('[Socket Provider] Connected:', socket.id);
       setConnected(true);
       setConnectingState(false);
       setConnecting(false);
@@ -97,7 +95,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       // Check for existing session and attempt reconnection
       const existingSession = getSession();
       if (existingSession && !isReconnectingRef.current) {
-        console.log('[Socket Provider] Found existing session, attempting to reconnect to room:', existingSession.roomId);
         isReconnectingRef.current = true;
         setIsReconnecting(true);
 
@@ -119,14 +116,12 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       setError('Failed to connect to server.');
     });
 
-    socket.on('disconnect', (reason) => {
-      console.log('[Socket Provider] Disconnected:', reason);
+    socket.on('disconnect', (_reason) => {
       setConnected(false);
     });
 
     // Game event listeners
     socket.on('room_update', (data) => {
-      console.log('[Socket Provider] Room update received');
       const room = deserializeRoom(data.room);
       setRoom(room);
 
@@ -151,34 +146,28 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    socket.on('player_joined', (data) => {
-      console.log('[Socket Provider] Player joined:', data.playerName);
+    socket.on('player_joined', (_data) => {
     });
 
     socket.on('player_left', (data) => {
-      console.log('[Socket Provider] Player left:', data.playerId);
       removePlayer(data.playerId);
     });
 
     socket.on('game_started', () => {
-      console.log('[Socket Provider] Game started');
       setGameState('playing');
     });
 
     socket.on('number_called', (data) => {
-      console.log('[Socket Provider] Number called:', data.number);
       addCalledNumber(data.number);
       setCurrentNumber(data.number);
     });
 
     socket.on('game_finished', (data) => {
-      console.log('[Socket Provider] Game finished. Winner:', data.winner.playerName);
       setWinner(data.winner);
       setGameState('finished');
     });
 
-    socket.on('game_reset', (data) => {
-      console.log('[Socket Provider] Game reset in room:', data.roomId);
+    socket.on('game_reset', (_data) => {
       setGameState('waiting');
       setWinner(null);
       setCurrentNumber(null);
@@ -192,42 +181,34 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     });
 
     socket.on('tickets_generated', (data) => {
-      console.log('[Socket Provider] Tickets generated:', data.tickets.length, 'cards');
       // Only update if this is for the current player
       if (socket.id === data.playerId) {
         setPlayerCards(data.tickets);
       }
     });
 
-    socket.on('caller_mode_changed', (data) => {
-      console.log('[Socket Provider] Caller mode changed:', data.mode);
+    socket.on('caller_mode_changed', (_data) => {
     });
 
-    socket.on('caller_changed', (data) => {
-      console.log('[Socket Provider] Caller changed from', data.oldCallerName, 'to', data.newCallerName);
+    socket.on('caller_changed', (_data) => {
     });
 
-    socket.on('marking_mode_changed', (data) => {
-      console.log('[Socket Provider] Marking mode changed to:', data.manualMarkingMode);
+    socket.on('marking_mode_changed', (_data) => {
     });
 
-    socket.on('player_renamed', (data) => {
-      console.log('[Socket Provider] Player renamed from', data.oldName, 'to', data.newName);
+    socket.on('player_renamed', (_data) => {
     });
 
-    socket.on('machine_paused', (data) => {
-      console.log('[Socket Provider] Machine paused in room:', data.roomId);
+    socket.on('machine_paused', (_data) => {
       // Room update will handle state change
     });
 
-    socket.on('machine_resumed', (data) => {
-      console.log('[Socket Provider] Machine resumed in room:', data.roomId);
+    socket.on('machine_resumed', (_data) => {
       // Room update will handle state change
     });
 
     // Session reconnection success
     socket.on('session_reconnected', () => {
-      console.log('[Socket Provider] Session reconnected successfully');
       isReconnectingRef.current = false;
       setIsReconnecting(false);
 
@@ -240,8 +221,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     });
 
     // Session reconnection failed
-    socket.on('session_reconnect_failed', (data) => {
-      console.log('[Socket Provider] Session reconnection failed:', data.message);
+    socket.on('session_reconnect_failed', (_data) => {
       isReconnectingRef.current = false;
       setIsReconnecting(false);
 
@@ -252,7 +232,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
     // Cleanup on unmount
     return () => {
-      console.log('[Socket Provider] Cleaning up');
       socket.off('connect');
       socket.off('connect_error');
       socket.off('disconnect');
@@ -288,7 +267,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     const newSessionId = generateSessionId();
     sessionIdRef.current = newSessionId;
 
-    console.log('[Socket Provider] Creating room:', { playerName, cardCount });
     socket.emit('create_room', {
       playerName,
       cardCount,
@@ -308,7 +286,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     const newSessionId = generateSessionId();
     sessionIdRef.current = newSessionId;
 
-    console.log('[Socket Provider] Joining room:', { roomId, playerName, cardCount });
     socket.emit('join_room', {
       roomId,
       playerName,
@@ -328,7 +305,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    console.log('[Socket Provider] Starting game');
     socket.emit('start_game', { roomId });
   };
 
@@ -343,7 +319,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    console.log('[Socket Provider] Calling number:', number);
     socket.emit('call_number', { roomId, number });
   };
 
@@ -358,7 +333,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    console.log('[Socket Provider] Claiming win');
     socket.emit('claim_win', { roomId });
   };
 
@@ -373,7 +347,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    console.log('[Socket Provider] Generating tickets:', { roomId, cardCount, boardsPerCard });
     socket.emit('generate_tickets', { roomId, cardCount, boardsPerCard });
   };
 
@@ -382,7 +355,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     if (!socket || !socket.connected) return;
     if (!roomId) return;
 
-    console.log('[Socket Provider] Leaving room');
     socket.emit('leave_room', { roomId });
 
     // Clear session when leaving room
@@ -401,7 +373,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    console.log('[Socket Provider] Kicking player:', playerId);
     socket.emit('kick_player', { roomId, playerId });
   };
 
@@ -416,7 +387,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    console.log('[Socket Provider] Changing caller mode:', mode, 'interval:', interval);
     socket.emit('change_caller_mode', { roomId, callerMode: mode, machineInterval: interval });
   };
 
@@ -431,7 +401,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    console.log('[Socket Provider] Changing caller to:', targetPlayerId);
     socket.emit('change_caller', { roomId, targetPlayerId });
   };
 
@@ -446,7 +415,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    console.log('[Socket Provider] Changing marking mode to:', manualMarkingMode);
     socket.emit('change_marking_mode', { roomId, manualMarkingMode });
   };
 
@@ -461,7 +429,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    console.log('[Socket Provider] Resetting game');
     socket.emit('reset_game', { roomId });
   };
 
@@ -476,7 +443,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    console.log('[Socket Provider] Renaming player to:', newName);
     socket.emit('rename_player', { roomId, newName });
   };
 
@@ -491,7 +457,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    console.log('[Socket Provider] Changing visibility settings:', { showCurrentNumber, showHistory });
     socket.emit('change_visibility_settings', { roomId, showCurrentNumber, showHistory });
   };
 
@@ -506,7 +471,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    console.log('[Socket Provider] Pausing machine mode');
     socket.emit('pause_machine', { roomId });
   };
 
@@ -521,7 +485,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    console.log('[Socket Provider] Resuming machine mode');
     socket.emit('resume_machine', { roomId });
   };
 
