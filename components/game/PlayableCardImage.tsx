@@ -54,12 +54,14 @@ export function PlayableCardImage({
   const config = getCardConfig(cardId);
   const colorClasses = getCardColorClasses(cardId);
 
-  // Get room ID for storage
+  // Get room ID and game state for storage and reset detection
   const roomId = useGameStore((state) => state.room?.id || 'local');
+  const gameState = useGameStore((state) => state.room?.gameState || 'waiting');
 
   // Track manually marked numbers (only used in manual mode) - with persistence
   const [manuallyMarked, setManuallyMarked] = useState<Set<number>>(new Set());
   const [isInitialized, setIsInitialized] = useState(false);
+  const [lastGameState, setLastGameState] = useState<string>(gameState);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -69,6 +71,15 @@ export function PlayableCardImage({
       setIsInitialized(true);
     }
   }, [isInitialized, roomId, cardId]);
+
+  // Clear marked numbers when game resets (state changes to 'waiting' from another state)
+  useEffect(() => {
+    if (isInitialized && gameState === 'waiting' && lastGameState !== 'waiting') {
+      console.log('[PlayableCardImage] Game reset detected, clearing marked numbers');
+      setManuallyMarked(new Set());
+    }
+    setLastGameState(gameState);
+  }, [gameState, lastGameState, isInitialized]);
 
   // Save to localStorage whenever manuallyMarked changes (skip initial load)
   useEffect(() => {

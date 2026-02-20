@@ -279,13 +279,14 @@ export default function RoomPage() {
     if (
       confirm("Bạn có chắc muốn đặt lại trò chơi? Mọi tiến trình sẽ bị mất.")
     ) {
-      resetGame();
       // Clear marked numbers for this room when resetting
       if (roomId) {
         clearMarkedNumbersForRoom(roomId);
       }
+      resetGame();
     }
   }, [resetGame, roomId]);
+
 
   const handleChangeCallerMode = useCallback(
     (mode: "machine" | "manual", interval?: number) => {

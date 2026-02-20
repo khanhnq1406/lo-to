@@ -7,11 +7,12 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, MousePointerClick, Zap } from "lucide-react";
+import { Sparkles, MousePointerClick, Zap, Eraser } from "lucide-react";
 import { PlayableCardImage } from "./PlayableCardImage";
 import { useGameStore } from "@/store/useGameStore";
 import type { Card } from "@/types";
 import { useState, useRef, useEffect } from "react";
+import { clearMarkedNumbersForRoom } from "@/lib/marked-numbers-storage";
 
 interface SelectedCardsDisplayProps {
   /** Map of selected cards: cardId -> playerId */
@@ -53,6 +54,9 @@ export function SelectedCardsDisplay({
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // Key to force re-render of cards when marked numbers are cleared
+  const [cardsKey, setCardsKey] = useState(0);
+
   // Toggle function - only for host
   const handleToggleMarkingMode = () => {
     console.log("[SelectedCardsDisplay] Toggle clicked", {
@@ -71,6 +75,22 @@ export function SelectedCardsDisplay({
     }
 
     onChangeMarkingMode(!manualMarkingMode);
+  };
+
+  // Clear marked numbers function
+  const handleClearMarkedNumbers = () => {
+    if (
+      confirm(
+        "Bạn có chắc muốn xóa tất cả các số đã đánh dấu trên phiếu dò của bạn?",
+      )
+    ) {
+      // Clear marked numbers for this room
+      if (room?.id) {
+        clearMarkedNumbersForRoom(room.id);
+      }
+      // Force re-render by updating the key
+      setCardsKey((prev) => prev + 1);
+    }
   };
 
   // Get current player's selected card IDs
@@ -183,59 +203,75 @@ export function SelectedCardsDisplay({
           </span>
         </div>
 
-        {/* Manual Marking Mode Toggle - Only shown to host */}
-        {isHost && (
-          <button
-            onClick={handleToggleMarkingMode}
-            className={`
+        <div className="flex items-start sm:items-center gap-2 flex-col sm:flex-row">
+          {/* Manual Marking Mode Toggle - Only shown to host */}
+          {isHost && (
+            <button
+              onClick={handleToggleMarkingMode}
+              className={`
+                flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm
+                transition-all shadow-md hover:shadow-lg active:scale-95
+                ${
+                  manualMarkingMode
+                    ? "bg-blue-500 text-white hover:bg-blue-600"
+                    : "bg-green-500 text-white hover:bg-green-600"
+                }
+              `}
+            >
+              {manualMarkingMode ? (
+                <>
+                  <MousePointerClick className="w-4 h-4" />
+                  <span>Đánh dấu thủ công</span>
+                </>
+              ) : (
+                <>
+                  <Zap className="w-4 h-4" />
+                  <span>Tự động đánh dấu</span>
+                </>
+              )}
+            </button>
+          )}
+
+          {/* Show mode indicator for non-host players */}
+          {!isHost && (
+            <div
+              className={`
               flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm
-              transition-all shadow-md hover:shadow-lg active:scale-95
               ${
                 manualMarkingMode
-                  ? "bg-blue-500 text-white hover:bg-blue-600"
-                  : "bg-green-500 text-white hover:bg-green-600"
+                  ? "bg-blue-100 text-blue-700"
+                  : "bg-green-100 text-green-700"
               }
             `}
-          >
-            {manualMarkingMode ? (
-              <>
-                <MousePointerClick className="w-4 h-4" />
-                <span>Đánh dấu thủ công</span>
-              </>
-            ) : (
-              <>
-                <Zap className="w-4 h-4" />
-                <span>Tự động đánh dấu</span>
-              </>
-            )}
-          </button>
-        )}
+            >
+              {manualMarkingMode ? (
+                <>
+                  <MousePointerClick className="w-4 h-4" />
+                  <span>Đánh dấu thủ công</span>
+                </>
+              ) : (
+                <>
+                  <Zap className="w-4 h-4" />
+                  <span>Tự động đánh dấu</span>
+                </>
+              )}
+            </div>
+          )}
 
-        {/* Show mode indicator for non-host players */}
-        {!isHost && (
-          <div
-            className={`
-            flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm
-            ${
-              manualMarkingMode
-                ? "bg-blue-100 text-blue-700"
-                : "bg-green-100 text-green-700"
-            }
-          `}
+          {/* Clear Marked Numbers Button - Available to all players */}
+          <button
+            onClick={handleClearMarkedNumbers}
+            className="
+              flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm
+              transition-all shadow-md hover:shadow-lg active:scale-95
+              bg-red-500 text-white hover:bg-red-600
+            "
+            title="Xóa tất cả số đã đánh dấu"
           >
-            {manualMarkingMode ? (
-              <>
-                <MousePointerClick className="w-4 h-4" />
-                <span>Đánh dấu thủ công</span>
-              </>
-            ) : (
-              <>
-                <Zap className="w-4 h-4" />
-                <span>Tự động đánh dấu</span>
-              </>
-            )}
-          </div>
-        )}
+            <Eraser className="w-4 h-4" />
+            <span>Xóa dấu</span>
+          </button>
+        </div>
       </div>
 
       {/* Mode explanation */}
@@ -271,8 +307,13 @@ export function SelectedCardsDisplay({
               if (!cardData) return null;
 
               return (
-                <motion.div key={cardId} variants={cardVariants} layout>
+                <motion.div
+                  key={`${cardId}-${cardsKey}`}
+                  variants={cardVariants}
+                  layout
+                >
                   <PlayableCardImage
+                    key={`card-${cardId}-${cardsKey}`}
                     cardId={cardId}
                     cardData={cardData}
                     calledNumbers={calledNumbers}
@@ -306,12 +347,13 @@ export function SelectedCardsDisplay({
 
                     return (
                       <motion.div
-                        key={cardId}
+                        key={`${cardId}-${cardsKey}`}
                         variants={cardVariants}
                         layout
                         className="flex-shrink-0 w-full snap-center px-4"
                       >
                         <PlayableCardImage
+                          key={`card-${cardId}-${cardsKey}`}
                           cardId={cardId}
                           cardData={cardData}
                           calledNumbers={calledNumbers}
@@ -350,8 +392,13 @@ export function SelectedCardsDisplay({
                 if (!cardData) return null;
 
                 return (
-                  <motion.div key={cardId} variants={cardVariants} layout>
+                  <motion.div
+                    key={`${cardId}-${cardsKey}`}
+                    variants={cardVariants}
+                    layout
+                  >
                     <PlayableCardImage
+                      key={`card-${cardId}-${cardsKey}`}
                       cardId={cardId}
                       cardData={cardData}
                       calledNumbers={calledNumbers}
