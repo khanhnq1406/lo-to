@@ -51,6 +51,7 @@ import { SelectedCardsDisplay } from "@/components/game/SelectedCardsDisplay";
 import { PlayerList } from "@/components/game/PlayerList";
 import { RoomInfo } from "@/components/game/RoomInfo";
 import { CallerControls } from "@/components/game/CallerControls";
+import { JoinRoomNameModal } from "@/components/game/JoinRoomNameModal";
 import { useCardSelection } from "@/hooks/useCardSelection";
 import { cn } from "@/lib/utils";
 import {
@@ -132,6 +133,8 @@ export default function RoomPage() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [hasJoined, setHasJoined] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
+  const [showNameModal, setShowNameModal] = useState(false);
+  const [modalError, setModalError] = useState<string | null>(null);
 
   // ===========================
   // CACHE PLAYER NAMES
@@ -184,12 +187,27 @@ export default function RoomPage() {
       return;
     }
 
-    // Get player name from localStorage or generate default
-    const storedName = localStorage.getItem("loto-player-name");
-    const playerName =
-      storedName || `Player_${Math.random().toString(36).substring(2, 6)}`;
+    // Show name modal for new users joining via link
+    console.log("[RoomPage] Showing name modal for room:", roomId);
+    setShowNameModal(true);
+  }, [
+    connected,
+    connecting,
+    isReconnecting,
+    room?.id,
+    roomId,
+    hasJoined,
+  ]);
 
-    console.log("[RoomPage] Auto-joining room:", { roomId, playerName });
+  // ===========================
+  // HANDLE JOIN WITH NAME
+  // ===========================
+
+  const handleJoinWithName = useCallback((playerName: string) => {
+    console.log("[RoomPage] Joining room with name:", { roomId, playerName });
+
+    // Clear previous errors
+    setModalError(null);
 
     try {
       // Join the room (cardCount = 0, cards will be selected later)
@@ -200,17 +218,22 @@ export default function RoomPage() {
       localStorage.setItem("loto-player-name", playerName);
     } catch (err) {
       console.error("[RoomPage] Failed to join room:", err);
-      setJoinError("Không thể tham gia phòng. Vui lòng thử lại.");
+      setModalError("Không thể tham gia phòng. Vui lòng thử lại.");
     }
-  }, [
-    connected,
-    connecting,
-    isReconnecting,
-    room?.id,
-    roomId,
-    hasJoined,
-    joinRoom,
-  ]);
+  }, [roomId, joinRoom]);
+
+  // ===========================
+  // WATCH FOR JOIN ERRORS
+  // ===========================
+
+  useEffect(() => {
+    // If there's an error and the modal is still open, show it in the modal
+    if (error && showNameModal) {
+      setModalError(error);
+      // Don't mark as joined if there's an error
+      setHasJoined(false);
+    }
+  }, [error, showNameModal]);
 
   // ===========================
   // REDIRECT IF NOT CONNECTED
@@ -306,7 +329,43 @@ export default function RoomPage() {
   // LOADING STATE
   // ===========================
 
-  if (connecting || !connected || !hasJoined || !room) {
+  // Show loading only if connecting or not connected yet
+  if (connecting || !connected) {
+    return (
+      <div className="min-h-screen bg-paper flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center"
+        >
+          <div className="inline-block p-8 bg-white rounded-xl border-2 border-loto-green shadow-lg">
+            <div className="w-16 h-16 border-4 border-loto-green border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              Đang kết nối...
+            </h2>
+            <p className="text-gray-600">Mã phòng: {roomId}</p>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Show name modal if connected but not joined yet
+  if (connected && showNameModal && !hasJoined) {
+    return (
+      <div className="min-h-screen bg-paper flex items-center justify-center p-4">
+        <JoinRoomNameModal
+          isOpen={showNameModal}
+          roomId={roomId}
+          onJoin={handleJoinWithName}
+          errorMessage={modalError}
+        />
+      </div>
+    );
+  }
+
+  // Show loading if joined but waiting for room data
+  if (hasJoined && !room) {
     return (
       <div className="min-h-screen bg-paper flex items-center justify-center p-4">
         <motion.div
@@ -330,7 +389,7 @@ export default function RoomPage() {
               <>
                 <div className="w-16 h-16 border-4 border-loto-green border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                  {connecting ? "Đang kết nối..." : "Đang tham gia phòng..."}
+                  Đang tham gia phòng...
                 </h2>
                 <p className="text-gray-600">Mã phòng: {roomId}</p>
               </>
@@ -365,6 +424,29 @@ export default function RoomPage() {
             >
               Về trang chủ
             </button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // ===========================
+  // SAFETY CHECK - ROOM MUST EXIST
+  // ===========================
+
+  if (!room) {
+    return (
+      <div className="min-h-screen bg-paper flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center"
+        >
+          <div className="inline-block p-8 bg-white rounded-xl border-2 border-loto-green shadow-lg">
+            <div className="w-16 h-16 border-4 border-loto-green border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              Đang tải phòng...
+            </h2>
           </div>
         </motion.div>
       </div>
